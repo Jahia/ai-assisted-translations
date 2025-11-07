@@ -1,6 +1,6 @@
 {
     "name": "@jahia/transation-deepl",
-    "version": "1.2.0",
+    "version": "1.2.1-SNAPSHOT",
     "scripts": {
         "build": "yarn webpack",
         "webpack": "webpack",
@@ -18,7 +18,7 @@
         "lint:scss:fix": "yarn lint:scss --fix",
         "lint": "yarn lint:scss && yarn lint:js",
         "lint:fix": "yarn lint:js:fix && yarn lint:scss:fix",
-	"sync-pom": "sync-pom-version --use-yarn"
+        "sync-pom": "sync-pom-version --use-yarn"
     },
     "description": "translation-deepl for Jahia",
     "main": "index.js",
