@@ -3,6 +3,7 @@ package org.jahia.community.translation.deepl.service.impl;
 import com.deepl.api.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.jahia.api.Constants;
 import org.jahia.community.translation.deepl.service.DeepLTranslationResponse;
 import org.jahia.community.translation.deepl.service.DeepLTranslatorService;
@@ -223,7 +224,9 @@ public class DeepLTranslatorServiceImpl implements DeepLTranslatorService {
             return Collections.emptyMap();
         }
 
-        final Map<String, String> translations = IntStream.range(0, nbTexts).boxed().collect(Collectors.toMap(keys::get, i -> results.get(i).getText()));
+        final Map<String, String> translations = IntStream.range(0, nbTexts).boxed()
+                .collect(Collectors.toMap(keys::get, i -> StringEscapeUtils.unescapeHtml4(results.get(i).getText())));
+
         return data.completeTranslations(translations);
     }
 
