@@ -31,7 +31,18 @@
         <dependency>
             <groupId>com.deepl.api</groupId>
             <artifactId>deepl-java</artifactId>
-            <version>1.10.3</version>
+            <version>1.14.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.openai</groupId>
+            <artifactId>openai-java</artifactId>
+            <version>4.26.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -49,12 +60,6 @@
             <groupId>com.graphql-java-kickstart</groupId>
             <artifactId>graphql-java-servlet</artifactId>
             <version>15.1.1-jahia</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jahia.modules</groupId>
-            <artifactId>graphql-dxm-provider</artifactId>
-            <version>2.9.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -94,7 +99,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <_dsannotations>org.jahia.community.translation.deepl.*</_dsannotations>
+                        <_dsannotations>org.jahia.community.translation.assisted.*</_dsannotations>
                     </instructions>
                 </configuration>
             </plugin>

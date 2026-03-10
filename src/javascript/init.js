@@ -1,5 +1,5 @@
 import {registry} from '@jahia/ui-extender';
-import register from './RequestTranslationDeepl/register';
+import register from './RequestAssistedTranslation/register';
 
 export default function () {
     registry.add('callback', 'requestTranslationDeepl', {

@@ -1,17 +1,21 @@
-package org.jahia.community.translation.deepl.service.impl;
+package org.jahia.community.translation.assisted.service.impl.deepl;
 
 import com.deepl.api.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jahia.api.Constants;
-import org.jahia.community.translation.deepl.service.DeepLTranslationResponse;
-import org.jahia.community.translation.deepl.service.DeepLTranslatorService;
+import org.jahia.community.translation.assisted.graphql.TranslatedField;
+import org.jahia.community.translation.assisted.service.AssistedTranslationResponse;
+import org.jahia.community.translation.assisted.service.TranslatorService;
+import org.jahia.community.translation.assisted.service.impl.TranslationData;
+import org.jahia.exceptions.JahiaException;
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.JCRSessionFactory;
 import org.jahia.services.content.JCRSessionWrapper;
 import org.jahia.services.content.nodetypes.ExtendedPropertyDefinition;
 import org.jahia.utils.LanguageCodeConverters;
+import org.osgi.framework.BundleException;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
@@ -30,19 +34,30 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.jahia.community.translation.deepl.DeeplConstants.*;
+import static org.jahia.community.translation.assisted.AssistedTranslationsConstants.*;
 
-@Component(service = DeepLTranslatorService.class, configurationPid = SERVICE_CONFIG_FILE_NAME)
-public class DeepLTranslatorServiceImpl implements DeepLTranslatorService {
+@Component(service = TranslatorService.class, configurationPid = SERVICE_CONFIG_FILE_NAME, property = {"service.translation.provider=deepl","service.ranking=5"}, immediate = true)
+public class DeepLTranslatorServiceImpl implements TranslatorService {
 
     private static final Logger logger = LoggerFactory.getLogger(DeepLTranslatorServiceImpl.class);
     private static final String SLASH = "/";
 
     private DeepLClient translator;
     private final Map<String, String> targetLanguages = new HashMap<>();
+    private boolean available;
+
+    @Override
+    public String getProviderKey() {
+        return "deepl";
+    }
+
+    @Override
+    public Boolean isAvailable() {
+        return available;
+    }
 
     @Activate
-    public void activate(Map<String, ?> properties) {
+    public void activate(Map<String, ?> properties) throws BundleException {
         translator = null;
         targetLanguages.clear();
         if (properties == null) {
@@ -52,13 +67,20 @@ public class DeepLTranslatorServiceImpl implements DeepLTranslatorService {
 
         final String authKey = (String) properties.getOrDefault(PROP_API_KEY, null);
         logger.debug("DeepL {} = {}", PROP_API_KEY, authKey);
+        if (authKey == null) {
+            available = false;
+        } else if(properties.getOrDefault(OPENAI_API_KEY, null) != null) {
+            available = false;
+        }
         translator = initializeTranslator(authKey);
         if (translator == null) {
+            available = false;
             return;
         }
 
-        properties.entrySet().stream().filter(e -> e.getKey().startsWith(PROP_PREFIX_TARGET_LANGUAGES)).forEach(e -> targetLanguages.put(e.getKey().substring(PROP_PREFIX_TARGET_LANGUAGES.length()), (String) e.getValue()));
 
+        properties.entrySet().stream().filter(e -> e.getKey().startsWith(PROP_PREFIX_TARGET_LANGUAGES)).forEach(e -> targetLanguages.put(e.getKey().substring(PROP_PREFIX_TARGET_LANGUAGES.length()), (String) e.getValue()));
+        available = true;
     }
 
     private DeepLClient initializeTranslator(String authKey) {
@@ -81,26 +103,43 @@ public class DeepLTranslatorServiceImpl implements DeepLTranslatorService {
     }
 
     @Override
-    public DeepLTranslationResponse translateNode(JCRNodeWrapper pNode, String sourceLanguage, String targetLanguage) throws RepositoryException, InterruptedException {
+    public AssistedTranslationResponse translateNode(JCRNodeWrapper pNode, String sourceLanguage, String targetLanguage) throws RepositoryException, InterruptedException {
         return translate(pNode, null, sourceLanguage, targetLanguage);
     }
 
     @Override
-    public DeepLTranslationResponse translateProperty(JCRNodeWrapper pNode, String propertyName, String sourceLanguage, String targetLanguage) throws RepositoryException, InterruptedException {
+    public AssistedTranslationResponse translateProperty(JCRNodeWrapper pNode, String propertyName, String sourceLanguage, String targetLanguage) throws RepositoryException, InterruptedException {
         return translate(pNode, propertyName, sourceLanguage, targetLanguage);
     }
 
-    public DeepLTranslationResponse translate(JCRNodeWrapper pNode, String propertyName, String sourceLanguage, String targetLanguage) throws RepositoryException, InterruptedException {
+    @Override
+    public List<TranslatedField> suggestTranslationForNode(JCRNodeWrapper node, String sourceLanguage, String targetLanguage) throws RepositoryException, InterruptedException {
+            // Ensure we get the nod ein the source language to be able to suggest translations
+            final JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession(node.getSession().getWorkspace().getName(), LanguageCodeConverters.languageCodeToLocale(sourceLanguage));
+            final JCRNodeWrapper localizedNode = session.getNodeByIdentifier(node.getIdentifier());
+            final TranslationData data = new TranslationData();
+
+            buildDataToTranslate(localizedNode, data, true);
+            final Map<String, String> translations = generateTranslations(data, sourceLanguage, targetLanguage);
+            // The keys of the translations are in the format path/to/node/property, we need to transform them to be able to return the property and its translation suggestion
+            return translations.entrySet().stream().map(e -> {
+                final String path = StringUtils.substringBeforeLast(e.getKey(), SLASH);
+                final String propertyName = StringUtils.substringAfterLast(e.getKey(), SLASH);
+                return new TranslatedField(propertyName, e.getValue());
+            }).collect(Collectors.toList());
+    }
+
+    public AssistedTranslationResponse translate(JCRNodeWrapper pNode, String propertyName, String sourceLanguage, String targetLanguage) throws RepositoryException, InterruptedException {
         final JCRSessionWrapper pNodeSession = pNode.getSession();
         final Set<String> siteLanguages = pNode.getResolveSite().getLanguages();
         if (!siteLanguages.contains(targetLanguage)) {
             final String warnMsg = String.format("The language %s is not allowed on the site", targetLanguage);
             logger.warn(warnMsg);
-            return new DeepLTranslationResponseImpl(false, warnMsg);
+            return new DeepLAssistedTranslationResponseImpl(false, warnMsg);
         } else if (StringUtils.equals(sourceLanguage, targetLanguage)) {
             final String warnMsg = String.format("The language %s is both the source and target languages", targetLanguage);
             logger.warn(warnMsg);
-            return new DeepLTranslationResponseImpl(false, warnMsg);
+            return new DeepLAssistedTranslationResponseImpl(false, warnMsg);
         }
 
         final JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession(pNodeSession.getWorkspace().getName(), LanguageCodeConverters.languageCodeToLocale(sourceLanguage));
@@ -108,12 +147,12 @@ public class DeepLTranslatorServiceImpl implements DeepLTranslatorService {
         if (!session.nodeExists(path)) {
             final String warnMsg = String.format("Impossible to translate from %s since the node doesn't exist in this language", sourceLanguage);
             logger.warn(warnMsg);
-            return new DeepLTranslationResponseImpl(false, warnMsg);
+            return new DeepLAssistedTranslationResponseImpl(false, warnMsg);
         }
         final JCRNodeWrapper node = session.getNode(path);
         final TranslationData data = new TranslationData();
         if (propertyName == null) {
-            buildDataToTranslate(node, data);
+            buildDataToTranslate(node, data, false);
         } else {
             buildDataToTranslate(node, propertyName, data);
         }
@@ -121,7 +160,7 @@ public class DeepLTranslatorServiceImpl implements DeepLTranslatorService {
         return translateAndSave(data, sourceLanguage, targetLanguage);
     }
 
-    private void buildDataToTranslate(JCRNodeWrapper node, TranslationData data) throws RepositoryException {
+    private void buildDataToTranslate(JCRNodeWrapper node, TranslationData data, boolean forceTranslation) throws RepositoryException {
         if (!isTranslatableNode(node)) {
             return;
         }
@@ -140,7 +179,7 @@ public class DeepLTranslatorServiceImpl implements DeepLTranslatorService {
             if (isTranslatableProperty(property)) {
                 final String key = node.getPath() + SLASH + property.getName();
                 final String stringValue = StringUtils.trimToNull(property.getValue().getString());
-                if (stringValue != null) {
+                if (forceTranslation || stringValue != null) {
                     data.trackText(key, stringValue);
                 }
             }
@@ -165,13 +204,13 @@ public class DeepLTranslatorServiceImpl implements DeepLTranslatorService {
         }
     }
 
-    private DeepLTranslationResponse translateAndSave(TranslationData data, String srcLanguage, String targetLanguage) throws InterruptedException {
+    private AssistedTranslationResponse translateAndSave(TranslationData data, String srcLanguage, String targetLanguage) throws InterruptedException {
         final Map<String, String> translations = generateTranslations(data, srcLanguage, targetLanguage);
 
         if (MapUtils.isEmpty(translations)) {
             final String warnMsg = String.format(MSG_NOTHING_TO_TRANSLATE, targetLanguage);
             logger.warn(warnMsg);
-            return new DeepLTranslationResponseImpl(false, warnMsg);
+            return new DeepLAssistedTranslationResponseImpl(false, warnMsg);
         }
 
         try {
@@ -179,17 +218,17 @@ public class DeepLTranslatorServiceImpl implements DeepLTranslatorService {
             if (saveTranslations(session, translations)) {
                 final String debugMsg = String.format("Content translated in %s", targetLanguage);
                 logger.debug(debugMsg);
-                return new DeepLTranslationResponseImpl(true, debugMsg);
+                return new DeepLAssistedTranslationResponseImpl(true, debugMsg);
             } else {
                 final String warnMsg = String.format(MSG_NOTHING_TO_TRANSLATE, targetLanguage);
                 logger.warn(warnMsg);
-                return new DeepLTranslationResponseImpl(false, warnMsg);
+                return new DeepLAssistedTranslationResponseImpl(false, warnMsg);
             }
         } catch (RepositoryException e) {
             if (logger.isErrorEnabled()) {
                 logger.error("", e);
             }
-            return new DeepLTranslationResponseImpl(false, "An error occurred while translating the content in " + targetLanguage);
+            return new DeepLAssistedTranslationResponseImpl(false, "An error occurred while translating the content in " + targetLanguage);
         }
     }
 

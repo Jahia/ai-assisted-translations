@@ -1,9 +1,9 @@
-package org.jahia.community.translation.deepl.service;
+package org.jahia.community.translation.assisted.service;
 
 import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLField;
 
-public interface DeepLTranslationResponse {
+public interface AssistedTranslationResponse {
 
     @GraphQLField
     @GraphQLDescription("Get the status of the response")
@@ -17,5 +17,5 @@ public interface DeepLTranslationResponse {
 
     public void addMessage(String text);
 
-    public DeepLTranslationResponse merge(DeepLTranslationResponse other);
+    public AssistedTranslationResponse merge(AssistedTranslationResponse other);
 }

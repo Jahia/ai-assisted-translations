@@ -1,4 +1,4 @@
-package org.jahia.community.translation.deepl.service.impl;
+package org.jahia.community.translation.assisted.service.impl;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;

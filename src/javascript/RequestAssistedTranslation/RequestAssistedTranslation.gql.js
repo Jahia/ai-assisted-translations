@@ -50,4 +50,15 @@ function getMutationTranslateProperty() {
     }`;
 }
 
-export {getQueryTranslationLocksAndPermissions, getMutationTranslateNode, getMutationTranslateProperty};
+
+const suggestTranslationForLanguage = gql`query SuggestTranslationForLanguage($path:String!, $sourceLanguage:String!, $targetLanguage:String!) {
+    jcr {
+        nodeByPath(path: $path) {
+            translationSuggestions(sourceLanguage: $sourceLanguage, targetLanguage: $targetLanguage) {
+                fieldName
+                translatedValue
+            }
+        }
+    }
+}`
+export {getQueryTranslationLocksAndPermissions, getMutationTranslateNode, getMutationTranslateProperty, suggestTranslationForLanguage};

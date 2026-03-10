@@ -1,11 +1,11 @@
-package org.jahia.community.translation.deepl.graphql;
+package org.jahia.community.translation.assisted.graphql;
 
 import graphql.annotations.annotationTypes.GraphQLDescription;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.annotationTypes.GraphQLTypeExtension;
-import org.jahia.community.translation.deepl.service.DeepLTranslationResponse;
-import org.jahia.community.translation.deepl.service.DeepLTranslatorService;
+import org.jahia.community.translation.assisted.service.AssistedTranslationResponse;
+import org.jahia.community.translation.assisted.service.TranslatorService;
 import org.jahia.modules.graphql.provider.dxm.node.GqlJcrNodeMutation;
 import org.jahia.osgi.BundleUtils;
 import org.slf4j.Logger;
@@ -15,22 +15,22 @@ import javax.jcr.RepositoryException;
 
 @GraphQLTypeExtension(GqlJcrNodeMutation.class)
 @GraphQLDescription("Entry point of the mutation for the DeepL GraphQL API")
-public class GqlJcrNodeMutationDeepl {
-    private static final Logger logger = LoggerFactory.getLogger(GqlJcrNodeMutationDeepl.class);
+public class GqlJcrNodeMutationAssistedTranslation {
+    private static final Logger logger = LoggerFactory.getLogger(GqlJcrNodeMutationAssistedTranslation.class);
 
 
-    private DeepLTranslatorService deepLTranslatorService;
+    private TranslatorService translatorService;
 
     private final GqlJcrNodeMutation nodeMutation;
 
-    public GqlJcrNodeMutationDeepl(GqlJcrNodeMutation nodeMutation) {
+    public GqlJcrNodeMutationAssistedTranslation(GqlJcrNodeMutation nodeMutation) {
         this.nodeMutation = nodeMutation;
-        this.deepLTranslatorService = BundleUtils.getOsgiService(DeepLTranslatorService.class, null);
+        this.translatorService = BundleUtils.getOsgiService(TranslatorService.class, null);
     }
 
     @GraphQLField
     @GraphQLDescription("Translate node")
-    public DeepLTranslationResponse translateNode(
+    public AssistedTranslationResponse translateNode(
             @GraphQLName("sourceLocale") @GraphQLDescription("Locale to translate from") String sourceLocale,
             @GraphQLName("targetLocale") @GraphQLDescription("Locale to translate to") String targetLocale
     ) throws InterruptedException {
@@ -38,7 +38,7 @@ public class GqlJcrNodeMutationDeepl {
             logger.error(String.format("Translating %s from %s to %s", nodeMutation.getNode().getPath(), sourceLocale, targetLocale));
         }
         try {
-            return deepLTranslatorService.translateNode(nodeMutation.getNode().getNode(), sourceLocale, targetLocale);
+            return translatorService.translateNode(nodeMutation.getNode().getNode(), sourceLocale, targetLocale);
         } catch (RepositoryException e) {
             if(logger.isErrorEnabled()) {
                 logger.error("Error when translating");
@@ -49,7 +49,7 @@ public class GqlJcrNodeMutationDeepl {
 
     @GraphQLField
     @GraphQLDescription("Translate property")
-    public DeepLTranslationResponse translateProperty(
+    public AssistedTranslationResponse translateProperty(
             @GraphQLName("propertyName") @GraphQLDescription("Property name to translate") String propertyName,
             @GraphQLName("sourceLocale") @GraphQLDescription("Locale to translate from") String sourceLocale,
             @GraphQLName("targetLocale") @GraphQLDescription("Locale to translate to") String targetLocale
@@ -59,7 +59,7 @@ public class GqlJcrNodeMutationDeepl {
             logger.error(String.format("Translating %s, property %s, from %s to %s", nodeMutation.getNode().getPath(), propertyName, sourceLocale, targetLocale));
         }
         try {
-            return deepLTranslatorService.translateProperty(nodeMutation.getNode().getNode(), propertyName, sourceLocale, targetLocale);
+            return translatorService.translateProperty(nodeMutation.getNode().getNode(), propertyName, sourceLocale, targetLocale);
         } catch (RepositoryException e) {
             if(logger.isErrorEnabled()) {
                 logger.error("Error when translating");

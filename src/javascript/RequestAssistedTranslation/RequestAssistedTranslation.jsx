@@ -2,17 +2,18 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle} from '@material-ui/core';
 import {Button, Checkbox, Input, Typography} from '@jahia/moonstone';
 import {useTranslation} from 'react-i18next';
-import styles from './RequestTranslationDeepl.scss';
+import styles from './RequestAssistedTranslation.scss';
 import {useApolloClient, useMutation, useQuery} from '@apollo/client';
 import PropTypes from 'prop-types';
 import {
-    getQueryTranslationLocksAndPermissions,
     getMutationTranslateNode,
-    getMutationTranslateProperty
-} from './RequestTranslationDeepl.gql';
+    getMutationTranslateProperty,
+    getQueryTranslationLocksAndPermissions,
+    suggestTranslationForLanguage
+} from './RequestAssistedTranslation.gql';
 import WarningAlert from './WarningAlert';
 
-export const RequestTranslationDeepl = ({
+export const RequestAssistedTranslation = ({
                                             path,
                                             language,
                                             setI18nContext,
@@ -20,6 +21,7 @@ export const RequestTranslationDeepl = ({
                                             field,
                                             fieldValue,
                                             fields,
+                                            formik,
                                             isOpen,
                                             isNew,
                                             onExited,
@@ -46,23 +48,34 @@ export const RequestTranslationDeepl = ({
 
     const [translateProperty] = useMutation(getMutationTranslateProperty());
 
+    const client = useApolloClient();
+
+    const suggestTranslation = async (targetLanguage) => {
+        const {data} = await client.query({
+            query: suggestTranslationForLanguage,
+            variables: {path, sourceLanguage: language, targetLanguage}
+        });
+        return data.jcr.nodeByPath.translationSuggestions;
+    }
+
     const handleClickDialog = () => {
-        if (isNew || isSingleField) {
-            selected.reduce((acc, lang) => {
-                console.log('testXX2:'+lang+", "+language);
-                translateProperty({
-                    variables: {
-                        path: path,
-                        propertyName: field.propertyName,
-                        sourceLocale: language,
-                        targetLocale: lang,
-                    }
-                });
-            }, {});
-            onClose();
-        } else {
-            setWarningModalShown(true);
-        }
+        suggestTranslation(selected[0]).then(data => {
+            data.forEach(suggestion => {
+                const key = suggestion.fieldName;
+                const value = suggestion.translatedValue;
+                // Find the field corresponding to the key, inside the dom a div with data-sel-content-editor-field="fieldName" is generated, we can use this to find the field and set the value in formik
+                // Getting the field with data-sel-content-editor-field="fieldName" and data-sel-i18n="true"
+                const initialField = document.querySelector(`[data-sel-content-editor-field$="_${key}"][data-sel-i18n="true"][data-sel-content-editor-field-readonly="false"]`)?.dataset.selContentEditorField;
+
+                // <div class="src-javascript-ContentEditor-editorTabs-EditPanelContent-FormBuilder-Field-Field__formControl--MdZFr" data-first-field="false" data-sel-content-editor-field="jdnt:company_headline" data-sel-content-editor-field-type="RichText" data-sel-content-editor-field-readonly="false" data-sel-content-editor-field-ismultiple="false" data-sel-i18n="true"></div>
+                if (initialField) {
+                    // Set to empty string if value is null or undefined to ensure field is cleared
+                    // This is necessary to avoid issues with formik not updating the field if the value is null
+                    // or undefined, as it will not trigger a change event
+                    formik.setFieldValue(initialField, value || '');
+                }
+            });
+        }).then(onClose());
     };
 
     const handleClickWarningModal = () => {
@@ -202,7 +215,7 @@ export const RequestTranslationDeepl = ({
 }
 
 
-RequestTranslationDeepl.propTypes = {
+RequestAssistedTranslation.propTypes = {
     path: PropTypes.string.isRequired,
     language: PropTypes.string.isRequired,
     siteLanguages: PropTypes.array.isRequired,
@@ -211,6 +224,7 @@ RequestTranslationDeepl.propTypes = {
     field: PropTypes.object,
     fieldValue: PropTypes.string,
     fields: PropTypes.object,
+    formik: PropTypes.object,
     isOpen: PropTypes.bool,
     onExited: PropTypes.func,
     onClose: PropTypes.func

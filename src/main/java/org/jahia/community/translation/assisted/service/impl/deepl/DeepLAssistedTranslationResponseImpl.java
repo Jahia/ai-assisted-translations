@@ -1,17 +1,17 @@
-package org.jahia.community.translation.deepl.service.impl;
+package org.jahia.community.translation.assisted.service.impl.deepl;
 
 import org.apache.commons.lang.StringUtils;
-import org.jahia.community.translation.deepl.service.DeepLTranslationResponse;
+import org.jahia.community.translation.assisted.service.AssistedTranslationResponse;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DeepLTranslationResponseImpl implements DeepLTranslationResponse {
+public class DeepLAssistedTranslationResponseImpl implements AssistedTranslationResponse {
 
     private final List<String> messages = new ArrayList<>();
     private boolean state;
 
-    public DeepLTranslationResponseImpl(boolean state, String reason) {
+    public DeepLAssistedTranslationResponseImpl(boolean state, String reason) {
         this.state = state;
         addMessage(reason);
     }
@@ -39,9 +39,9 @@ public class DeepLTranslationResponseImpl implements DeepLTranslationResponse {
     }
 
     @Override
-    public DeepLTranslationResponse merge(DeepLTranslationResponse other) {
+    public AssistedTranslationResponse merge(AssistedTranslationResponse other) {
         state = state || other.isSuccessful();
-        messages.addAll(((DeepLTranslationResponseImpl) other).messages);
+        messages.addAll(((DeepLAssistedTranslationResponseImpl) other).messages);
         return this;
     }
 }

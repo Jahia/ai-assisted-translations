@@ -2,12 +2,12 @@ import React, {useContext, useMemo} from 'react';
 import PropTypes from 'prop-types';
 import {useTranslation} from 'react-i18next';
 import {ComponentRendererContext} from '@jahia/ui-extender';
-import {RequestTranslationDeepl} from './RequestTranslationDeepl';
-import {useContentEditorContext, useContentEditorSectionContext} from '@jahia/jcontent';
+import {RequestAssistedTranslation} from './RequestAssistedTranslation';
+import {useContentEditorContext, useContentEditorSectionContext, useContentEditorConfigContext} from '@jahia/jcontent';
 import {useNodeChecks} from '@jahia/data-helper';
 import {useFormikContext} from 'formik';
 
-export const RequestTranslationDeeplForAllLanguagesActionComponent = ({
+export const RequestAssistedTranslationComponent = ({
     render: Render,
     loading: Loading,
     ...others
@@ -16,7 +16,9 @@ export const RequestTranslationDeeplForAllLanguagesActionComponent = ({
     const editorSectionContext = useContentEditorSectionContext();
     const formikContext = useFormikContext();
     const componentRenderer = useContext(ComponentRendererContext);
+    const editorConfigContext = useContentEditorConfigContext();
 
+    console.debug('RequestTranslationDeeplForAllLanguagesActionComponent {editorContext, editorSectionContext, formikContext, editorConfigContext}', {editorContext, editorSectionContext, formikContext, editorConfigContext});
     // Load namespace
     useTranslation('translation-deepl');
 
@@ -60,14 +62,15 @@ export const RequestTranslationDeeplForAllLanguagesActionComponent = ({
             isVisible
             enabled={enabled}
             onClick={() => {
-                componentRenderer.render('requestTranslationDeeplForAllLanguages', RequestTranslationDeepl, {
+                componentRenderer.render('requestTranslationDeeplForAllLanguages', RequestAssistedTranslation, {
                     path: editorContext.nodeData.path,
-                    language: editorContext.lang,
-                    siteLanguages: editorContext.siteInfo.languages,
+                    language: editorConfigContext.sideBySideContext.lang,
+                    siteLanguages: editorContext.siteInfo.languages.filter(lang => lang.language === editorContext.lang),
                     isOpen: true,
                     isNew: editorContext?.nodeData?.newName !== undefined,
                     setI18nContext: editorContext.setI18nContext,
                     fields,
+                    formik: formikContext,
                     onClose: () => {
                         componentRenderer.setProperties('requestTranslationDeeplForAllLanguages', {isOpen: false});
                     },
@@ -80,7 +83,7 @@ export const RequestTranslationDeeplForAllLanguagesActionComponent = ({
     );
 };
 
-RequestTranslationDeeplForAllLanguagesActionComponent.propTypes = {
+RequestAssistedTranslationComponent.propTypes = {
     formik: PropTypes.object.isRequired,
     editorContext: PropTypes.object.isRequired,
     render: PropTypes.func.isRequired,
