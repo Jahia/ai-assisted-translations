@@ -9,7 +9,6 @@ import org.jahia.community.translation.assisted.graphql.TranslatedField;
 import org.jahia.community.translation.assisted.service.AssistedTranslationResponse;
 import org.jahia.community.translation.assisted.service.TranslatorService;
 import org.jahia.community.translation.assisted.service.impl.TranslationData;
-import org.jahia.exceptions.JahiaException;
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.JCRSessionFactory;
 import org.jahia.services.content.JCRSessionWrapper;
@@ -18,6 +17,7 @@ import org.jahia.utils.LanguageCodeConverters;
 import org.osgi.framework.BundleException;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,11 @@ import java.util.stream.IntStream;
 
 import static org.jahia.community.translation.assisted.AssistedTranslationsConstants.*;
 
-@Component(service = TranslatorService.class, configurationPid = SERVICE_CONFIG_FILE_NAME, property = {"service.translation.provider=deepl","service.ranking=5"}, immediate = true)
+@Component(service = TranslatorService.class,
+        configurationPid = SERVICE_CONFIG_FILE_NAME_DEEPL,
+        property = {"service.translation.provider=deepl", "service.ranking=5"},
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class DeepLTranslatorServiceImpl implements TranslatorService {
 
     private static final Logger logger = LoggerFactory.getLogger(DeepLTranslatorServiceImpl.class);
@@ -65,12 +69,10 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
             return;
         }
 
-        final String authKey = (String) properties.getOrDefault(PROP_API_KEY, null);
-        logger.debug("DeepL {} = {}", PROP_API_KEY, authKey);
-        if (authKey == null) {
+        final String authKey = (String) properties.getOrDefault(DEEPL_API_KEY, null);
+        if (authKey == null || properties.getOrDefault(OPENAI_API_KEY, null) != null) {
             available = false;
-        } else if(properties.getOrDefault(OPENAI_API_KEY, null) != null) {
-            available = false;
+            return;
         }
         translator = initializeTranslator(authKey);
         if (translator == null) {
@@ -85,7 +87,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
 
     private DeepLClient initializeTranslator(String authKey) {
         if (StringUtils.isBlank(authKey)) {
-            logger.warn("{} not defined. Please add it to {}", PROP_API_KEY, SERVICE_CONFIG_FILE_FULLNAME);
+            logger.warn("{} not defined. Please add it to {}", DEEPL_API_KEY, SERVICE_CONFIG_FILE_FULLNAME);
             return null;
         }
 

@@ -10,7 +10,7 @@ export default () => {
     registry.add('action', 'requestTranslationDeeplForAllLanguages', {
         buttonIcon: <DeeplIcon/>,
         buttonLabel: 'translation-deepl:label.actionAllProperties',
-        targets: ['translate/header/3dots:5.5'],
+        targets: ['translate/header/3dots:5.5','content-editor/header/3dots:5.5'],
         component: RequestAssistedTranslationComponent
     });
 };

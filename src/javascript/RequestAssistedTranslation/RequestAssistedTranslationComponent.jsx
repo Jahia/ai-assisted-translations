@@ -29,23 +29,6 @@ export const RequestAssistedTranslationComponent = ({
         }
     );
 
-    const fields = useMemo(() => {
-        const fieldNames = editorSectionContext.sections.flatMap(section =>
-            section.fieldSets.flatMap(fieldset =>
-                fieldset.fields
-                    .filter(field =>
-                        field?.i18n === true &&
-                        field?.readOnly === false &&
-                        field?.name !== undefined
-                    )
-                    .map(field => field.name)
-            )
-        );
-        return Object.fromEntries(
-            fieldNames.map(name => [name, formikContext.values[name] ?? ''])
-        );
-    }, [editorSectionContext.sections, formikContext.values]);
-
     if (res.loading) {
         return (Loading && <Loading {...others}/>) || false;
     }
@@ -53,8 +36,8 @@ export const RequestAssistedTranslationComponent = ({
     if (!res.checksResult || editorContext.siteInfo.languages.length <= 1) {
         return false;
     }
-
-    const enabled = !editorContext.nodeData?.lockedAndCannotBeEdited;
+    const sourceLanguage = editorConfigContext?.sideBySideContext?.lang || editorContext.nodeData?.translationLanguages?.[0];
+    const enabled = !editorContext.nodeData?.lockedAndCannotBeEdited && sourceLanguage !== undefined;
 
     return (
         <Render
@@ -62,14 +45,15 @@ export const RequestAssistedTranslationComponent = ({
             isVisible
             enabled={enabled}
             onClick={() => {
+
                 componentRenderer.render('requestTranslationDeeplForAllLanguages', RequestAssistedTranslation, {
                     path: editorContext.nodeData.path,
-                    language: editorConfigContext.sideBySideContext.lang,
-                    siteLanguages: editorContext.siteInfo.languages.filter(lang => lang.language === editorContext.lang),
+                    sourceLanguage: sourceLanguage,
+                    targetLanguage: editorContext.lang,
+                    siteLanguages: editorContext.siteInfo.languages,
+                    availableSourceLanguages: editorContext.nodeData?.translationLanguages,
+                    showDropdown: editorConfigContext?.sideBySideContext?.lang === undefined,
                     isOpen: true,
-                    isNew: editorContext?.nodeData?.newName !== undefined,
-                    setI18nContext: editorContext.setI18nContext,
-                    fields,
                     formik: formikContext,
                     onClose: () => {
                         componentRenderer.setProperties('requestTranslationDeeplForAllLanguages', {isOpen: false});

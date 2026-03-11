@@ -1,40 +1,43 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle} from '@material-ui/core';
-import {Button, Checkbox, Input, Typography} from '@jahia/moonstone';
-import {useTranslation} from 'react-i18next';
-import styles from './RequestAssistedTranslation.scss';
-import {useApolloClient, useMutation, useQuery} from '@apollo/client';
-import PropTypes from 'prop-types';
+import React, {useMemo, useState} from 'react';
 import {
-    getMutationTranslateNode,
-    getMutationTranslateProperty,
-    getQueryTranslationLocksAndPermissions,
-    suggestTranslationForLanguage
-} from './RequestAssistedTranslation.gql';
-import WarningAlert from './WarningAlert';
+    Backdrop,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle
+} from '@material-ui/core';
+import {Button, Dropdown, Typography} from '@jahia/moonstone';
+import {useTranslation} from 'react-i18next';
+import {useApolloClient, useQuery} from '@apollo/client';
+import PropTypes from 'prop-types';
+import {getQueryTranslationLocksAndPermissions, suggestTranslationForLanguage} from './RequestAssistedTranslation.gql';
+import styles from './RequestAssistedTranslation.scss';
+
+function getInitialState(siteLanguages, sourceLanguage) {
+    return siteLanguages.find(siteLanguage => siteLanguage.language === sourceLanguage);
+}
 
 export const RequestAssistedTranslation = ({
                                             path,
-                                            language,
-                                            setI18nContext,
+                                               sourceLanguage,
+                                               targetLanguage,
                                             siteLanguages,
-                                            field,
-                                            fieldValue,
-                                            fields,
+                                               availableSourceLanguages,
+                                               showDropdown,
                                             formik,
                                             isOpen,
-                                            isNew,
                                             onExited,
                                             onClose
                                         }) => {
     const {t} = useTranslation('translation-deepl');
-    const [selected, setSelected] = useState([]);
-    const [filter, setFilter] = useState('');
+    const {t: j} = useTranslation('jcontent');
+    const [selected, setSelected] = useState(getInitialState(siteLanguages, sourceLanguage));
     const [errorState, setErrorState] = useState('');
-    const [warningModalShown, setWarningModalShown] = useState(false);
-    const isSingleField = !fields;
+    const [isLoading, setIsLoading] = useState(false);
 
-    const allLanguages = useMemo(() => siteLanguages.filter(l => l.language !== language), [siteLanguages, language]);
+    const allLanguages = useMemo(() => siteLanguages.filter(l => l.language !== sourceLanguage), [siteLanguages, sourceLanguage]);
 
     const {data, error} = useQuery(getQueryTranslationLocksAndPermissions(allLanguages, path), {
         errorPolicy: 'ignore', variables: {path}
@@ -44,22 +47,19 @@ export const RequestAssistedTranslation = ({
         console.log(error);
     }
 
-    const [translateNode] = useMutation(getMutationTranslateNode());
-
-    const [translateProperty] = useMutation(getMutationTranslateProperty());
-
     const client = useApolloClient();
 
-    const suggestTranslation = async (targetLanguage) => {
+    const suggestTranslation = async () => {
         const {data} = await client.query({
             query: suggestTranslationForLanguage,
-            variables: {path, sourceLanguage: language, targetLanguage}
+            variables: {path, sourceLanguage: selected.language, targetLanguage}
         });
         return data.jcr.nodeByPath.translationSuggestions;
     }
 
     const handleClickDialog = () => {
-        suggestTranslation(selected[0]).then(data => {
+        setIsLoading(true);
+        suggestTranslation().then((data) => {
             data.forEach(suggestion => {
                 const key = suggestion.fieldName;
                 const value = suggestion.translatedValue;
@@ -75,109 +75,83 @@ export const RequestAssistedTranslation = ({
                     formik.setFieldValue(initialField, value || '');
                 }
             });
-        }).then(onClose());
+        }).catch((err) => {
+            console.error(err);
+            setErrorState('translation_error');
+        }).finally(() => {
+            setIsLoading(false);
+            onClose();
+        });
     };
 
-    const handleClickWarningModal = () => {
-        selected.reduce((acc, lang) => {
-            console.log('testXX2:'+lang+", "+language);
-            translateNode({
-                variables: {
-                    path: path,
-                    sourceLocale: language,
-                    targetLocale: lang,
-                }
-            });
-        }, {});
-        onClose();
-        setWarningModalShown(false);
-        onClose();
+    let sourceLanguageObject = siteLanguages.find(siteLanguage => siteLanguage.language === sourceLanguage);
+    let targetLanguageObject = siteLanguages.find(siteLanguage => siteLanguage.language === targetLanguage);
+    let translationLanguages = {
+        sourceLanguage: sourceLanguageObject.displayName,
+        sourceLanguageUI: sourceLanguageObject.uiLanguageDisplayName,
+        targetLanguage: targetLanguageObject.displayName,
+        targetLanguageUI: targetLanguageObject.uiLanguageDisplayName
     };
-
-    const available = useMemo(() => {
-        const disabledLanguages = data ? allLanguages.filter(l => !data.jcr.nodeByPath[`perm_${l.language}`] || (data.jcr[`lock_${l.language}`] && data.jcr[`lock_${l.language}`].lockInfo.details.length > 0)) : allLanguages;
-        return allLanguages.filter(l => !disabledLanguages.includes(l)).map(l => l.language);
-    }, [data, allLanguages]);
-
-    useEffect(() => {
-        setSelected(available);
-    }, [available]);
-
-    const filtered = allLanguages.filter(l => !filter || l.language.includes(filter) || l.displayName.includes(filter));
-    const filteredAndAvailable = filtered.map(l => l.language).filter(l => available.includes(l));
-    const selectedDisplayNames = filtered.filter(l => selected.includes(l.language)).map(l => l.displayName).join(', ');
-    const currentDisplayName = siteLanguages.find(l => l.language === language)?.displayName;
-
-    const title = isSingleField ? t('translation-deepl:label.dialogTitle', {propertyName: field.displayName}) : t('translation-deepl:label.dialogTitleAllProperties');
-    const description = isSingleField ? t('translation-deepl:label.dialogDescription') : t('translation-deepl:label.dialogDescriptionAllProperties');
-    const errorDescription = isSingleField ? t('translation-deepl:label.errorContent', {property: field.displayName}) : t('translation-deepl:label.errorContentAllProperties');
-
     return (<>
         <Dialog fullWidth
                 open={isOpen}
                 aria-labelledby="form-dialog-title"
                 data-sel-role="translate-language-dialog"
                 onExited={onExited}
-                onClose={onClose}
+                onClose={isLoading ? undefined : onClose}
         >
-            <DialogTitle>
-                {title}
+            <DialogTitle id="dialog-language-title">
+                <Typography isUpperCase variant="heading" weight="bold">
+                    {t('translation-deepl:label.dialogTitleAllProperties', translationLanguages)}
+                </Typography>
             </DialogTitle>
-            <DialogContent>
-                <DialogContentText component="div">
-                    <div className={styles.subheading}>
-                        <Typography>{description}</Typography>
-                    </div>
-                    <div className={styles.actions}>
-                        <Button size="default"
-                                label={t('translation-deepl:label.addAll')}
-                                data-sel-role="add-all-button"
-                                isDisabled={filteredAndAvailable.every(v => selected.includes(v))}
-                                onClick={() => data && setSelected(filteredAndAvailable)}/>
-                        <Button size="default"
-                                label={t('translation-deepl:label.removeAll')}
-                                data-sel-role="remove-all-button"
-                                isDisabled={selected.length === 0}
-                                onClick={() => data && setSelected([])}/>
-                        <div className="flexFluid"/>
-                        <Typography>{t('translation-deepl:label.languagesSelected', {count: selected.length})}</Typography>
-                    </div>
-                    <div className={styles.actions}>
-                        <Input variant="search"
-                               data-sel-role="language-filter"
-                               placeholder={t('translation-deepl:label.filterLanguages')}
-                               value={filter}
-                               onChange={e => {
-                                   setFilter(e.target.value);
-                               }}
-                               onClear={() => setFilter('')}/>
-                    </div>
-                    <div className={styles.languages}>
-                        {filtered.length > 0 ? filtered.map(l => (<label key={l.language} className={styles.item}>
-                            <Checkbox checked={selected.includes(l.language)}
-                                      data-sel-role="translate-language-button"
-                                      isDisabled={!available.includes(l.language)}
-                                      name="lang"
-                                      value={l.language}
-                                      aria-label={l.displayName}
-                                      onChange={() => setSelected((selected.includes(l.language)) ? selected.filter(s => l.language !== s) : [...selected, l.language])}
-                            />
-                            {l.displayName} {data && !available.includes(l.language) && (' - ' + t('translation-deepl:label.lock'))}
-                        </label>)) : (<div className={styles.emptylanguages}>
-                            <Typography>{t('translation-deepl:label.noResults')}</Typography></div>)}
-                    </div>
-                </DialogContentText>
+            <DialogContent style={{overflowY: 'hidden'}}>
+                {showDropdown && <>
+                    <Typography variant="subheading">
+                        {t('translation-deepl:label.translateFrom')}
+                    </Typography>
+                    <Dropdown
+                        className={styles.language}
+                        label={`${selected.displayName} (${selected.uiLanguageDisplayName})`}
+                        value={selected.language}
+                        size="medium"
+                        data-sel-role="from-language-selector"
+                        data={availableSourceLanguages.flatMap(element => {
+                            let optionLanguage = siteLanguages.find(siteLanguage => siteLanguage.language === element);
+                            // Get rid of the language in the dropdown if the language is not available in siteLanguages, as it means that the language is not available for translation
+                            if (!optionLanguage) {
+                                return [];
+                            }
+                            return {
+                                value: element,
+                                label: `${optionLanguage.displayName} (${optionLanguage.uiLanguageDisplayName})`
+                            };
+                        })}
+                        onChange={(e, item) => setSelected(getInitialState(siteLanguages, item.value))}
+                    /></>}
+                {!showDropdown &&
+                    <Typography variant="subheading">
+                        <span
+                            dangerouslySetInnerHTML={{__html: t('translation-deepl:label.dialogDescriptionAllProperties', translationLanguages)}}/>
+                    </Typography>
+                }
+                {isLoading && <Backdrop open={isLoading}
+                          style={{position: 'absolute', zIndex: 10000, color: 'burlywood'}}
+                >
+                    <CircularProgress color="secondary" size={60} thickness={6}/>
+                </Backdrop>}
             </DialogContent>
             <DialogActions>
                 <Button size="big"
                         label={t('translation-deepl:label.cancel')}
                         data-sel-role="cancel-button"
+                        disabled={isLoading}
                         onClick={onClose}/>
                 <Button size="big"
-                        isDisabled={selected.length === 0}
                         color="accent"
                         data-sel-role="translate-button"
                         label={t('translation-deepl:label.translate')}
+                        disabled={isLoading}
                         onClick={handleClickDialog}
                 />
             </DialogActions>
@@ -192,7 +166,8 @@ export const RequestAssistedTranslation = ({
         >
             <DialogTitle id="alert-dialog-title">{t('translation-deepl:label.errorTitle')}</DialogTitle>
             <DialogContent>
-                <DialogContentText id="alert-dialog-description">{errorDescription}</DialogContentText>
+                <DialogContentText
+                    id="alert-dialog-description">{t('translation-deepl:label.errorContentAllProperties')}</DialogContentText>
             </DialogContent>
             <DialogActions>
                 <Button label={t('translation-deepl:label.cancel')}
@@ -202,28 +177,17 @@ export const RequestAssistedTranslation = ({
                 />
             </DialogActions>
         </Dialog>
-        <WarningAlert
-            languages={selectedDisplayNames}
-            currentLanguage={currentDisplayName}
-            isOpen={warningModalShown}
-            onApply={handleClickWarningModal}
-            onClose={() => {
-                setWarningModalShown(false);
-            }}
-        />
     </>);
 }
 
 
 RequestAssistedTranslation.propTypes = {
     path: PropTypes.string.isRequired,
-    language: PropTypes.string.isRequired,
+    sourceLanguage: PropTypes.string.isRequired,
+    targetLanguage: PropTypes.string.isRequired,
     siteLanguages: PropTypes.array.isRequired,
-    setI18nContext: PropTypes.func.isRequired,
-    isNew: PropTypes.bool,
-    field: PropTypes.object,
-    fieldValue: PropTypes.string,
-    fields: PropTypes.object,
+    availableSourceLanguages: PropTypes.array,
+    showDropdown: PropTypes.bool,
     formik: PropTypes.object,
     isOpen: PropTypes.bool,
     onExited: PropTypes.func,

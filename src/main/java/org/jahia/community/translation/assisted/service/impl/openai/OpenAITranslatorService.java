@@ -19,6 +19,7 @@ import org.json.JSONObject;
 import org.osgi.framework.BundleException;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,7 @@ import javax.jcr.Property;
 import javax.jcr.PropertyIterator;
 import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,11 +36,15 @@ import java.util.stream.Collectors;
 import static org.jahia.community.translation.assisted.AssistedTranslationsConstants.*;
 
 
-@Component(service = TranslatorService.class, property = {"service.translation.provider=openai","service.ranking=10"}, configurationPid = SERVICE_CONFIG_FILE_NAME)
+@Component(service = TranslatorService.class,
+        property = {"service.translation.provider=openai","service.ranking=10"},
+        configurationPid = SERVICE_CONFIG_FILE_NAME_OPENAI,
+        configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class OpenAITranslatorService implements TranslatorService {
     private static final Logger logger = LoggerFactory.getLogger(OpenAITranslatorService.class);
     private static final String SLASH = "/";
     private OpenAIClient openAIClient;
+    private MessageFormat messageFormat;
     private boolean available;
 
     @Override
@@ -61,9 +67,13 @@ public class OpenAITranslatorService implements TranslatorService {
         final String authKey = (String) properties.getOrDefault(OPENAI_API_KEY, null);
         if (authKey == null) {
             available=false;
+            return;
         }
-        logger.debug("DeepL {} = {}", OPENAI_API_KEY, authKey);
-        openAIClient = OpenAIOkHttpClient.builder().apiKey(authKey).organization("org-g0yPMZedFvXKAonaRbXKQykS").project("proj_MEag26KzVkGWSXdevjhi7Syh").build();
+        openAIClient = OpenAIOkHttpClient.builder().apiKey(authKey).build();
+        if (properties.containsKey(TRANSLATION_OPENAI_PROMPT)) {
+            String pattern = (String) properties.get(TRANSLATION_OPENAI_PROMPT);
+            messageFormat = new MessageFormat(pattern.replace("{{sourceLanguage}}","{0}").replace("{{targetLanguage}}","{1}"));
+        }
         available=true;
     }
 
@@ -90,15 +100,12 @@ public class OpenAITranslatorService implements TranslatorService {
 //            "role": "user",
 //                "content": "{\"sourceLanguage\":\"en\",\"targetLanguage\":\"fr\",\"texts\":{\"/a/title\":\"Hello <b>world</b>\",\"/a/desc\":\"A &amp; B\"}}"
 //        }
-        JSONObject json = new JSONObject();
-        json.put("sourceLanguage", sourceLanguage);
-        json.put("targetLanguage", targetLanguage);
-        json.put("texts", data.getTexts());
+        JSONObject json = new JSONObject(data.getTexts());
         // Use Chat Completions for traductions
         ChatCompletionCreateParams params = ChatCompletionCreateParams
                 .builder()
                 .model(ChatModel.GPT_4_1_MINI)
-                .addSystemMessage("You are a translation engine. Return only strict JSON object key->translated text.Preserve HTML tags/entities exactly. The source language is " + sourceLanguage + " and the target language is " + targetLanguage)
+                .addSystemMessage(messageFormat.format(new Object[]{sourceLanguage, targetLanguage}))
                 .addUserMessage(json.toString())
                 .build();
         // Call OpenAI API
@@ -108,9 +115,8 @@ public class OpenAITranslatorService implements TranslatorService {
         if(content.isPresent()) {
             JSONObject responseJson = new JSONObject(content.get());
             // The response is a JSON object with the same structure as the request, but with the texts translated, e.g. {"sourceLanguage":"en","targetLanguage":"fr","texts":{"/a/title":"Bonjour <b>le monde</b>","/a/desc":"A &amp; B"}}
-            JSONObject translatedTexts = responseJson.getJSONObject("texts");
             // Build the response with the translated texts by transforming in TranslatedField objects, where the key is the JCR path to the property and the value is the translated text
-             return translatedTexts.toMap().entrySet().stream()
+             return responseJson.toMap().entrySet().stream()
                     .map(e -> new TranslatedField(StringUtils.substringAfterLast(e.getKey(),SLASH), (String) e.getValue()))
                     .collect(Collectors.toList());
         } else  {
