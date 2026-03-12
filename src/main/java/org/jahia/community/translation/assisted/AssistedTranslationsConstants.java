@@ -13,6 +13,7 @@ public class AssistedTranslationsConstants {
     public static final String PROP_PREFIX_TARGET_LANGUAGES = "targetLanguages.";
 
     public static final String MSG_NOTHING_TO_TRANSLATE = "Nothing to translate in %";
+    public static final String SLASH = "/";
 
     private AssistedTranslationsConstants() {
 

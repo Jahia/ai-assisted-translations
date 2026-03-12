@@ -8,23 +8,19 @@ import org.jahia.api.Constants;
 import org.jahia.community.translation.assisted.graphql.TranslatedField;
 import org.jahia.community.translation.assisted.service.AssistedTranslationResponse;
 import org.jahia.community.translation.assisted.service.TranslationServicesManager;
+import org.jahia.community.translation.assisted.service.TranslationServicesManagerImpl;
 import org.jahia.community.translation.assisted.service.TranslatorService;
 import org.jahia.community.translation.assisted.service.impl.TranslationData;
+import org.jahia.osgi.BundleUtils;
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.JCRSessionFactory;
 import org.jahia.services.content.JCRSessionWrapper;
-import org.jahia.services.content.nodetypes.ExtendedPropertyDefinition;
 import org.jahia.utils.LanguageCodeConverters;
 import org.osgi.framework.BundleException;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Property;
-import javax.jcr.PropertyIterator;
-import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -48,8 +44,10 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
     private static final String SLASH = "/";
 
     private DeepLClient translator;
-    private Map<String, String> targetLanguages;
     private boolean available;
+
+    @Reference
+    private TranslationServicesManager translationServicesManager;
 
     @Override
     public String getProviderKey() {
@@ -68,7 +66,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
             logger.warn("Missing configurations: {}", SERVICE_CONFIG_FILE_FULLNAME);
             return;
         }
-
+        logger.info("Activating DeeplTranslator Service");
         final String authKey = properties.getOrDefault(DEEPL_API_KEY, null);
         if (authKey == null || properties.getOrDefault(OPENAI_API_KEY, null) != null) {
             available = false;
@@ -79,9 +77,6 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
             available = false;
             return;
         }
-
-
-        targetLanguages = TranslationServicesManager.transformTargetLanguagesPropertiesToMap(properties);
         available = true;
     }
 
@@ -121,7 +116,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
             final JCRNodeWrapper localizedNode = session.getNodeByIdentifier(node.getIdentifier());
             final TranslationData data = new TranslationData();
 
-            buildDataToTranslate(localizedNode, data, true);
+            translationServicesManager.buildDataToTranslate(localizedNode, data, true);
             final Map<String, String> translations = generateTranslations(data, sourceLanguage, targetLanguage);
             // The keys of the translations are in the format path/to/node/property, we need to transform them to be able to return the property and its translation suggestion
             return translations.entrySet().stream().map(e -> {
@@ -153,57 +148,15 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
         final JCRNodeWrapper node = session.getNode(path);
         final TranslationData data = new TranslationData();
         if (propertyName == null) {
-            buildDataToTranslate(node, data, false);
+            translationServicesManager.buildDataToTranslate(node, data, false);
         } else {
-            buildDataToTranslate(node, propertyName, data);
+            translationServicesManager.buildDataToTranslate(node, propertyName, data);
         }
 
         return translateAndSave(data, sourceLanguage, targetLanguage);
     }
 
-    private void buildDataToTranslate(JCRNodeWrapper node, TranslationData data, boolean forceTranslation) throws RepositoryException {
-        if (!isTranslatableNode(node)) {
-            return;
-        }
 
-        final PropertyIterator properties;
-        try {
-            properties = node.getProperties();
-        } catch (RepositoryException e) {
-            if (logger.isErrorEnabled()) {
-                logger.error("", e);
-            }
-            return;
-        }
-        while (properties.hasNext()) {
-            final Property property = properties.nextProperty();
-            if (isTranslatableProperty(property)) {
-                final String key = node.getPath() + SLASH + property.getName();
-                final String stringValue = StringUtils.trimToNull(property.getValue().getString());
-                if (forceTranslation || stringValue != null) {
-                    data.trackText(key, stringValue);
-                }
-            }
-
-        }
-    }
-
-    private void buildDataToTranslate(JCRNodeWrapper node, String propertyName, TranslationData data) throws RepositoryException {
-        if (!isTranslatableNode(node)) {
-            return;
-        }
-        if (node.hasProperty(propertyName)) {
-            final Property property = node.getProperty(propertyName);
-            if (!isTranslatableProperty(property)) {
-                return;
-            }
-            final String key = node.getPath() + SLASH + property.getName();
-            final String stringValue = StringUtils.trimToNull(property.getValue().getString());
-            if (stringValue != null && !stringValue.isEmpty()) {
-                data.trackText(key, stringValue);
-            }
-        }
-    }
 
     private AssistedTranslationResponse translateAndSave(TranslationData data, String srcLanguage, String targetLanguage) throws InterruptedException {
         final Map<String, String> translations = generateTranslations(data, srcLanguage, targetLanguage);
@@ -243,7 +196,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
             return Collections.emptyMap();
         }
 
-        final String destDeepLLanguage = targetLanguages.getOrDefault(destLanguage, destLanguage);
+        final String destDeepLLanguage = translationServicesManager.getTargetLanguages().getOrDefault(destLanguage, destLanguage);
         final Map<String, String> texts = data.getTexts();
         final int nbTexts = texts.size();
         final List<String> keys = new ArrayList<>(nbTexts);
@@ -298,35 +251,5 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
         }
 
         return hasSavedSomething.get();
-    }
-
-    private boolean isTranslatableNode(JCRNodeWrapper node) {
-        try {
-            if (node.isNodeType(Constants.JAHIANT_PAGE)) {
-                return true;
-            }
-            if (node.isNodeType(Constants.JAHIANT_CONTENT)) {
-                return true;
-            }
-        } catch (RepositoryException e) {
-            if (logger.isErrorEnabled()) {
-                logger.error("", e);
-            }
-        }
-        return false;
-    }
-
-    private boolean isTranslatableProperty(Property property) {
-        final ExtendedPropertyDefinition definition;
-        try {
-            definition = (ExtendedPropertyDefinition) property.getDefinition();
-        } catch (RepositoryException e) {
-            if (logger.isErrorEnabled()) {
-                logger.error("", e);
-            }
-            return false;
-        }
-
-        return definition.isInternationalized() && !definition.isMultiple() && definition.getRequiredType() == PropertyType.STRING && !definition.isHidden() && !definition.isProtected();
     }
 }
