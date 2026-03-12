@@ -17,8 +17,7 @@ import java.util.Map;
 
 import static org.jahia.community.translation.assisted.AssistedTranslationsConstants.*;
 
-@Component(
-        configurationPid = SERVICE_CONFIG_FILE_NAME, immediate = true)
+@Component(configurationPid = SERVICE_CONFIG_FILE_NAME, immediate = true)
 /**
  * Manager of translation services, responsible for providing the appropriate service based on the provider key.
  */
@@ -27,7 +26,6 @@ public class TranslationServicesManager {
 
     @Reference
     private ConfigurationAdmin configurationAdmin;
-    private final Map<String, String> targetLanguages = new HashMap<>();
 
 
     @Activate
@@ -36,7 +34,6 @@ public class TranslationServicesManager {
             logger.warn("Missing configurations: {}", SERVICE_CONFIG_FILE_FULLNAME);
             return;
         }
-        targetLanguages.clear();
         final String openAIKey = properties.getOrDefault(OPENAI_API_KEY, "");
         final String deeplAIKey = properties.getOrDefault(DEEPL_API_KEY, "");
         try {
@@ -70,7 +67,7 @@ public class TranslationServicesManager {
         } else {
             logger.info("API key provided for DeepL translator service. Only DeepL translator service will be available.");
         }
-        properties.entrySet().stream().filter(e -> e.getKey().startsWith(PROP_PREFIX_TARGET_LANGUAGES)).forEach(e -> targetLanguages.put(e.getKey().substring(PROP_PREFIX_TARGET_LANGUAGES.length()), (String) e.getValue()));
+        Map targetLanguages = transformTargetLanguagesPropertiesToMap(properties);
         if (StringUtils.isNotEmpty(openAIKey)) {
             try {
                 Configuration configuration = configurationAdmin.getConfiguration(SERVICE_CONFIG_FILE_NAME_OPENAI);
@@ -83,6 +80,9 @@ public class TranslationServicesManager {
                 }
                 if (properties.containsKey(TRANSLATION_OPENAI_PROMPT)) {
                     configProperties.put(TRANSLATION_OPENAI_PROMPT, properties.get(TRANSLATION_OPENAI_PROMPT));
+                }
+                if (properties.containsKey(TRANSLATION_OPENAI_MODEL)) {
+                    configProperties.put(TRANSLATION_OPENAI_MODEL, properties.get(TRANSLATION_OPENAI_MODEL));
                 }
                 configuration.updateIfDifferent(configProperties);
             } catch (IOException e) {
@@ -106,6 +106,12 @@ public class TranslationServicesManager {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public static Map<String, String> transformTargetLanguagesPropertiesToMap(Map<String, String> properties) {
+        Map<String, String> targetLanguages = new HashMap<>();
+        properties.entrySet().stream().filter(e -> e.getKey().startsWith(PROP_PREFIX_TARGET_LANGUAGES)).forEach(e -> targetLanguages.put(e.getKey().substring(PROP_PREFIX_TARGET_LANGUAGES.length()), e.getValue()));
+        return targetLanguages;
     }
 
 }

@@ -7,6 +7,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.jahia.api.Constants;
 import org.jahia.community.translation.assisted.graphql.TranslatedField;
 import org.jahia.community.translation.assisted.service.AssistedTranslationResponse;
+import org.jahia.community.translation.assisted.service.TranslationServicesManager;
 import org.jahia.community.translation.assisted.service.TranslatorService;
 import org.jahia.community.translation.assisted.service.impl.TranslationData;
 import org.jahia.services.content.JCRNodeWrapper;
@@ -38,7 +39,7 @@ import static org.jahia.community.translation.assisted.AssistedTranslationsConst
 
 @Component(service = TranslatorService.class,
         configurationPid = SERVICE_CONFIG_FILE_NAME_DEEPL,
-        property = {"service.translation.provider=deepl", "service.ranking=5"},
+        property = {"service.translation.provider=deepl", "service.ranking=5.0"},
         immediate = true,
         configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class DeepLTranslatorServiceImpl implements TranslatorService {
@@ -47,7 +48,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
     private static final String SLASH = "/";
 
     private DeepLClient translator;
-    private final Map<String, String> targetLanguages = new HashMap<>();
+    private Map<String, String> targetLanguages;
     private boolean available;
 
     @Override
@@ -61,15 +62,14 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
     }
 
     @Activate
-    public void activate(Map<String, ?> properties) throws BundleException {
+    public void activate(Map<String, String> properties) throws BundleException {
         translator = null;
-        targetLanguages.clear();
         if (properties == null) {
             logger.warn("Missing configurations: {}", SERVICE_CONFIG_FILE_FULLNAME);
             return;
         }
 
-        final String authKey = (String) properties.getOrDefault(DEEPL_API_KEY, null);
+        final String authKey = properties.getOrDefault(DEEPL_API_KEY, null);
         if (authKey == null || properties.getOrDefault(OPENAI_API_KEY, null) != null) {
             available = false;
             return;
@@ -81,7 +81,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
         }
 
 
-        properties.entrySet().stream().filter(e -> e.getKey().startsWith(PROP_PREFIX_TARGET_LANGUAGES)).forEach(e -> targetLanguages.put(e.getKey().substring(PROP_PREFIX_TARGET_LANGUAGES.length()), (String) e.getValue()));
+        targetLanguages = TranslationServicesManager.transformTargetLanguagesPropertiesToMap(properties);
         available = true;
     }
 
@@ -125,7 +125,6 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
             final Map<String, String> translations = generateTranslations(data, sourceLanguage, targetLanguage);
             // The keys of the translations are in the format path/to/node/property, we need to transform them to be able to return the property and its translation suggestion
             return translations.entrySet().stream().map(e -> {
-                final String path = StringUtils.substringBeforeLast(e.getKey(), SLASH);
                 final String propertyName = StringUtils.substringAfterLast(e.getKey(), SLASH);
                 return new TranslatedField(propertyName, e.getValue());
             }).collect(Collectors.toList());

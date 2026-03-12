@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jahia.api.Constants;
 import org.jahia.community.translation.assisted.graphql.TranslatedField;
 import org.jahia.community.translation.assisted.service.AssistedTranslationResponse;
+import org.jahia.community.translation.assisted.service.TranslationServicesManager;
 import org.jahia.community.translation.assisted.service.TranslatorService;
 import org.jahia.community.translation.assisted.service.impl.TranslationData;
 import org.jahia.services.content.JCRNodeWrapper;
@@ -37,7 +38,7 @@ import static org.jahia.community.translation.assisted.AssistedTranslationsConst
 
 
 @Component(service = TranslatorService.class,
-        property = {"service.translation.provider=openai","service.ranking=10"},
+        property = {"service.translation.provider=openai","service.ranking=10.0"},
         configurationPid = SERVICE_CONFIG_FILE_NAME_OPENAI,
         configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class OpenAITranslatorService implements TranslatorService {
@@ -45,7 +46,9 @@ public class OpenAITranslatorService implements TranslatorService {
     private static final String SLASH = "/";
     private OpenAIClient openAIClient;
     private MessageFormat messageFormat;
+    private ChatModel chatModel;
     private boolean available;
+    private Map<String, String> targetLanguages;
 
     @Override
     public String getProviderKey() {
@@ -58,22 +61,26 @@ public class OpenAITranslatorService implements TranslatorService {
     }
 
     @Activate
-    public void activate(Map<String, ?> properties) throws BundleException {
+    public void activate(Map<String, String> properties) {
         if (properties == null) {
             logger.warn("Missing configurations: {}", SERVICE_CONFIG_FILE_FULLNAME);
             return;
         }
 
-        final String authKey = (String) properties.getOrDefault(OPENAI_API_KEY, null);
+        final String authKey = properties.getOrDefault(OPENAI_API_KEY, null);
         if (authKey == null) {
             available=false;
             return;
         }
         openAIClient = OpenAIOkHttpClient.builder().apiKey(authKey).build();
         if (properties.containsKey(TRANSLATION_OPENAI_PROMPT)) {
-            String pattern = (String) properties.get(TRANSLATION_OPENAI_PROMPT);
+            String pattern = properties.get(TRANSLATION_OPENAI_PROMPT);
             messageFormat = new MessageFormat(pattern.replace("{{sourceLanguage}}","{0}").replace("{{targetLanguage}}","{1}"));
         }
+        if (properties.containsKey(TRANSLATION_OPENAI_MODEL)) {
+            chatModel = ChatModel.of(properties.get(TRANSLATION_OPENAI_MODEL));
+        }
+        targetLanguages = TranslationServicesManager.transformTargetLanguagesPropertiesToMap(properties);
         available=true;
     }
 
@@ -102,13 +109,19 @@ public class OpenAITranslatorService implements TranslatorService {
 //        }
         JSONObject json = new JSONObject(data.getTexts());
         // Use Chat Completions for traductions
+        String sourceLanguageMapped = targetLanguages.getOrDefault(sourceLanguage, sourceLanguage);
+        String targetLanguageMapped = targetLanguages.getOrDefault(targetLanguage, targetLanguage);
+        String systemPrompt = messageFormat.format(new Object[]{sourceLanguageMapped, targetLanguageMapped});
         ChatCompletionCreateParams params = ChatCompletionCreateParams
                 .builder()
-                .model(ChatModel.GPT_4_1_MINI)
-                .addSystemMessage(messageFormat.format(new Object[]{sourceLanguage, targetLanguage}))
+                .model(chatModel)
+                .addSystemMessage(systemPrompt)
                 .addUserMessage(json.toString())
                 .build();
         // Call OpenAI API
+        if (logger.isDebugEnabled()) {
+            logger.debug("Calling OpenAI API with prompt: {} and requested translation {}", systemPrompt, json.toString());
+        }
         ChatCompletion chatCompletion = openAIClient.chat().completions().create(params);
         List<ChatCompletion.Choice> choices = chatCompletion.choices();
         Optional<String> content = choices.get(0).message().content();
