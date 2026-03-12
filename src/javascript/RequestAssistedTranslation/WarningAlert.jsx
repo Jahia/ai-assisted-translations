@@ -10,7 +10,7 @@ const WarningAlert = ({
     isOpen,
     onApply,
     onClose}) => {
-    const {t} = useTranslation('translation-deepl');
+    const {t} = useTranslation('ai-assisted-translations');
 
     return (
         <Dialog maxWidth="md"
@@ -22,14 +22,14 @@ const WarningAlert = ({
             <DialogTitle id="dialog-warningBeforeSave">
                 <Warning size="big" color="yellow"/>
                 <Typography variant="heading">
-                    {t('translation-deepl:label.warning')}
+                    {t('ai-assisted-translations:label.warning')}
                 </Typography>
             </DialogTitle>
 
             <DialogContent>
                 <DialogContentText>
                     <Typography weight="semiBold">
-                        {t('translation-deepl:label.warningAllProperties', {languages, currentLanguage})}
+                        {t('ai-assisted-translations:label.warningAllProperties', {languages, currentLanguage})}
                     </Typography>
                 </DialogContentText>
             </DialogContent>
@@ -39,14 +39,14 @@ const WarningAlert = ({
                     size="big"
                     color="accent"
                     data-sel-role="content-type-dialog-apply"
-                    label={t('translation-deepl:label.translate')}
+                    label={t('ai-assisted-translations:label.translate')}
                     onClick={onApply}
                 />
                 <Button
                     size="big"
                     color="primary"
                     data-sel-role="content-type-dialog-cancel"
-                    label={t('translation-deepl:label.cancel')}
+                    label={t('ai-assisted-translations:label.cancel')}
                     onClick={onClose}
                 />
             </DialogActions>

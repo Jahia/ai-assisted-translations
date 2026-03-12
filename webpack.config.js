@@ -22,7 +22,7 @@ module.exports = (env, argv) => {
         },
         output: {
             path: path.resolve(__dirname, 'src/main/resources/javascript/apps/'),
-            filename: 'translation-deepl.bundle.js',
+            filename: 'ai-assisted-translations.bundle.js',
             chunkFilename: '[name].jahia.[chunkhash:6].js'
         },
         resolve: {
@@ -89,7 +89,7 @@ module.exports = (env, argv) => {
         },
         plugins: [
             new ModuleFederationPlugin(getModuleFederationConfig(packageJson, {
-                library: { type: "assign", name: "appShell.remotes.translationDeepl" },
+                library: { type: "assign", name: "appShell.remotes.aiAssistedTranslations" },
                 remotes: {
                     '@jahia/jcontent': 'appShell.remotes.jcontent'
                 }

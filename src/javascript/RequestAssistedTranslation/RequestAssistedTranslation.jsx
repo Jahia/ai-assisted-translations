@@ -31,7 +31,7 @@ export const RequestAssistedTranslation = ({
                                             onExited,
                                             onClose
                                         }) => {
-    const {t} = useTranslation('translation-deepl');
+    const {t} = useTranslation('ai-assisted-translations');
     const {t: j} = useTranslation('jcontent');
     const [selected, setSelected] = useState(getInitialState(siteLanguages, sourceLanguage));
     const [errorState, setErrorState] = useState('');
@@ -102,13 +102,13 @@ export const RequestAssistedTranslation = ({
         >
             <DialogTitle id="dialog-language-title">
                 <Typography isUpperCase variant="heading" weight="bold">
-                    {t('translation-deepl:label.dialogTitleAllProperties', translationLanguages)}
+                    {t('ai-assisted-translations:label.dialogTitleAllProperties', translationLanguages)}
                 </Typography>
             </DialogTitle>
             <DialogContent style={{overflowY: 'hidden'}}>
                 {showDropdown && <>
                     <Typography variant="subheading">
-                        {t('translation-deepl:label.translateFrom')}
+                        {t('ai-assisted-translations:label.translateFrom')}
                     </Typography>
                     <Dropdown
                         className={styles.language}
@@ -132,7 +132,7 @@ export const RequestAssistedTranslation = ({
                 {!showDropdown &&
                     <Typography variant="subheading">
                         <span
-                            dangerouslySetInnerHTML={{__html: t('translation-deepl:label.dialogDescriptionAllProperties', translationLanguages)}}/>
+                            dangerouslySetInnerHTML={{__html: t('ai-assisted-translations:label.dialogDescriptionAllProperties', translationLanguages)}}/>
                     </Typography>
                 }
                 {isLoading && <Backdrop open={isLoading}
@@ -143,14 +143,14 @@ export const RequestAssistedTranslation = ({
             </DialogContent>
             <DialogActions>
                 <Button size="big"
-                        label={t('translation-deepl:label.cancel')}
+                        label={t('ai-assisted-translations:label.cancel')}
                         data-sel-role="cancel-button"
                         disabled={isLoading}
                         onClick={onClose}/>
                 <Button size="big"
                         color="accent"
                         data-sel-role="translate-button"
-                        label={t('translation-deepl:label.translate')}
+                        label={t('ai-assisted-translations:label.translate')}
                         disabled={isLoading}
                         onClick={handleClickDialog}
                 />
@@ -164,13 +164,13 @@ export const RequestAssistedTranslation = ({
             aria-describedby="alert-dialog-description"
             onClose={() => setErrorState()}
         >
-            <DialogTitle id="alert-dialog-title">{t('translation-deepl:label.errorTitle')}</DialogTitle>
+            <DialogTitle id="alert-dialog-title">{t('ai-assisted-translations:label.errorTitle')}</DialogTitle>
             <DialogContent>
                 <DialogContentText
-                    id="alert-dialog-description">{t('translation-deepl:label.errorContentAllProperties')}</DialogContentText>
+                    id="alert-dialog-description">{t('ai-assisted-translations:label.errorContentAllProperties')}</DialogContentText>
             </DialogContent>
             <DialogActions>
-                <Button label={t('translation-deepl:label.cancel')}
+                <Button label={t('ai-assisted-translations:label.cancel')}
                         color="accent"
                         size="big"
                         onClick={() => setErrorState()}

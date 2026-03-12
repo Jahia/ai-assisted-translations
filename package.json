@@ -1,5 +1,5 @@
 {
-    "name": "@jahia/transation-deepl",
+    "name": "@jahia/ai-assisted-translations",
     "version": "1.2.2-SNAPSHOT",
     "scripts": {
         "build": "yarn webpack",
@@ -20,9 +20,9 @@
         "lint:fix": "yarn lint:js:fix && yarn lint:scss:fix",
         "sync-pom": "sync-pom-version --use-yarn"
     },
-    "description": "translation-deepl for Jahia",
+    "description": "AI Assisted Translations for Jahia",
     "main": "index.js",
-    "repository": "git@github.com:Jahia/translation-deepl.git",
+    "repository": "git@github.com:Jahia/ai-assisted-translations.git",
     "author": "Jahia Customer Support Team <support@jahia.com>",
     "license": "MIT",
     "jahia": {

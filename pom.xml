@@ -8,15 +8,15 @@
     </parent>
 
     <groupId>org.jahia.community</groupId>
-    <artifactId>translation-deepl</artifactId>
-    <name>Translation - DeepL</name>
+    <artifactId>ai-assisted-translations</artifactId>
+    <name>AI Assisted Translations</name>
     <version>1.2.2-SNAPSHOT</version>
     <packaging>bundle</packaging>
-    <description>Module to allow you asking translation to DeepL from jContent.</description>
+    <description>Module to request AI-assisted translations from jContent.</description>
     <scm>
-        <connection>scm:git:git@github.com:Jahia/translation-deepl.git</connection>
-        <developerConnection>scm:git:git@github.com:Jahia/translation-deepl.git</developerConnection>
-        <url>https://github.com/Jahia/translation-deepl</url>
+        <connection>scm:git:git@github.com:Jahia/ai-assisted-translations.git</connection>
+        <developerConnection>scm:git:git@github.com:Jahia/ai-assisted-translations.git</developerConnection>
+        <url>https://github.com/Jahia/ai-assisted-translations</url>
         <tag>HEAD</tag>
     </scm>
 

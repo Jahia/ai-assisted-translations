@@ -1,0 +1,19 @@
+name: Nightly Test run (Jahia RL)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron:  '0 1 * * *'
+
+jobs:
+  integration-tests:
+    uses:  Jahia/jahia-modules-action/.github/workflows/reusable-integration-tests.yml@v2
+    secrets: inherit
+    with:
+      jahia_image: jahia/jahia-ee:8
+      module_id: ai-assisted-translations
+      testrail_project: Jahia User Password Authentication Module
+      pagerduty_incident_service: ai-assisted-translations-JahiaRL
+      provisioning_manifest: provisioning-manifest-snapshot.yml
+      artifact_prefix: upa-nightly-rl
+      module_branch: ${{ github.ref }}

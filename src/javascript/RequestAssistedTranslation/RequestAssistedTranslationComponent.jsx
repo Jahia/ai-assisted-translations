@@ -18,14 +18,14 @@ export const RequestAssistedTranslationComponent = ({
     const componentRenderer = useContext(ComponentRendererContext);
     const editorConfigContext = useContentEditorConfigContext();
 
-    console.debug('RequestTranslationDeeplForAllLanguagesActionComponent {editorContext, editorSectionContext, formikContext, editorConfigContext}', {editorContext, editorSectionContext, formikContext, editorConfigContext});
+    console.debug('RequestTranslationAiAssistedForAllLanguagesActionComponent {editorContext, editorSectionContext, formikContext, editorConfigContext}', {editorContext, editorSectionContext, formikContext, editorConfigContext});
     // Load namespace
-    useTranslation('translation-deepl');
+    useTranslation('ai-assisted-translations');
 
     const res = useNodeChecks(
         {path: editorContext.nodeData.path},
         {
-            requireModuleInstalledOnSite: ['translation-deepl']
+            requireModuleInstalledOnSite: ['ai-assisted-translations']
         }
     );
 
@@ -46,7 +46,7 @@ export const RequestAssistedTranslationComponent = ({
             enabled={enabled}
             onClick={() => {
 
-                componentRenderer.render('requestTranslationDeeplForAllLanguages', RequestAssistedTranslation, {
+                componentRenderer.render('requestTranslationAiAssistedForAllLanguages', RequestAssistedTranslation, {
                     path: editorContext.nodeData.path,
                     sourceLanguage: sourceLanguage,
                     targetLanguage: editorContext.lang,
@@ -56,10 +56,10 @@ export const RequestAssistedTranslationComponent = ({
                     isOpen: true,
                     formik: formikContext,
                     onClose: () => {
-                        componentRenderer.setProperties('requestTranslationDeeplForAllLanguages', {isOpen: false});
+                        componentRenderer.setProperties('requestTranslationAiAssistedForAllLanguages', {isOpen: false});
                     },
                     onExited: () => {
-                        componentRenderer.destroy('requestTranslationDeeplForAllLanguages');
+                        componentRenderer.destroy('requestTranslationAiAssistedForAllLanguages');
                     }
                 });
             }}

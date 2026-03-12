@@ -7,9 +7,9 @@ import {
 import DeeplIcon from "./DeeplIcon";
 
 export default () => {
-    registry.add('action', 'requestTranslationDeeplForAllLanguages', {
+    registry.add('action', 'requestTranslationAiAssistedForAllLanguages', {
         buttonIcon: <DeeplIcon/>,
-        buttonLabel: 'translation-deepl:label.actionAllProperties',
+        buttonLabel: 'ai-assisted-translations:label.actionAllProperties',
         targets: ['translate/header/3dots:5.5','content-editor/header/3dots:5.5'],
         component: RequestAssistedTranslationComponent
     });

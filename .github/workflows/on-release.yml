@@ -1,0 +1,18 @@
+# This workflow is triggered when someone create a new release in GitHub
+# and checks the "This is a pre-relase" box.
+name: Trigger Release creation
+
+on:
+  release:
+    types: [prereleased]
+
+permissions:
+  actions: read
+  checks: write
+  contents: read
+  id-token: write
+
+jobs:
+  release-module:
+    uses: Jahia/jahia-modules-action/.github/workflows/reusable-release-module.yml@v2
+    secrets: inherit

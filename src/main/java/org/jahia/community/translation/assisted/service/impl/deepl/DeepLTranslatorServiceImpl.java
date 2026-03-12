@@ -91,7 +91,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
             return null;
         }
 
-        final DeepLClientOptions options = (DeepLClientOptions) new DeepLClientOptions().setAppInfo("translation-deepl", "1.2.0").setMaxRetries(3).setTimeout(Duration.ofSeconds(3));
+        final DeepLClientOptions options = (DeepLClientOptions) new DeepLClientOptions().setAppInfo("ai-assisted-translations", "1.2.0").setMaxRetries(3).setTimeout(Duration.ofSeconds(3));
 
         final String proxyHost = System.getProperty("https.proxyHost");
         final String proxyPort = System.getProperty("https.proxyPort");
