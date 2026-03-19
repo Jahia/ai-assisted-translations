@@ -9,7 +9,7 @@ import java.util.Map;
 public interface TranslationServicesManager {
     Map<String, String> getTargetLanguages();
 
-    void buildDataToTranslate(JCRNodeWrapper node, TranslationData data, boolean forceTranslation) throws RepositoryException;
+    void buildDataToTranslate(JCRNodeWrapper node, TranslationData data, boolean forceTranslation, boolean subtree) throws RepositoryException;
 
     void buildDataToTranslate(JCRNodeWrapper node, String propertyName, TranslationData data) throws RepositoryException;
 }

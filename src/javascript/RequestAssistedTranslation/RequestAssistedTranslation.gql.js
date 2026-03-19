@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 
-function getQueryTranslationLocksAndPermissions(allLanguages, path) {
+const getQueryTranslationLocksAndPermissions = (allLanguages, path) => {
     const locks = allLanguages.map(l => `lock_${l.language}:nodeByPath(path: "${path}/j:translation_${l.language}") {lockInfo {details {type}}}`);
     const perms = allLanguages.map(l => `perm_${l.language}:hasPermission(permissionName: "jcr:modifyProperties_default_${l.language}")`);
 
@@ -24,21 +24,18 @@ function getQueryTranslationLocksAndPermissions(allLanguages, path) {
     }`;
 }
 
-function getMutationTranslateNode() {
-    return gql`mutation translateNode($path:String!,$sourceLocale:String!,$targetLocale:String!) {
+const getMutationTranslateNode = gql`mutation translateNode($path:String!,$sourceLanguage:String!,$targetLanguage:String!) {
         jcr{
             mutateNode(pathOrId: $path) {
-                translateNode(sourceLocale: $sourceLocale, targetLocale: $targetLocale){
+                translateNode(sourceLocale: $sourceLanguage, targetLocale: $targetLanguage){
                     message
                     successful
                 }
             }
         }
     }`;
-}
 
-function getMutationTranslateProperty() {
-    return gql`mutation translateProperty($path:String!,$propertyName:String!,$sourceLocale:String!,$targetLocale:String!) {
+const getMutationTranslateProperty = gql`mutation translateProperty($path:String!,$propertyName:String!,$sourceLocale:String!,$targetLocale:String!) {
         jcr{
             mutateNode(pathOrId: $path) {
                 translateProperty(propertyName: $propertyName, sourceLocale: $sourceLocale, targetLocale: $targetLocale){
@@ -48,7 +45,7 @@ function getMutationTranslateProperty() {
             }
         }
     }`;
-}
+
 
 
 const suggestTranslationForLanguage = gql`query SuggestTranslationForLanguage($path:String!, $sourceLanguage:String!, $targetLanguage:String!) {
@@ -60,5 +57,5 @@ const suggestTranslationForLanguage = gql`query SuggestTranslationForLanguage($p
             }
         }
     }
-}`
+}`;
 export {getQueryTranslationLocksAndPermissions, getMutationTranslateNode, getMutationTranslateProperty, suggestTranslationForLanguage};

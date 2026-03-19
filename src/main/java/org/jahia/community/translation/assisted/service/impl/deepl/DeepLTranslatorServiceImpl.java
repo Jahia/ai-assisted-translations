@@ -116,7 +116,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
             final JCRNodeWrapper localizedNode = session.getNodeByIdentifier(node.getIdentifier());
             final TranslationData data = new TranslationData();
 
-            translationServicesManager.buildDataToTranslate(localizedNode, data, true);
+            translationServicesManager.buildDataToTranslate(localizedNode, data, true, false);
             final Map<String, String> translations = generateTranslations(data, sourceLanguage, targetLanguage);
             // The keys of the translations are in the format path/to/node/property, we need to transform them to be able to return the property and its translation suggestion
             return translations.entrySet().stream().map(e -> {
@@ -148,7 +148,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
         final JCRNodeWrapper node = session.getNode(path);
         final TranslationData data = new TranslationData();
         if (propertyName == null) {
-            translationServicesManager.buildDataToTranslate(node, data, false);
+            translationServicesManager.buildDataToTranslate(node, data, false, true);
         } else {
             translationServicesManager.buildDataToTranslate(node, propertyName, data);
         }

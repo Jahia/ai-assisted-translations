@@ -34,14 +34,15 @@ public class GqlJcrNodeMutationAssistedTranslation {
             @GraphQLName("sourceLocale") @GraphQLDescription("Locale to translate from") String sourceLocale,
             @GraphQLName("targetLocale") @GraphQLDescription("Locale to translate to") String targetLocale
     ) throws InterruptedException {
-        if(logger.isErrorEnabled()) {
-            logger.error(String.format("Translating %s from %s to %s", nodeMutation.getNode().getPath(), sourceLocale, targetLocale));
+        if(logger.isDebugEnabled()) {
+            logger.debug(String.format("Translating %s from %s to %s", nodeMutation.getNode().getPath(), sourceLocale, targetLocale));
         }
+
         try {
             return translatorService.translateNode(nodeMutation.getNode().getNode(), sourceLocale, targetLocale);
         } catch (RepositoryException e) {
             if(logger.isErrorEnabled()) {
-                logger.error("Error when translating");
+                logger.error("Error when translating {} from {} to {}", nodeMutation.getNode().getPath(), sourceLocale, targetLocale);
             }
         }
         return null;
@@ -55,14 +56,14 @@ public class GqlJcrNodeMutationAssistedTranslation {
             @GraphQLName("targetLocale") @GraphQLDescription("Locale to translate to") String targetLocale
 
     ) throws InterruptedException {
-        if(logger.isErrorEnabled()) {
-            logger.error(String.format("Translating %s, property %s, from %s to %s", nodeMutation.getNode().getPath(), propertyName, sourceLocale, targetLocale));
+        if(logger.isDebugEnabled()) {
+            logger.debug(String.format("Translating %s, property %s, from %s to %s", nodeMutation.getNode().getPath(), propertyName, sourceLocale, targetLocale));
         }
         try {
             return translatorService.translateProperty(nodeMutation.getNode().getNode(), propertyName, sourceLocale, targetLocale);
         } catch (RepositoryException e) {
             if(logger.isErrorEnabled()) {
-                logger.error("Error when translating");
+                logger.error("Error when translating  {} of node {} from {} to {}", propertyName, nodeMutation.getNode().getPath(), sourceLocale, targetLocale);
             }
         }
         return null;

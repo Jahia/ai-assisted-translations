@@ -36,4 +36,8 @@ public class TranslationData {
         duplicates.forEach((key, ref) -> translations.put(key, translations.get(ref)));
         return translations;
     }
+
+    public Map<String, String> getDuplicates() {
+        return duplicates;
+    }
 }
