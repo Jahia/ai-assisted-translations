@@ -3,8 +3,10 @@ package org.jahia.community.translation.assisted.service.impl.openai;
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.models.ChatModel;
-import com.openai.models.chat.completions.ChatCompletion;
-import com.openai.models.chat.completions.ChatCompletionCreateParams;
+import com.openai.models.ResponseFormatJsonObject;
+import com.openai.models.responses.Response;
+import com.openai.models.responses.ResponseCreateParams;
+import com.openai.models.responses.ResponseTextConfig;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.api.Constants;
 import org.jahia.community.translation.assisted.graphql.TranslatedField;
@@ -28,22 +30,24 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import java.text.MessageFormat;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static org.jahia.community.translation.assisted.AssistedTranslationsConstants.*;
 
 
 @Component(service = TranslatorService.class,
-        property = {"service.translation.provider=openai","service.ranking=10.0"},
+        property = {"service.translation.provider=openai", "service.ranking=10.0"},
         configurationPid = SERVICE_CONFIG_FILE_NAME_OPENAI,
         immediate = true,
         configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class OpenAITranslatorService implements TranslatorService {
     private static final Logger logger = LoggerFactory.getLogger(OpenAITranslatorService.class);
+    private static final int TRANSLATION_BATCH_SIZE = 200;
+    private static final String JSON_RESPONSE_INSTRUCTION = "Return only a valid JSON object with exactly the same keys as the input and translated string values. Do not add markdown or explanations.";
+    private static final String JSON_INPUT_PREFIX = "json payload to translate:\n";
+    private static final ResponseTextConfig JSON_OBJECT_TEXT_CONFIG = ResponseTextConfig.builder()
+            .format(ResponseFormatJsonObject.builder().build())
+            .build();
     private OpenAIClient openAIClient;
     private MessageFormat messageFormat;
     private ChatModel chatModel;
@@ -51,6 +55,29 @@ public class OpenAITranslatorService implements TranslatorService {
 
     @Reference
     private TranslationServicesManager translationServicesManager;
+
+    private static String ensureJsonKeywordInInput(String input) {
+        String safeInput = input == null ? "" : input;
+        if (StringUtils.containsIgnoreCase(safeInput, "json")) {
+            return safeInput;
+        }
+        return JSON_INPUT_PREFIX + safeInput;
+    }
+
+    private static Optional<String> extractOutputText(Response response) {
+        StringBuilder outputText = new StringBuilder();
+        response.output().stream()
+                .filter(com.openai.models.responses.ResponseOutputItem::isMessage)
+                .map(com.openai.models.responses.ResponseOutputItem::asMessage)
+                .flatMap(message -> message.content().stream())
+                .filter(com.openai.models.responses.ResponseOutputMessage.Content::isOutputText)
+                .map(content -> content.asOutputText().text())
+                .forEach(outputText::append);
+        if (outputText.length() == 0) {
+            return Optional.empty();
+        }
+        return Optional.of(outputText.toString());
+    }
 
     @Override
     public String getProviderKey() {
@@ -71,18 +98,18 @@ public class OpenAITranslatorService implements TranslatorService {
         logger.info("Activating OpenAI Translator Service");
         final String authKey = properties.getOrDefault(OPENAI_API_KEY, null);
         if (authKey == null) {
-            available=false;
+            available = false;
             return;
         }
         openAIClient = OpenAIOkHttpClient.builder().apiKey(authKey).build();
         if (properties.containsKey(TRANSLATION_OPENAI_PROMPT)) {
             String pattern = properties.get(TRANSLATION_OPENAI_PROMPT);
-            messageFormat = new MessageFormat(pattern.replace("{{sourceLanguage}}","{0}").replace("{{targetLanguage}}","{1}"));
+            messageFormat = new MessageFormat(pattern.replace("{{sourceLanguage}}", "{0}").replace("{{targetLanguage}}", "{1}"));
         }
         if (properties.containsKey(TRANSLATION_OPENAI_MODEL)) {
             chatModel = ChatModel.of(properties.get(TRANSLATION_OPENAI_MODEL));
         }
-        available=true;
+        available = true;
     }
 
     @Override
@@ -94,37 +121,11 @@ public class OpenAITranslatorService implements TranslatorService {
 
         translationServicesManager.buildDataToTranslate(localizedNode, data, true, true);
         List<TranslatedField> translatedFields = getTranslatedFieldList(sourceLanguage, targetLanguage, data, true);
-        // As we translate a tree, we might have found some duplicates in TranslationData, so we need to complete the translatedFields with the duplicates
-        Map<String, String> duplicates = data.getDuplicates();
-        duplicates.forEach((key, value) -> {
-            Optional<TranslatedField> translatedValue = translatedFields.stream().filter(f -> StringUtils.equals(f.getFieldName(), value)).findFirst();
-            if (translatedValue.isPresent()) {
-                translatedFields.add(new TranslatedField(key, translatedValue.get().getTranslatedValue()));
-            } else {
-                logger.warn("No translation found for duplicate key {} with reference {}", key, value);
-            }
-        });
-        if (translatedFields.size() != (data.getDuplicates().size() + data.getTexts().size())) {
-            logger.warn("Translated fields size {} is different from texts to translate size {} plus duplicates size {}", translatedFields.size(), data.getTexts().size(), data.getDuplicates().size());
-        }
+        // We need to transform this list to handle multivalued fields have their fieldname ending with ___index___
+        // Each of those field values need to be stored in a List at the same original index
+        Map<String, TranslatedField> translatedFieldMap = translationServicesManager.getTranslatedFieldMap(translatedFields);
         try {
-            translatedFields.forEach(field -> {
-                try {
-                    String path = field.getFieldName();
-                    String value = field.getTranslatedValue();
-                    final JCRNodeWrapper targetNode = sessionTarget.getNode(StringUtils.substringBeforeLast(path, SLASH));
-                    final String propertyName = StringUtils.substringAfterLast(path, SLASH);
-                    if (targetNode.hasProperty(propertyName) && StringUtils.equals(targetNode.getPropertyAsString(propertyName), value)) {
-                        logger.warn("{} is already translated", path);
-                    } else {
-                        targetNode.setProperty(propertyName, value);
-                    }
-                } catch (RepositoryException e) {
-                    if (logger.isErrorEnabled()) {
-                        logger.error("", e);
-                    }
-                }
-            });
+            translatedFieldMap.values().forEach(field -> translationServicesManager.copyFieldValue(field, sessionTarget));
             sessionTarget.save();
             // Load the translated node in target language to render the new title
             String displayableName = sessionTarget.getNodeByIdentifier(node.getIdentifier()).getDisplayableName();
@@ -163,33 +164,80 @@ public class OpenAITranslatorService implements TranslatorService {
     }
 
     private @NotNull List<TranslatedField> getTranslatedFieldList(String sourceLanguage, String targetLanguage, TranslationData data, boolean subtree) {
-        JSONObject json = new JSONObject(data.getTexts());
-        // Use Chat Completions for traductions
+        // Use Responses API for translations.
         String sourceLanguageMapped = translationServicesManager.getTargetLanguages().getOrDefault(sourceLanguage, sourceLanguage);
         String targetLanguageMapped = translationServicesManager.getTargetLanguages().getOrDefault(targetLanguage, targetLanguage);
-        String systemPrompt = messageFormat.format(new Object[]{sourceLanguageMapped, targetLanguageMapped});
-        ChatCompletionCreateParams params = ChatCompletionCreateParams
+        String systemPrompt = messageFormat.format(new Object[]{sourceLanguageMapped, targetLanguageMapped}) + "\n" + JSON_RESPONSE_INSTRUCTION;
+        List<Map.Entry<String, String>> textEntries = new ArrayList<>(data.getTexts().entrySet());
+        if (textEntries.isEmpty()) {
+            return List.of();
+        }
+
+        // Keep one conversation across batches with previous_response_id without replaying full history.
+        String previousResponseId = null;
+        Map<String, String> translatedValues = new HashMap<>();
+
+        for (int startIdx = 0; startIdx < textEntries.size(); startIdx += TRANSLATION_BATCH_SIZE) {
+            int endIdx = Math.min(startIdx + TRANSLATION_BATCH_SIZE, textEntries.size());
+            Map<String, String> batchTexts = new LinkedHashMap<>();
+            textEntries.subList(startIdx, endIdx).forEach(entry -> batchTexts.put(entry.getKey(), entry.getValue()));
+
+            JSONObject requestJson = new JSONObject(batchTexts);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Calling OpenAI API with requested translation batch [{}, {})", startIdx, endIdx);
+            }
+
+            Response response = createTranslationResponse(requestJson.toString(), previousResponseId, systemPrompt);
+            previousResponseId = response.id();
+            Optional<JSONObject> responseJson = extractOutputText(response).flatMap(this::parseJsonObject);
+
+            if (responseJson.isEmpty()) {
+                logger.warn("OpenAI response {} for batch [{}, {}) was not valid JSON, retrying once", response.id(), startIdx, endIdx);
+                String repairPrompt = "Your previous answer was not valid JSON. " + JSON_RESPONSE_INSTRUCTION + " Input payload: " + requestJson;
+                Response retryResponse = createTranslationResponse(repairPrompt, previousResponseId, null);
+                previousResponseId = retryResponse.id();
+                responseJson = extractOutputText(retryResponse).flatMap(this::parseJsonObject);
+            }
+
+            if (responseJson.isEmpty()) {
+                logger.error("OpenAI did not return valid JSON for translation batch [{}, {})", startIdx, endIdx);
+                return List.of();
+            }
+
+            Map<String, Object> responseJsonMap = responseJson.get().toMap();
+            batchTexts.keySet().forEach(key -> {
+                if (responseJsonMap.containsKey(key) && responseJsonMap.get(key) != null) {
+                    translatedValues.put(key, responseJsonMap.get(key).toString());
+                }
+            });
+        }
+
+        return translationServicesManager.getTranslatedFieldList(data, subtree, translatedValues);
+    }
+
+    private Response createTranslationResponse(String input, String previousResponseId, String instructions) {
+        ResponseCreateParams.Builder paramsBuilder = ResponseCreateParams
                 .builder()
                 .model(chatModel)
-                .addSystemMessage(systemPrompt)
-                .addUserMessage(json.toString())
-                .build();
-        // Call OpenAI API
-        if (logger.isDebugEnabled()) {
-            logger.debug("Calling OpenAI API with prompt: {} and requested translation {}", systemPrompt, json.toString());
+                .text(JSON_OBJECT_TEXT_CONFIG)
+                .input(ensureJsonKeywordInInput(input));
+        if (instructions != null) {
+            paramsBuilder.instructions(instructions);
         }
-        ChatCompletion chatCompletion = openAIClient.chat().completions().create(params);
-        List<ChatCompletion.Choice> choices = chatCompletion.choices();
-        Optional<String> content = choices.get(0).message().content();
-        if(content.isPresent()) {
-            JSONObject responseJson = new JSONObject(content.get());
-            // The response is a JSON object with the same structure as the request, but with the texts translated, e.g. {"sourceLanguage":"en","targetLanguage":"fr","texts":{"/a/title":"Bonjour <b>le monde</b>","/a/desc":"A &amp; B"}}
-            // Build the response with the translated texts by transforming in TranslatedField objects, where the key is the JCR path to the property and the value is the translated text
-            return responseJson.toMap().entrySet().stream()
-                    .map(e -> new TranslatedField((subtree ? e.getKey() : StringUtils.substringAfterLast(e.getKey(), SLASH)), (String) e.getValue()))
-                    .collect(Collectors.toList());
-        } else  {
-            return List.of();
+        if (previousResponseId != null) {
+            paramsBuilder.previousResponseId(previousResponseId);
+        }
+        return openAIClient.responses().create(paramsBuilder.build());
+    }
+
+    private Optional<JSONObject> parseJsonObject(String content) {
+        try {
+            return Optional.of(new JSONObject(content));
+        } catch (Exception e) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Unable to parse OpenAI output as JSON: {}", content, e);
+            }
+            return Optional.empty();
         }
     }
 }

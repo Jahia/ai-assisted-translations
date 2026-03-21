@@ -2,6 +2,7 @@ package org.jahia.community.translation.assisted.service;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jahia.api.Constants;
+import org.jahia.community.translation.assisted.graphql.TranslatedField;
 import org.jahia.community.translation.assisted.service.impl.TranslationData;
 import org.jahia.exceptions.JahiaRuntimeException;
 import org.jahia.services.content.JCRNodeWrapper;
@@ -9,6 +10,7 @@ import org.jahia.services.content.JCRPublicationService;
 import org.jahia.services.content.JCRSessionWrapper;
 import org.jahia.services.content.PublicationInfo;
 import org.jahia.services.content.nodetypes.ExtendedPropertyDefinition;
+import org.jahia.services.content.nodetypes.SelectorType;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Activate;
@@ -17,12 +19,14 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Property;
-import javax.jcr.PropertyIterator;
-import javax.jcr.PropertyType;
-import javax.jcr.RepositoryException;
+import javax.jcr.*;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.jahia.community.translation.assisted.AssistedTranslationsConstants.*;
 
@@ -32,7 +36,10 @@ import static org.jahia.community.translation.assisted.AssistedTranslationsConst
  */
 public class TranslationServicesManagerImpl implements TranslationServicesManager {
     private static final Logger logger = LoggerFactory.getLogger(TranslationServicesManagerImpl.class);
-
+    private static final Pattern VALUE_IDX_IN_FIELD = Pattern.compile("(.*)___(\\d+)___$");
+    private final List<String> translatableNodeTypes = Arrays.asList(Constants.JAHIAMIX_MAIN_RESOURCE, "jmix:editorialContent", Constants.JAHIANT_PAGE, Constants.JAHIANT_CONTENT);
+    private final MessageFormat keyFormat = new MessageFormat("{0}/{1}");
+    private final MessageFormat indexedKeyFormat = new MessageFormat("{0}/{1}___{2}___");
     private ConfigurationAdmin configurationAdmin;
     private JCRPublicationService publicationService;
     private Map<String, String> targetLanguages;
@@ -58,7 +65,7 @@ public class TranslationServicesManagerImpl implements TranslationServicesManage
         validateAtLeastOneKeyExist(deeplAIKey, openAIKey);
         targetLanguages = transformTargetLanguagesPropertiesToMap(properties);
         configureOpenAI(properties, openAIKey);
-        configureDeepL(deeplAIKey, openAIKey);
+        configureDeepL(deeplAIKey);
     }
 
     @Override
@@ -74,19 +81,13 @@ public class TranslationServicesManagerImpl implements TranslationServicesManage
 
     @Override
     public void buildDataToTranslate(JCRNodeWrapper node, TranslationData data, boolean forceTranslation, boolean subtree) throws RepositoryException {
-        if (!isTranslatableNode(node)) {
-            return;
-        }
-
         if (subtree) {
             Set<String> languages = new HashSet<>();
             languages.add(node.getSession().getLocale().toString());
             // Use publication service to get the list of nodes part of this node publication
             Set<String> uuids = new HashSet<>();
             List<PublicationInfo> publicationInfo = publicationService.getPublicationInfo(node.getIdentifier(), languages, false, true, false, Constants.EDIT_WORKSPACE, Constants.LIVE_WORKSPACE);
-            publicationInfo.forEach(p -> {
-                uuids.addAll(p.getAllUuids(false, true));
-            });
+            publicationInfo.forEach(p -> uuids.addAll(p.getAllUuids(false, true)));
 
             JCRSessionWrapper session = node.getSession();
             for (String uuid : uuids) {
@@ -101,6 +102,7 @@ public class TranslationServicesManagerImpl implements TranslationServicesManage
                     }
                 }
             }
+        } else if (!isTranslatableNode(node)) {
         } else {
             translatePropertiesOfNode(node, data, forceTranslation);
         }
@@ -118,14 +120,7 @@ public class TranslationServicesManagerImpl implements TranslationServicesManage
         }
         while (properties.hasNext()) {
             final Property property = properties.nextProperty();
-            if (isTranslatableProperty(property)) {
-                final String key = relatedNode.getPath() + SLASH + property.getName();
-                final String stringValue = org.apache.commons.lang.StringUtils.trimToNull(property.getValue().getString());
-                if (forceTranslation || stringValue != null) {
-                    data.trackText(key, stringValue);
-                }
-            }
-
+            analyzeProperty(relatedNode, data, property);
         }
     }
 
@@ -135,52 +130,159 @@ public class TranslationServicesManagerImpl implements TranslationServicesManage
             return;
         }
         if (node.hasProperty(propertyName)) {
-            final Property property = node.getProperty(propertyName);
-            if (!isTranslatableProperty(property)) {
-                return;
-            }
-            final String key = node.getPath() + SLASH + property.getName();
-            final String stringValue = org.apache.commons.lang.StringUtils.trimToNull(property.getValue().getString());
-            if (stringValue != null && !stringValue.isEmpty()) {
-                data.trackText(key, stringValue);
-            }
+            analyzeProperty(node, data, node.getProperty(propertyName));
         }
     }
 
-    private List<String> translatableNodeTypes = Arrays.asList(Constants.JAHIAMIX_MAIN_RESOURCE, "jmix:editorialContent", Constants.JAHIANT_PAGE, Constants.JAHIANT_CONTENT);
-    private boolean isTranslatableNode(JCRNodeWrapper node) {
-        return translatableNodeTypes.stream().anyMatch(type -> {
-            try {
-                return node.isNodeType(type);
-            } catch (RepositoryException e) {
-                if (logger.isErrorEnabled()) {
-                    logger.error("", e);
+    @Override
+    public Map<String, TranslatedField> getTranslatedFieldMap(List<TranslatedField> translatedFields) {
+        Map<String, TranslatedField> translatedFieldMap = new HashMap<>();
+        translatedFields.forEach(field -> {
+            Matcher matcher = VALUE_IDX_IN_FIELD.matcher(field.getFieldName());
+            if (matcher.matches()) {
+                String fieldName = matcher.group(1);
+                int index = Integer.parseInt(matcher.group(2));
+                if (translatedFieldMap.containsKey(fieldName)) {
+                    translatedFieldMap.get(fieldName).addTranslatedValue(field.getTranslatedValue(), index);
+                } else {
+                    TranslatedField translatedField = new TranslatedField(fieldName, new ArrayList<>());
+                    translatedField.addTranslatedValue(field.getTranslatedValue(), index);
+                    translatedFieldMap.put(fieldName, translatedField);
                 }
-                throw new JahiaRuntimeException(e);
+            } else {
+                translatedFieldMap.put(field.getFieldName(), field);
             }
         });
+        return translatedFieldMap;
     }
 
-    private boolean isTranslatableProperty(Property property) {
-        final ExtendedPropertyDefinition definition;
+    @Override
+    public List<TranslatedField> getTranslatedFieldList(TranslationData data, boolean subtree, Map<String, String> translatedValues) {
+        return data.completeTranslations(translatedValues).entrySet().stream()
+                .map(e -> new TranslatedField((subtree ? e.getKey() : org.apache.commons.lang.StringUtils.substringAfterLast(e.getKey(), SLASH)), e.getValue()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void copyFieldValue(TranslatedField field, JCRSessionWrapper sessionTarget) {
         try {
-            definition = (ExtendedPropertyDefinition) property.getDefinition();
+            String path = field.getFieldName();
+            final JCRNodeWrapper targetNode = sessionTarget.getNode(org.apache.commons.lang.StringUtils.substringBeforeLast(path, SLASH));
+            final String propertyName = org.apache.commons.lang.StringUtils.substringAfterLast(path, SLASH);
+            if (field.getTranslatedValues() != null) {
+                targetNode.setProperty(propertyName, field.getTranslatedValues().toArray(new String[0]));
+            } else if (targetNode.hasProperty(propertyName) && org.apache.commons.lang.StringUtils.equals(targetNode.getPropertyAsString(propertyName), field.getTranslatedValue())) {
+                logger.warn("{} is already translated", path);
+            } else {
+                targetNode.setProperty(propertyName, field.getTranslatedValue());
+            }
         } catch (RepositoryException e) {
             if (logger.isErrorEnabled()) {
                 logger.error("", e);
             }
-            return false;
         }
-
-        return definition.isInternationalized() && !definition.isMultiple() && definition.getRequiredType() == PropertyType.STRING && !definition.isHidden() && !definition.isProtected();
     }
 
-    private void configureDeepL(String deeplAIKey, String openAIKey) {
+    private void analyzeProperty(JCRNodeWrapper node, TranslationData data, Property property) throws RepositoryException {
+        int valueIdx = 0;
+        switch (getPropertyAction(property)) {
+            case TRANSLATE:
+                trackProperty(property, node, data::trackText);
+                break;
+            case TRANSLATE_ARRAY:
+                for (Value value : property.getValues()) {
+                    trackProperty(property, node, value.getString(), valueIdx++, data::trackText);
+                }
+                break;
+            case COPY:
+                trackProperty(property, node, data::trackCopiedValue);
+                break;
+            case COPY_ARRAY:
+                for (Value value : property.getValues()) {
+                    trackProperty(property, node, value.getString(), valueIdx++, data::trackCopiedValue);
+                }
+                break;
+            case IGNORE:
+        }
+    }
+
+    private boolean isTranslatableNode(JCRNodeWrapper node) {
+        try {
+            // Skip the node if it has no I18N node in this language
+            if (node.hasI18N(node.getSession().getLocale())) {
+                // The node is translated let's see if we accept the type
+                return translatableNodeTypes.stream().anyMatch(type -> {
+                    try {
+                        return node.isNodeType(type);
+                    } catch (RepositoryException e) {
+                        if (logger.isErrorEnabled()) {
+                            logger.error("", e);
+                        }
+                        throw new JahiaRuntimeException(e);
+                    }
+                });
+            }
+        } catch (RepositoryException e) {
+            throw new JahiaRuntimeException(e);
+        }
+        return false;
+    }
+
+    private PropertyAction getPropertyAction(Property property) {
+        final ExtendedPropertyDefinition definition;
+        try {
+            definition = (ExtendedPropertyDefinition) property.getDefinition();
+        } catch (RepositoryException e) {
+            logger.error("", e);
+            return PropertyAction.IGNORE;
+        }
+
+        if (!definition.isInternationalized()
+                || definition.isHidden()
+                || definition.isProtected()) {
+            return PropertyAction.IGNORE;
+        }
+
+        // If multiple I18N String with selector in SMALL_TEXT, TEXT_AREA, RICH_TEXT return PropertyAction.TRANSLATE_ARRAY
+        if ((definition.getRequiredType() == PropertyType.STRING)
+                && (definition.getSelector() == SelectorType.SMALLTEXT
+                || definition.getSelector() == SelectorType.TEXTAREA
+                || definition.getSelector() == SelectorType.RICHTEXT)) {
+            return definition.isMultiple() ? PropertyAction.TRANSLATE_ARRAY : PropertyAction.TRANSLATE;
+        }
+
+        // Any other I18N String should be copied
+        if (definition.getRequiredType() == PropertyType.STRING || definition.getRequiredType() == PropertyType.WEAKREFERENCE) {
+            return definition.isMultiple() ? PropertyAction.COPY_ARRAY : PropertyAction.COPY;
+        }
+
+        return PropertyAction.IGNORE;
+    }
+
+    private void trackProperty(Property property, JCRNodeWrapper node, BiConsumer<String, String> tracker) {
+        try {
+            trackProperty(property, node, property.getValue().getString(), -1, tracker);
+        } catch (RepositoryException e) {
+            logger.error("", e);
+        }
+    }
+
+    private void trackProperty(Property property, JCRNodeWrapper node, String value, int index, BiConsumer<String, String> tracker) {
+        try {
+            final String key = index >= 0 ? indexedKeyFormat.format(new Object[]{node.getPath(), property.getName(), index}) : keyFormat.format(new Object[]{node.getPath(), property.getName()});
+            final String stringValue = StringUtils.trimToNull(value);
+            if (stringValue != null) tracker.accept(key, stringValue);
+        } catch (RepositoryException e) {
+            logger.error("", e);
+        }
+    }
+
+    private void configureDeepL(String deeplAIKey) {
         if (StringUtils.isNotEmpty(deeplAIKey)) {
             try {
                 Configuration configuration = configurationAdmin.getConfiguration(SERVICE_CONFIG_FILE_NAME_DEEPL);
                 Dictionary<String, Object> configProperties = new Hashtable<>();
-                configProperties.put(DEEPL_API_KEY, openAIKey);
+                configProperties.put(DEEPL_API_KEY, deeplAIKey);
                 configuration.updateIfDifferent(configProperties);
 
             } catch (IOException e) {
@@ -188,6 +290,8 @@ public class TranslationServicesManagerImpl implements TranslationServicesManage
             }
         }
     }
+
+    // Private configuration methods
 
     private void configureOpenAI(Map<String, String> properties, String openAIKey) {
         if (StringUtils.isNotEmpty(openAIKey)) {
@@ -242,5 +346,7 @@ public class TranslationServicesManagerImpl implements TranslationServicesManage
             logger.info("API key provided for DeepL translator service. Only DeepL translator service will be available.");
         }
     }
+
+    private enum PropertyAction {TRANSLATE, TRANSLATE_ARRAY, COPY, COPY_ARRAY, IGNORE}
 
 }

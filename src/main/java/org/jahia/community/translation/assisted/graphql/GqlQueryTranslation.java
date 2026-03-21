@@ -1,6 +1,9 @@
 package org.jahia.community.translation.assisted.graphql;
 
-import graphql.annotations.annotationTypes.*;
+import graphql.annotations.annotationTypes.GraphQLDescription;
+import graphql.annotations.annotationTypes.GraphQLField;
+import graphql.annotations.annotationTypes.GraphQLName;
+import graphql.annotations.annotationTypes.GraphQLTypeExtension;
 import org.jahia.community.translation.assisted.service.TranslatorService;
 import org.jahia.modules.graphql.provider.dxm.DataFetchingException;
 import org.jahia.modules.graphql.provider.dxm.node.GqlJcrNode;
@@ -11,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.RepositoryException;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 
 
 @GraphQLTypeExtension(GqlJcrNode.class)
@@ -36,9 +38,9 @@ public class GqlQueryTranslation {
         try {
             TranslatorService translatorService = BundleUtils.getOsgiService(TranslatorService.class, null);
             logger.info("Translated translations from {} to {} with {}", sourceLocale, targetLocale, translatorService.getProviderKey());
-            if(translatorService.isAvailable()) {
+            if (translatorService.isAvailable()) {
                 return translatorService.suggestTranslationForNode(node.getNode(), sourceLocale, targetLocale);
-            } else  {
+            } else {
                 return Collections.emptyList();
             }
         } catch (RepositoryException e) {

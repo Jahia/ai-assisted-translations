@@ -7,15 +7,15 @@ public interface AssistedTranslationResponse {
 
     @GraphQLField
     @GraphQLDescription("Get the status of the response")
-    public boolean isSuccessful();
+    boolean isSuccessful();
 
-    public void setSuccessful(boolean state);
+    void setSuccessful(boolean state);
 
     @GraphQLField
     @GraphQLDescription("Get the DeepL response message")
-    public String getMessage();
+    String getMessage();
 
-    public void addMessage(String text);
+    void addMessage(String text);
 
-    public AssistedTranslationResponse merge(AssistedTranslationResponse other);
+    AssistedTranslationResponse merge(AssistedTranslationResponse other);
 }

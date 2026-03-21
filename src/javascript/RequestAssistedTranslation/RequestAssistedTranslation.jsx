@@ -44,9 +44,27 @@ function getInitialState(siteLanguages, sourceLanguage) {
 
 function handleSuggestionCall(suggestTranslation, formik, setErrorState, setIsLoading, onClose) {
     suggestTranslation().then((data) => {
+        // First we transform data as some fields are multivalued and in this case the fieldname contains the index at the end fieldname___index___, we need to group the values per firld name amnd use an array for multivalued ones
+        const fields = {};
         data.forEach(suggestion => {
             const key = suggestion.fieldName;
+            // Detect if it is a multiple field
             const value = suggestion.translatedValue;
+            if (key.match(/___\d+___$/)) {
+                const fieldName = key.replace(/___\d+___$/, '');
+                // Keep the original index
+                const index = key.match(/___\d+___$/)[0].replaceAll('___', '');
+                if (!fields[fieldName]) {
+                    fields[fieldName] = [];
+                }
+                fields[fieldName][index] = value;
+            } else {
+                fields[key] = value;
+            }
+        })
+
+        Object.keys(fields).forEach(key => {
+            const value = fields[key];
             // Find the field corresponding to the key, inside the dom a div with data-sel-content-editor-field="fieldName" is generated, we can use this to find the field and set the value in formik
             // Getting the field with data-sel-content-editor-field="fieldName" and data-sel-i18n="true"
             const initialField = document.querySelector(`[data-sel-content-editor-field$="_${key}"][data-sel-i18n="true"][data-sel-content-editor-field-readonly="false"]`)?.dataset.selContentEditorField;

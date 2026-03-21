@@ -11,6 +11,6 @@ public class DXGraphQLExtensionAssistedTranslationProvider implements DXGraphQLE
 
     @Override
     public Collection<Class<?>> getExtensions() {
-        return Arrays.<Class<?>>asList(GqlJcrNodeMutationAssistedTranslation.class,GqlQueryTranslation.class);
+        return Arrays.asList(GqlJcrNodeMutationAssistedTranslation.class, GqlQueryTranslation.class);
     }
 }
