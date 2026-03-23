@@ -36,6 +36,7 @@ export const RequestAssistedTranslationComponent = ({
     if (!res.checksResult || editorContext.siteInfo.languages.length <= 1) {
         return false;
     }
+
     const sourceLanguage = editorConfigContext?.sideBySideContext?.lang || editorContext.nodeData?.translationLanguages?.[0];
     const enabled = !editorContext.nodeData?.lockedAndCannotBeEdited && sourceLanguage !== undefined;
 
@@ -45,7 +46,6 @@ export const RequestAssistedTranslationComponent = ({
             isVisible
             enabled={enabled}
             onClick={() => {
-
                 componentRenderer.render('requestTranslationAiAssistedForAllLanguages', RequestAssistedTranslation, {
                     path: editorContext.nodeData.path,
                     sourceLanguage: sourceLanguage,

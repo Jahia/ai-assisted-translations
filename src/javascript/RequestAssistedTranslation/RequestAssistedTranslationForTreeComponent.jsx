@@ -3,14 +3,14 @@ import PropTypes from 'prop-types';
 import {RequestAssistedTranslation} from './RequestAssistedTranslation';
 import {useNodeChecks, useNodeInfo, useSiteInfo} from '@jahia/data-helper';
 import {useSelector} from 'react-redux';
-import {ComponentRendererContext} from "@jahia/ui-extender";
+import {ComponentRendererContext} from '@jahia/ui-extender';
 
 export const RequestAssistedTranslationForTreeComponent = ({
-                                                               path,
-                                                               render: Render,
-                                                               loading: Loading,
-                                                               ...others
-                                                           }) => {
+    path,
+    render: Render,
+    loading: Loading,
+    ...others
+}) => {
     const {language, site, uiLanguage} = useSelector(state => ({language: state.language, site: state.site, uiLanguage: state.uilang}));
     const {siteInfo, loading} = useSiteInfo({siteKey: site, displayLanguage: language, uiLanguage});
     const componentRenderer = useContext(ComponentRendererContext);
@@ -33,6 +33,7 @@ export const RequestAssistedTranslationForTreeComponent = ({
     if (!res.checksResult) {
         return false;
     }
+
     const enabled = node.hasWritePermission && !node.lockedAndCannotBeEdited;
 
     return (
@@ -41,7 +42,6 @@ export const RequestAssistedTranslationForTreeComponent = ({
             isVisible
             enabled={enabled}
             onClick={() => {
-
                 componentRenderer.render('requestTranslationAiAssistedForAllLanguages', RequestAssistedTranslation, {
                     path: path,
                     sourceLanguage: siteInfo.defaultLanguage,
