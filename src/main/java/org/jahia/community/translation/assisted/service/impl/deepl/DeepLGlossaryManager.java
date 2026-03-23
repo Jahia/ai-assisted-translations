@@ -93,17 +93,11 @@ public class DeepLGlossaryManager {
                     .collect(Collectors.toSet());
             try {
                 for (MultilingualGlossaryInfo glossaryInfo : translator.listMultilingualGlossaries()) {
-                    if (!StringUtils.startsWith(glossaryInfo.getName(), GLOSSARY_NAME_PREFIX)) {
-                        continue;
-                    }
-                    if (protectedGlossaryIds.contains(glossaryInfo.getGlossaryId())) {
+                    if (!StringUtils.startsWith(glossaryInfo.getName(), GLOSSARY_NAME_PREFIX) || protectedGlossaryIds.contains(glossaryInfo.getGlossaryId())) {
                         continue;
                     }
                     Date creationTime = glossaryInfo.getCreationTime();
-                    if (creationTime == null) {
-                        continue;
-                    }
-                    if (synchronizedNow - creationTime.getTime() < GLOSSARY_MAX_AGE_MILLIS) {
+                    if (creationTime == null || synchronizedNow - creationTime.getTime() < GLOSSARY_MAX_AGE_MILLIS) {
                         continue;
                     }
                     translator.deleteMultilingualGlossary(glossaryInfo);

@@ -10,13 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -49,7 +43,7 @@ public class GlossaryCsvParser {
                 int lineNumber = (int) csvRecord.getRecordNumber() + 1;
                 Map<String, String> row = new LinkedHashMap<>();
                 for (int i = 0; i < headers.size(); i++) {
-                    String value = i <  csvRecord.size() ? csvRecord.get(i) : "";
+                    String value = i < csvRecord.size() ? csvRecord.get(i) : "";
                     row.put(headers.get(i), StringUtils.trimToEmpty(value));
                 }
                 validateRow(lineNumber, row, headers, errors);

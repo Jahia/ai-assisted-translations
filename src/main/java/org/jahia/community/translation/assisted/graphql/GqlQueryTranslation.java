@@ -38,7 +38,7 @@ public class GqlQueryTranslation {
         try {
             TranslatorService translatorService = BundleUtils.getOsgiService(TranslatorService.class, null);
             logger.info("Translated translations from {} to {} with {}", sourceLocale, targetLocale, translatorService.getProviderKey());
-            if (translatorService.isAvailable()) {
+            if (Boolean.TRUE.equals(translatorService.isAvailable())) {
                 return translatorService.suggestTranslationForNode(node.getNode(), sourceLocale, targetLocale);
             } else {
                 return Collections.emptyList();
@@ -46,6 +46,7 @@ public class GqlQueryTranslation {
         } catch (RepositoryException e) {
             throw new DataFetchingException("Error when suggesting translation", e);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new DataFetchingException("Translation interrupted", e);
         }
     }

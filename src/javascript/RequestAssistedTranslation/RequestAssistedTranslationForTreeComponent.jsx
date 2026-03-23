@@ -14,7 +14,7 @@ export const RequestAssistedTranslationForTreeComponent = ({
     const {language, site, uiLanguage} = useSelector(state => ({language: state.language, site: state.site, uiLanguage: state.uilang}));
     const {siteInfo, loading} = useSiteInfo({siteKey: site, displayLanguage: language, uiLanguage});
     const componentRenderer = useContext(ComponentRendererContext);
-    const {node, nodeLoading: nodeLoading} = useNodeInfo({path: path, language: language}, {getDisplayName: true});
+    const {node, nodeLoading} = useNodeInfo({path: path, language: language}, {getDisplayName: true});
     const res = useNodeChecks(
         {path: path},
         {

@@ -185,7 +185,6 @@ export const RequestAssistedTranslation = ({
                     </Typography>
                     <Dropdown
                         className={styles.language}
-                        label={`${selected.displayName} (${selected.uiLanguageDisplayName})`}
                         value={selected.language}
                         size="medium"
                         data-sel-role="from-language-selector"
@@ -195,10 +194,10 @@ export const RequestAssistedTranslation = ({
                             if (!optionLanguage) {
                                 return [];
                             }
-                            return {
+                            return [{
                                 value: element,
                                 label: `${optionLanguage.displayName} (${optionLanguage.uiLanguageDisplayName})`
-                            };
+                            }];
                         })}
                         onChange={(e, item) => setSelected(getInitialState(siteLanguages, item.value))}
                     /></>}

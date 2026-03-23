@@ -1,6 +1,7 @@
 package org.jahia.community.translation.assisted.service;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.felix.utils.collections.MapToDictionary;
 import org.jahia.api.Constants;
 import org.jahia.community.translation.assisted.graphql.TranslatedField;
 import org.jahia.community.translation.assisted.service.impl.TranslationData;
@@ -31,9 +32,6 @@ import java.util.stream.Collectors;
 import static org.jahia.community.translation.assisted.AssistedTranslationsConstants.*;
 
 @Component(configurationPid = SERVICE_CONFIG_FILE_NAME, immediate = true, service = TranslationServicesManager.class)
-/**
- * Manager of translation services, responsible for providing the appropriate service based on the provider key.
- */
 public class TranslationServicesManagerImpl implements TranslationServicesManager {
     private static final Logger logger = LoggerFactory.getLogger(TranslationServicesManagerImpl.class);
     private static final Pattern VALUE_IDX_IN_FIELD = Pattern.compile("(.*)___(\\d+)___$");
@@ -94,7 +92,7 @@ public class TranslationServicesManagerImpl implements TranslationServicesManage
                 try {
                     JCRNodeWrapper relatedNode = session.getNodeByIdentifier(uuid);
                     if (isTranslatableNode(relatedNode)) {
-                        translatePropertiesOfNode(relatedNode, data, forceTranslation);
+                        translatePropertiesOfNode(relatedNode, data);
                     }
                 } catch (RepositoryException e) {
                     if (logger.isErrorEnabled()) {
@@ -102,13 +100,12 @@ public class TranslationServicesManagerImpl implements TranslationServicesManage
                     }
                 }
             }
-        } else if (!isTranslatableNode(node)) {
-        } else {
-            translatePropertiesOfNode(node, data, forceTranslation);
+        } else if (isTranslatableNode(node)) {
+            translatePropertiesOfNode(node, data);
         }
     }
 
-    private void translatePropertiesOfNode(JCRNodeWrapper relatedNode, TranslationData data, boolean forceTranslation) throws RepositoryException {
+    private void translatePropertiesOfNode(JCRNodeWrapper relatedNode, TranslationData data) throws RepositoryException {
         final PropertyIterator properties;
         try {
             properties = relatedNode.getProperties();
@@ -281,9 +278,9 @@ public class TranslationServicesManagerImpl implements TranslationServicesManage
         if (StringUtils.isNotEmpty(deeplAIKey)) {
             try {
                 Configuration configuration = configurationAdmin.getConfiguration(SERVICE_CONFIG_FILE_NAME_DEEPL);
-                Dictionary<String, Object> configProperties = new Hashtable<>();
+                Map<String, String> configProperties = new HashMap<>();
                 configProperties.put(DEEPL_API_KEY, deeplAIKey);
-                configuration.updateIfDifferent(configProperties);
+                configuration.updateIfDifferent(new MapToDictionary(configProperties));
 
             } catch (IOException e) {
                 throw new JahiaRuntimeException(e);

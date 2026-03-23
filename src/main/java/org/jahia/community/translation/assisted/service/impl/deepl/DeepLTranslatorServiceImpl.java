@@ -16,7 +16,6 @@ import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.JCRSessionFactory;
 import org.jahia.services.content.JCRSessionWrapper;
 import org.jahia.utils.LanguageCodeConverters;
-import org.osgi.framework.BundleException;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -83,7 +82,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
     }
 
     @Activate
-    public void activate(Map<String, String> properties) throws BundleException {
+    public void activate(Map<String, String> properties) {
         translator = null;
         deepLGlossaryManager.reset();
         if (properties == null) {

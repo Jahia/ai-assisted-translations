@@ -12,9 +12,7 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jcr.Binary;
 import javax.jcr.Node;
-import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -29,9 +27,8 @@ import static org.jahia.community.translation.assisted.AssistedTranslationsConst
 public class JcrGlossaryFileLocator implements GlossaryFileLocator {
 
     private static final Logger logger = LoggerFactory.getLogger(JcrGlossaryFileLocator.class);
-
-    private String glossaryRelativePath = "/files/glossaries";
     private final Pattern glossaryFilePattern = Pattern.compile(".*\\.csv$");
+    private String glossaryRelativePath;
 
     @Activate
     public void activate(Map<String, String> properties) {
@@ -40,7 +37,7 @@ public class JcrGlossaryFileLocator implements GlossaryFileLocator {
         }
         glossaryRelativePath = StringUtils.defaultIfBlank(
                 properties.get(AssistedTranslationsConstants.TRANSLATION_GLOSSARY_RELATIVE_PATH),
-                glossaryRelativePath
+                "/files/glossaries"
         );
     }
 

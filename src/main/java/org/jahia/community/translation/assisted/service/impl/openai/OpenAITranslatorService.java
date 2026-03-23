@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.RepositoryException;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.jahia.community.translation.assisted.AssistedTranslationsConstants.*;
 
@@ -165,10 +165,6 @@ public class OpenAITranslatorService implements TranslatorService {
 
         translationServicesManager.buildDataToTranslate(localizedNode, data, true, false);
         // Build JSON to send to OpenAI, using data.getTexts() which is a map of key->text to translate, where key is the JCR path to the property (e.g. /a/title) and value is the text to translate (e.g. "Hello <b>world</b>")
-//        {
-//            "role": "user",
-//                "content": "{\"sourceLanguage\":\"en\",\"targetLanguage\":\"fr\",\"texts\":{\"/a/title\":\"Hello <b>world</b>\",\"/a/desc\":\"A &amp; B\"}}"
-//        }
         ResolvedGlossary resolvedGlossary = glossaryService.resolve(localizedNode, sourceLanguage, targetLanguage);
         return getTranslatedFieldList(sourceLanguage, targetLanguage, data, false, resolvedGlossary.getTerms());
     }
@@ -193,19 +189,10 @@ public class OpenAITranslatorService implements TranslatorService {
             Map<String, String> batchTexts = new LinkedHashMap<>();
             textEntries.subList(startIdx, endIdx).forEach(entry -> batchTexts.put(entry.getKey(), entry.getValue()));
 
-            batchTexts.forEach((key, sourceText) -> {
-                String glossaryMatch = glossaryTerms.get(sourceText);
-                if (StringUtils.isNotBlank(glossaryMatch)) {
-                    translatedValues.put(key, glossaryMatch);
-                }
-            });
+            processGlossaryTerms(glossaryTerms, batchTexts, translatedValues);
 
             Map<String, String> textsToTranslate = new LinkedHashMap<>();
-            batchTexts.forEach((key, value) -> {
-                if (!translatedValues.containsKey(key)) {
-                    textsToTranslate.put(key, value);
-                }
-            });
+            processTextToTranslates(batchTexts, translatedValues, textsToTranslate);
 
             if (textsToTranslate.isEmpty()) {
                 continue;
@@ -222,7 +209,9 @@ public class OpenAITranslatorService implements TranslatorService {
             Optional<JSONObject> responseJson = extractOutputText(response).flatMap(this::parseJsonObject);
 
             if (responseJson.isEmpty()) {
-                logger.warn("OpenAI response {} for batch [{}, {}) was not valid JSON, retrying once", response.id(), startIdx, endIdx);
+                if (logger.isWarnEnabled()) {
+                    logger.warn("OpenAI response {} for batch [{}, {}) was not valid JSON, retrying once", response.id(), startIdx, endIdx);
+                }
                 String repairPrompt = "Your previous answer was not valid JSON. " + JSON_RESPONSE_INSTRUCTION + " Input payload: " + requestJson;
                 Response retryResponse = createTranslationResponse(repairPrompt, previousResponseId, null);
                 previousResponseId = retryResponse.id();
@@ -234,15 +223,40 @@ public class OpenAITranslatorService implements TranslatorService {
                 return List.of();
             }
 
+            processJsonResponse(responseJson, textsToTranslate, translatedValues);
+        }
+
+        return translationServicesManager.getTranslatedFieldList(data, subtree, translatedValues);
+    }
+
+    private static void processJsonResponse(Optional<JSONObject> responseJson, Map<String, String> textsToTranslate, Map<String, String> translatedValues) {
+        if(responseJson.isPresent()) {
             Map<String, Object> responseJsonMap = responseJson.get().toMap();
             textsToTranslate.keySet().forEach(key -> {
                 if (responseJsonMap.containsKey(key) && responseJsonMap.get(key) != null) {
                     translatedValues.put(key, responseJsonMap.get(key).toString());
                 }
             });
+        } else {
+            logger.error("No valid JSON response to process");
         }
+    }
 
-        return translationServicesManager.getTranslatedFieldList(data, subtree, translatedValues);
+    private static void processTextToTranslates(Map<String, String> batchTexts, Map<String, String> translatedValues, Map<String, String> textsToTranslate) {
+        batchTexts.forEach((key, value) -> {
+            if (!translatedValues.containsKey(key)) {
+                textsToTranslate.put(key, value);
+            }
+        });
+    }
+
+    private static void processGlossaryTerms(Map<String, String> glossaryTerms, Map<String, String> batchTexts, Map<String, String> translatedValues) {
+        batchTexts.forEach((key, sourceText) -> {
+            String glossaryMatch = glossaryTerms.get(sourceText);
+            if (StringUtils.isNotBlank(glossaryMatch)) {
+                translatedValues.put(key, glossaryMatch);
+            }
+        });
     }
 
     private Response createTranslationResponse(String input, String previousResponseId, String instructions) {
