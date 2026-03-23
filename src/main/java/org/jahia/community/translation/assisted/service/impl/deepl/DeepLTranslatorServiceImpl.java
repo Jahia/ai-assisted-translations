@@ -9,6 +9,8 @@ import org.jahia.community.translation.assisted.graphql.TranslatedField;
 import org.jahia.community.translation.assisted.service.AssistedTranslationResponse;
 import org.jahia.community.translation.assisted.service.TranslationServicesManager;
 import org.jahia.community.translation.assisted.service.TranslatorService;
+import org.jahia.community.translation.assisted.service.glossary.GlossaryService;
+import org.jahia.community.translation.assisted.service.glossary.ResolvedGlossary;
 import org.jahia.community.translation.assisted.service.impl.TranslationData;
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.JCRSessionFactory;
@@ -41,13 +43,18 @@ import static org.jahia.community.translation.assisted.AssistedTranslationsConst
 public class DeepLTranslatorServiceImpl implements TranslatorService {
 
     private static final Logger logger = LoggerFactory.getLogger(DeepLTranslatorServiceImpl.class);
-    private static final String SLASH = "/";
 
     private DeepLClient translator;
     private boolean available;
 
     @Reference
     private TranslationServicesManager translationServicesManager;
+
+    @Reference
+    private GlossaryService glossaryService;
+
+    @Reference
+    private DeepLGlossaryManager deepLGlossaryManager;
 
     private boolean saveTranslations(JCRSessionWrapper session, Map<String, TranslatedField> translations) {
         boolean hasSavedSomething = false;
@@ -78,6 +85,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
     @Activate
     public void activate(Map<String, String> properties) throws BundleException {
         translator = null;
+        deepLGlossaryManager.reset();
         if (properties == null) {
             logger.warn("Missing configurations: {}", SERVICE_CONFIG_FILE_FULLNAME);
             return;
@@ -93,6 +101,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
             available = false;
             return;
         }
+        deepLGlossaryManager.cleanupStaleGlossariesIfNeeded(translator, true);
         available = true;
     }
 
@@ -133,7 +142,8 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
         final TranslationData data = new TranslationData();
 
         translationServicesManager.buildDataToTranslate(localizedNode, data, true, false);
-        return generateTranslations(data, sourceLanguage, targetLanguage);
+        ResolvedGlossary resolvedGlossary = glossaryService.resolve(localizedNode, sourceLanguage, targetLanguage);
+        return generateTranslations(data, sourceLanguage, targetLanguage, resolvedGlossary.getTerms());
     }
 
     public AssistedTranslationResponse translate(JCRNodeWrapper pNode, String propertyName, String sourceLanguage, String targetLanguage) throws RepositoryException, InterruptedException {
@@ -164,11 +174,12 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
             translationServicesManager.buildDataToTranslate(node, propertyName, data);
         }
 
-        return translateAndSave(data, sourceLanguage, targetLanguage);
+        ResolvedGlossary resolvedGlossary = glossaryService.resolve(node, sourceLanguage, targetLanguage);
+        return translateAndSave(data, sourceLanguage, targetLanguage, resolvedGlossary.getTerms());
     }
 
-    private AssistedTranslationResponse translateAndSave(TranslationData data, String srcLanguage, String targetLanguage) throws InterruptedException {
-        final Map<String, TranslatedField> translations = translationServicesManager.getTranslatedFieldMap(generateTranslations(data, srcLanguage, targetLanguage));
+    private AssistedTranslationResponse translateAndSave(TranslationData data, String srcLanguage, String targetLanguage, Map<String, String> glossaryTerms) throws InterruptedException {
+        final Map<String, TranslatedField> translations = translationServicesManager.getTranslatedFieldMap(generateTranslations(data, srcLanguage, targetLanguage, glossaryTerms));
 
         if (MapUtils.isEmpty(translations)) {
             final String warnMsg = String.format(MSG_NOTHING_TO_TRANSLATE, targetLanguage);
@@ -195,7 +206,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
         }
     }
 
-    private List<TranslatedField> generateTranslations(TranslationData data, String srcLanguage, String destLanguage) throws InterruptedException {
+    private List<TranslatedField> generateTranslations(TranslationData data, String srcLanguage, String destLanguage, Map<String, String> glossaryTerms) throws InterruptedException {
         if (translator == null) {
             logger.warn("Translator is null");
             return Collections.emptyList();
@@ -218,6 +229,11 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
         try {
             TextTranslationOptions textTranslationOptions = new TextTranslationOptions();
             textTranslationOptions.setTagHandling("html");
+            textTranslationOptions.setTagHandlingVersion("v2");
+            String glossaryId = deepLGlossaryManager.getOrCreateGlossaryId(translator, srcLanguage, destDeepLLanguage, glossaryTerms);
+            if (StringUtils.isNotBlank(glossaryId)) {
+                textTranslationOptions.setGlossaryId(glossaryId);
+            }
             results = translator.translateText(srcTexts, srcLanguage, destDeepLLanguage, textTranslationOptions);
         } catch (DeepLException e) {
             if (logger.isErrorEnabled()) {

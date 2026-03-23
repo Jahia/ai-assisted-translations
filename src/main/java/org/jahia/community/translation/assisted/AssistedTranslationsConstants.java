@@ -10,6 +10,8 @@ public class AssistedTranslationsConstants {
     public static final String OPENAI_API_KEY = "translation.openai.api.key";
     public static final String TRANSLATION_OPENAI_PROMPT = "translation.openai.prompt";
     public static final String TRANSLATION_OPENAI_MODEL = "translation.openai.model";
+    public static final String TRANSLATION_GLOSSARY_RELATIVE_PATH = "translation.glossary.relative.path";
+    public static final String TRANSLATION_GLOSSARY_FILE_PATTERN = "translation.glossary.file.pattern";
     public static final String PROP_PREFIX_TARGET_LANGUAGES = "targetLanguages.";
 
     public static final String MSG_NOTHING_TO_TRANSLATE = "Nothing to translate in %s";

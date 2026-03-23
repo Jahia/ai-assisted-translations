@@ -13,6 +13,8 @@ import org.jahia.community.translation.assisted.graphql.TranslatedField;
 import org.jahia.community.translation.assisted.service.AssistedTranslationResponse;
 import org.jahia.community.translation.assisted.service.TranslationServicesManager;
 import org.jahia.community.translation.assisted.service.TranslatorService;
+import org.jahia.community.translation.assisted.service.glossary.GlossaryService;
+import org.jahia.community.translation.assisted.service.glossary.ResolvedGlossary;
 import org.jahia.community.translation.assisted.service.impl.TranslationData;
 import org.jahia.community.translation.assisted.service.impl.deepl.DeepLAssistedTranslationResponseImpl;
 import org.jahia.services.content.JCRNodeWrapper;
@@ -31,6 +33,8 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.RepositoryException;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 
 import static org.jahia.community.translation.assisted.AssistedTranslationsConstants.*;
 
@@ -43,6 +47,7 @@ import static org.jahia.community.translation.assisted.AssistedTranslationsConst
 public class OpenAITranslatorService implements TranslatorService {
     private static final Logger logger = LoggerFactory.getLogger(OpenAITranslatorService.class);
     private static final int TRANSLATION_BATCH_SIZE = 200;
+    private static final int MAX_GLOSSARY_TERMS_IN_PROMPT = 200;
     private static final String JSON_RESPONSE_INSTRUCTION = "Return only a valid JSON object with exactly the same keys as the input and translated string values. Do not add markdown or explanations.";
     private static final String JSON_INPUT_PREFIX = "json payload to translate:\n";
     private static final ResponseTextConfig JSON_OBJECT_TEXT_CONFIG = ResponseTextConfig.builder()
@@ -55,6 +60,9 @@ public class OpenAITranslatorService implements TranslatorService {
 
     @Reference
     private TranslationServicesManager translationServicesManager;
+
+    @Reference
+    private GlossaryService glossaryService;
 
     private static String ensureJsonKeywordInInput(String input) {
         String safeInput = input == null ? "" : input;
@@ -120,7 +128,8 @@ public class OpenAITranslatorService implements TranslatorService {
         final TranslationData data = new TranslationData();
 
         translationServicesManager.buildDataToTranslate(localizedNode, data, true, true);
-        List<TranslatedField> translatedFields = getTranslatedFieldList(sourceLanguage, targetLanguage, data, true);
+        ResolvedGlossary resolvedGlossary = glossaryService.resolve(localizedNode, sourceLanguage, targetLanguage);
+        List<TranslatedField> translatedFields = getTranslatedFieldList(sourceLanguage, targetLanguage, data, true, resolvedGlossary.getTerms());
         // We need to transform this list to handle multivalued fields have their fieldname ending with ___index___
         // Each of those field values need to be stored in a List at the same original index
         Map<String, TranslatedField> translatedFieldMap = translationServicesManager.getTranslatedFieldMap(translatedFields);
@@ -160,14 +169,16 @@ public class OpenAITranslatorService implements TranslatorService {
 //            "role": "user",
 //                "content": "{\"sourceLanguage\":\"en\",\"targetLanguage\":\"fr\",\"texts\":{\"/a/title\":\"Hello <b>world</b>\",\"/a/desc\":\"A &amp; B\"}}"
 //        }
-        return getTranslatedFieldList(sourceLanguage, targetLanguage, data, false);
+        ResolvedGlossary resolvedGlossary = glossaryService.resolve(localizedNode, sourceLanguage, targetLanguage);
+        return getTranslatedFieldList(sourceLanguage, targetLanguage, data, false, resolvedGlossary.getTerms());
     }
 
-    private @NotNull List<TranslatedField> getTranslatedFieldList(String sourceLanguage, String targetLanguage, TranslationData data, boolean subtree) {
+    private @NotNull List<TranslatedField> getTranslatedFieldList(String sourceLanguage, String targetLanguage, TranslationData data, boolean subtree, Map<String, String> glossaryTerms) {
         // Use Responses API for translations.
         String sourceLanguageMapped = translationServicesManager.getTargetLanguages().getOrDefault(sourceLanguage, sourceLanguage);
         String targetLanguageMapped = translationServicesManager.getTargetLanguages().getOrDefault(targetLanguage, targetLanguage);
-        String systemPrompt = messageFormat.format(new Object[]{sourceLanguageMapped, targetLanguageMapped}) + "\n" + JSON_RESPONSE_INSTRUCTION;
+        String baseSystemPrompt = messageFormat.format(new Object[]{sourceLanguageMapped, targetLanguageMapped})
+                + "\n" + JSON_RESPONSE_INSTRUCTION;
         List<Map.Entry<String, String>> textEntries = new ArrayList<>(data.getTexts().entrySet());
         if (textEntries.isEmpty()) {
             return List.of();
@@ -182,11 +193,30 @@ public class OpenAITranslatorService implements TranslatorService {
             Map<String, String> batchTexts = new LinkedHashMap<>();
             textEntries.subList(startIdx, endIdx).forEach(entry -> batchTexts.put(entry.getKey(), entry.getValue()));
 
-            JSONObject requestJson = new JSONObject(batchTexts);
+            batchTexts.forEach((key, sourceText) -> {
+                String glossaryMatch = glossaryTerms.get(sourceText);
+                if (StringUtils.isNotBlank(glossaryMatch)) {
+                    translatedValues.put(key, glossaryMatch);
+                }
+            });
+
+            Map<String, String> textsToTranslate = new LinkedHashMap<>();
+            batchTexts.forEach((key, value) -> {
+                if (!translatedValues.containsKey(key)) {
+                    textsToTranslate.put(key, value);
+                }
+            });
+
+            if (textsToTranslate.isEmpty()) {
+                continue;
+            }
+
+            JSONObject requestJson = new JSONObject(textsToTranslate);
             if (logger.isDebugEnabled()) {
                 logger.debug("Calling OpenAI API with requested translation batch [{}, {})", startIdx, endIdx);
             }
 
+            String systemPrompt = baseSystemPrompt + buildGlossaryInstruction(glossaryTerms, textsToTranslate.values());
             Response response = createTranslationResponse(requestJson.toString(), previousResponseId, systemPrompt);
             previousResponseId = response.id();
             Optional<JSONObject> responseJson = extractOutputText(response).flatMap(this::parseJsonObject);
@@ -205,7 +235,7 @@ public class OpenAITranslatorService implements TranslatorService {
             }
 
             Map<String, Object> responseJsonMap = responseJson.get().toMap();
-            batchTexts.keySet().forEach(key -> {
+            textsToTranslate.keySet().forEach(key -> {
                 if (responseJsonMap.containsKey(key) && responseJsonMap.get(key) != null) {
                     translatedValues.put(key, responseJsonMap.get(key).toString());
                 }
@@ -228,6 +258,62 @@ public class OpenAITranslatorService implements TranslatorService {
             paramsBuilder.previousResponseId(previousResponseId);
         }
         return openAIClient.responses().create(paramsBuilder.build());
+    }
+
+    private String buildGlossaryInstruction(Map<String, String> glossaryTerms, Collection<String> batchTexts) {
+        if (glossaryTerms == null || glossaryTerms.isEmpty()) {
+            return "";
+        }
+
+        List<String> nonEmptyBatchTexts = batchTexts.stream()
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toList());
+        if (nonEmptyBatchTexts.isEmpty()) {
+            return "";
+        }
+
+        List<Map.Entry<String, String>> entries = new ArrayList<>(glossaryTerms.entrySet());
+        // Prefer longer terms first so specific phrases are not dropped when capped.
+        entries.sort((a, b) -> Integer.compare(StringUtils.length(b.getKey()), StringUtils.length(a.getKey())));
+
+        Map<String, String> limitedTerms = new LinkedHashMap<>();
+        for (Map.Entry<String, String> entry : entries) {
+            String sourceTerm = StringUtils.trimToEmpty(entry.getKey());
+            if (StringUtils.isBlank(sourceTerm)) {
+                continue;
+            }
+            boolean relevant = isRelevantGlossaryTerm(sourceTerm, nonEmptyBatchTexts);
+            if (relevant) {
+                limitedTerms.put(sourceTerm, entry.getValue());
+            }
+            if (limitedTerms.size() >= MAX_GLOSSARY_TERMS_IN_PROMPT) {
+                break;
+            }
+        }
+
+        if (limitedTerms.isEmpty()) {
+            return "";
+        }
+
+        return "\nApply this json glossary (source->target) when terms appear: " + new JSONObject(limitedTerms);
+    }
+
+    private boolean isRelevantGlossaryTerm(String sourceTerm, Collection<String> batchTexts) {
+        String[] tokens = StringUtils.trimToEmpty(sourceTerm).split("\\s+");
+        if (tokens.length == 0) {
+            return false;
+        }
+
+        String joinedTokens = Arrays.stream(tokens)
+                .filter(StringUtils::isNotBlank)
+                .map(Pattern::quote)
+                .collect(Collectors.joining("\\\\s+"));
+        if (StringUtils.isBlank(joinedTokens)) {
+            return false;
+        }
+
+        Pattern termPattern = Pattern.compile("(?<![\\\\p{L}\\\\p{N}])" + joinedTokens + "(?![\\\\p{L}\\\\p{N}])", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+        return batchTexts.stream().anyMatch(text -> termPattern.matcher(text).find());
     }
 
     private Optional<JSONObject> parseJsonObject(String content) {

@@ -25,6 +25,11 @@
         <jahia.plugin.version>6.13</jahia.plugin.version>
         <require-capability>osgi.extender;filter:="(osgi.extender=org.jahia.bundles.blueprint.extender.config)"</require-capability>
         <yarn.arguments>build:production</yarn.arguments>
+        <import-package>
+            !org.apache.commons.io,
+            !org.apache.commons.io.*,
+            *
+        </import-package>
     </properties>
 
     <dependencies>
@@ -74,6 +79,11 @@
             <version>21.1</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.14.1</version>
+        </dependency>
     </dependencies>
 
     <repositories>
@@ -100,6 +110,11 @@
                 <configuration>
                     <instructions>
                         <_dsannotations>org.jahia.community.translation.assisted.*</_dsannotations>
+                        <Import-Package>
+                            !org.apache.commons.io,
+                            !org.apache.commons.io.*,
+                            *
+                        </Import-Package>
                     </instructions>
                 </configuration>
             </plugin>
