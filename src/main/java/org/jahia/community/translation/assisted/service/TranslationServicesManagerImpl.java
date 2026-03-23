@@ -294,7 +294,7 @@ public class TranslationServicesManagerImpl implements TranslationServicesManage
         if (StringUtils.isNotEmpty(openAIKey)) {
             try {
                 Configuration configuration = configurationAdmin.getConfiguration(SERVICE_CONFIG_FILE_NAME_OPENAI);
-                Dictionary<String, Object> configProperties = new Hashtable<>();
+                Map<String, String> configProperties = new HashMap<>();
                 configProperties.put(OPENAI_API_KEY, openAIKey);
                 if (properties.containsKey(TRANSLATION_OPENAI_PROMPT)) {
                     configProperties.put(TRANSLATION_OPENAI_PROMPT, properties.get(TRANSLATION_OPENAI_PROMPT));
@@ -302,7 +302,7 @@ public class TranslationServicesManagerImpl implements TranslationServicesManage
                 if (properties.containsKey(TRANSLATION_OPENAI_MODEL)) {
                     configProperties.put(TRANSLATION_OPENAI_MODEL, properties.get(TRANSLATION_OPENAI_MODEL));
                 }
-                configuration.updateIfDifferent(configProperties);
+                configuration.updateIfDifferent(new MapToDictionary(configProperties));
             } catch (IOException e) {
                 throw new JahiaRuntimeException(e);
             }
