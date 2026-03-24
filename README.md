@@ -266,3 +266,12 @@ Glossaries are managed as CSV files stored in Jahia (not one JCR node per term e
   - verify CSV header/row validity
   - for DeepL, verify API key and glossary endpoint availability
 
+---
+
+## Future improvements
+- Add support for only translating selected content in main resource screen (not all nodes under a folder)
+- Add support for selecting translation provider when both are configured (currently OpenAI has priority over DeepL)
+- Add support for glossary management in the UI (currently requires manual CSV file management)
+- Add support for custom prompts per content type or site (currently a single prompt is used for all translations)
+- Add support for batch translation of multiple nodes at once (currently one page/folder at a time)
+
