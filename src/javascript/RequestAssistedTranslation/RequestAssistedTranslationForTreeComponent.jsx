@@ -50,7 +50,7 @@ export const RequestAssistedTranslationForTreeComponent = ({
                     availableSourceLanguages: siteInfo.languages,
                     showDropdown: true,
                     isOpen: true,
-                    translateTree: true,
+                    isTranslateTree: true,
                     onClose: () => {
                         componentRenderer.setProperties('requestTranslationAiAssistedForAllLanguages', {isOpen: false});
                     },

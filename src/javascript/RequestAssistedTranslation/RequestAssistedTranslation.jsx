@@ -15,7 +15,6 @@ import PropTypes from 'prop-types';
 import {getMutationTranslateNode, suggestTranslationForLanguage} from './RequestAssistedTranslation.gql';
 import styles from './RequestAssistedTranslation.scss';
 import {registry} from '@jahia/ui-extender';
-import {useNotifications} from '@jahia/react-material';
 
 const triggerRefetch = (name, queryParams) => {
     const refetch = registry.get('refetcher', name);
@@ -35,7 +34,9 @@ const triggerRefetchAll = () => {
 };
 
 const getInitialState = (siteLanguages, sourceLanguage) => {
-    return siteLanguages.find(siteLanguage => siteLanguage.language === sourceLanguage);
+    let languageObject = siteLanguages.find(siteLanguage => siteLanguage.language === sourceLanguage);
+    console.debug('Found language matching', languageObject, siteLanguages, sourceLanguage);
+    return languageObject;
 };
 
 // eslint-disable-next-line max-params
@@ -85,9 +86,8 @@ const handleSuggestionCall = (suggestTranslation, formik, setErrorState, setIsLo
 };
 
 // eslint-disable-next-line max-params
-const handleTreeTranslationCall = (translateTreeMutation, setErrorState, setIsLoading, onClose, client, notification) => {
-    translateTreeMutation().then(data => {
-        notification.notify(data.message, ['closeButton']);
+const handleTreeTranslationCall = (translateTreeMutation, setErrorState, setIsLoading, onClose, client) => {
+    translateTreeMutation().then(() => {
         client.reFetchObservableQueries();
         triggerRefetchAll();
     }).catch(err => {
@@ -117,7 +117,6 @@ export const RequestAssistedTranslation = ({
     const [selected, setSelected] = useState(getInitialState(siteLanguages, sourceLanguage));
     const [errorState, setErrorState] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const notification = useNotifications();
 
     const client = useApolloClient();
 
@@ -142,7 +141,7 @@ export const RequestAssistedTranslation = ({
         if (formik !== undefined) {
             handleSuggestionCall(suggestTranslation, formik, setErrorState, setIsLoading, onClose);
         } else if (isTranslateTree === true) {
-            handleTreeTranslationCall(translateTreeMutation, j, setErrorState, setIsLoading, onClose, client, notification);
+            handleTreeTranslationCall(translateTreeMutation, setErrorState, setIsLoading, onClose, client);
         }
     };
 
@@ -187,7 +186,7 @@ export const RequestAssistedTranslation = ({
                                     }
 
                                     return [{
-                                        value: element,
+                                        value: optionLanguage.language,
                                         label: `${optionLanguage.displayName} (${optionLanguage.uiLanguageDisplayName})`
                                     }];
                                 })}
