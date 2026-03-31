@@ -1,0 +1,8 @@
+# Uninstall the JS modules shipped with Jahia to use the one we want to test
+- uninstallBundle: "javascript-modules-engine"
+- installBundle:
+    - "mvn:org.jahia.modules/legacy-default-components"
+    - "mvn:org.jahia.modules/calendar"
+    - "mvn:org.jahia.modules/event"
+  autoStart: true
+  uninstallPreviousVersion: true

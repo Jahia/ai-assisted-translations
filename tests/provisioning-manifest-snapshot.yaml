@@ -1,0 +1,26 @@
+- addMavenRepository: 'https://store.jahia.com/nexus/content/repositories/jahia-public-app-store@id=JahiaStore'
+- addMavenRepository: 'https://devtools.jahia.com/nexus/content/groups/public/@snapshots@noreleases@id=JahiaPublicSnapshots'
+- addMavenRepository: 'https://devtools.jahia.com/nexus/content/groups/public/@snapshots@noreleases@id=JahiaSnapshot'
+- addMavenRepository: 'https://devtools.jahia.com/nexus/content/groups/internal/@id=jahia-internal@snapshots'
+  username: ${env:NEXUS_USERNAME}
+  password: ${env:NEXUS_PASSWORD}
+
+- installOrUpgradeBundle:
+    - "mvn:org.jahia.modules/javascript-modules-engine/LATEST"
+    - 'mvn:org.jahia.modules/qa-module'
+  autoStart: true
+  uninstallPreviousVersion: true
+  ignoreChecks: true
+
+- installOrUpgradeBundle:
+    - "js:mvn:org.jahia.test/javascript-modules-engine-test-module/LATEST/tgz"
+  autoStart: true
+  uninstallPreviousVersion: true
+  ignoreChecks: true
+
+- installOrUpgradeBundle:
+    - "js:mvn:org.jahia.samples/javascript-modules-samples-hydrogen/LATEST/tgz"
+  autoStart: true
+  uninstallPreviousVersion: true
+  ignoreChecks: true
+

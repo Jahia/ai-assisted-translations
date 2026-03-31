@@ -1,0 +1,11 @@
+mutation enableGraalVMDebugger($inspect: String!, $suspend: String!, $secure: String!) {
+  admin {
+    jahia {
+      configuration(pid: "org.jahia.modules.javascript.modules.engine.jsengine.GraalVMEngine") {
+        polyGlotInspect: value(name: "polyglot.inspect", value: $inspect)
+        polyGlotInspectSuspend: value(name: "polyglot.inspect.Suspend", value: $suspend)
+        polyGlotInspectSecure: value(name: "polyglot.inspect.Secure", value: $secure)
+      }
+    }
+  }
+}
