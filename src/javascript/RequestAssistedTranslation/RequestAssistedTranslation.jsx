@@ -40,7 +40,7 @@ const getInitialState = (siteLanguages, sourceLanguage) => {
 };
 
 // eslint-disable-next-line max-params
-const handleSuggestionCall = (suggestTranslation, formik, setErrorState, setIsLoading, onClose) => {
+const handleSuggestionCall = (suggestTranslation, formik, setErrorState, setIsLoading, onClose, setErrorMessage) => {
     suggestTranslation().then(data => {
         // First we transform data as some fields are multivalued and in this case the fieldname contains the index at the end fieldname___index___, we need to group the values per firld name amnd use an array for multivalued ones
         const fields = {};
@@ -76,26 +76,26 @@ const handleSuggestionCall = (suggestTranslation, formik, setErrorState, setIsLo
                 formik.setFieldValue(initialField, value || '');
             }
         });
+        setIsLoading(false);
+        onClose();
     }).catch(err => {
         console.error(err);
         setErrorState('translation_error');
-    }).finally(() => {
-        setIsLoading(false);
-        onClose();
+        setErrorMessage(err.message);
     });
 };
 
 // eslint-disable-next-line max-params
-const handleTreeTranslationCall = (translateTreeMutation, setErrorState, setIsLoading, onClose, client) => {
+const handleTreeTranslationCall = (translateTreeMutation, setErrorState, setIsLoading, onClose, client, setErrorMessage) => {
     translateTreeMutation().then(() => {
         client.reFetchObservableQueries();
         triggerRefetchAll();
+        setIsLoading(false);
+        onClose();
     }).catch(err => {
         console.error(err);
         setErrorState('translation_error');
-    }).finally(() => {
-        setIsLoading(false);
-        onClose();
+        setErrorMessage(err.message);
     });
 };
 
@@ -115,7 +115,8 @@ export const RequestAssistedTranslation = ({
     const {t} = useTranslation('ai-assisted-translations');
     const {t: j} = useTranslation('jcontent');
     const [selected, setSelected] = useState(getInitialState(siteLanguages, sourceLanguage));
-    const [errorState, setErrorState] = useState('');
+    const [errorState, setErrorState] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
     const client = useApolloClient();
@@ -139,9 +140,9 @@ export const RequestAssistedTranslation = ({
     const handleClickDialog = () => {
         setIsLoading(true);
         if (formik !== undefined) {
-            handleSuggestionCall(suggestTranslation, formik, setErrorState, setIsLoading, onClose);
+            handleSuggestionCall(suggestTranslation, formik, setErrorState, setIsLoading, onClose, setErrorMessage);
         } else if (isTranslateTree === true) {
-            handleTreeTranslationCall(translateTreeMutation, setErrorState, setIsLoading, onClose, client);
+            handleTreeTranslationCall(translateTreeMutation, setErrorState, setIsLoading, onClose, client, setErrorMessage());
         }
     };
 
@@ -226,20 +227,28 @@ export const RequestAssistedTranslation = ({
                 open={Boolean(errorState)}
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
-                onClose={() => setErrorState()}
+                onClose={() => {
+                    setErrorState(false);
+                    setIsLoading(false);
+                    onClose();
+                }}
             >
                 <DialogTitle id="alert-dialog-title">{t('ai-assisted-translations:label.errorTitle')}</DialogTitle>
                 <DialogContent>
                     <DialogContentText
                         id="alert-dialog-description"
-                    >{t('ai-assisted-translations:label.errorContentAllProperties')}
+                    >{errorMessage === undefined ? t('ai-assisted-translations:label.errorContentAllProperties') : errorMessage}
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button label={t('ai-assisted-translations:label.cancel')}
                             color="accent"
                             size="big"
-                            onClick={() => setErrorState()}
+                            onClick={() => {
+                                setErrorState(false);
+                                setIsLoading(false);
+                                onClose();
+                            }}
                     />
                 </DialogActions>
             </Dialog>

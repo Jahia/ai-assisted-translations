@@ -12,6 +12,7 @@ import org.jahia.community.translation.assisted.service.TranslatorService;
 import org.jahia.community.translation.assisted.service.glossary.GlossaryService;
 import org.jahia.community.translation.assisted.service.glossary.ResolvedGlossary;
 import org.jahia.community.translation.assisted.service.impl.TranslationData;
+import org.jahia.modules.graphql.provider.dxm.DataFetchingException;
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.JCRSessionFactory;
 import org.jahia.services.content.JCRSessionWrapper;
@@ -142,7 +143,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
 
         translationServicesManager.buildDataToTranslate(localizedNode, data, true, false);
         ResolvedGlossary resolvedGlossary = glossaryService.resolve(localizedNode, sourceLanguage, targetLanguage);
-        return generateTranslations(data, sourceLanguage, targetLanguage, resolvedGlossary.getTerms());
+        return generateTranslations(data, sourceLanguage, targetLanguage, resolvedGlossary.getTerms(), false);
     }
 
     public AssistedTranslationResponse translate(JCRNodeWrapper pNode, String propertyName, String sourceLanguage, String targetLanguage) throws RepositoryException, InterruptedException {
@@ -178,7 +179,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
     }
 
     private AssistedTranslationResponse translateAndSave(TranslationData data, String srcLanguage, String targetLanguage, Map<String, String> glossaryTerms) throws InterruptedException {
-        final Map<String, TranslatedField> translations = translationServicesManager.getTranslatedFieldMap(generateTranslations(data, srcLanguage, targetLanguage, glossaryTerms));
+        final Map<String, TranslatedField> translations = translationServicesManager.getTranslatedFieldMap(generateTranslations(data, srcLanguage, targetLanguage, glossaryTerms, true));
 
         if (MapUtils.isEmpty(translations)) {
             final String warnMsg = String.format(MSG_NOTHING_TO_TRANSLATE, targetLanguage);
@@ -205,7 +206,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
         }
     }
 
-    private List<TranslatedField> generateTranslations(TranslationData data, String srcLanguage, String destLanguage, Map<String, String> glossaryTerms) throws InterruptedException {
+    private List<TranslatedField> generateTranslations(TranslationData data, String srcLanguage, String destLanguage, Map<String, String> glossaryTerms, boolean subtree) throws InterruptedException {
         if (translator == null) {
             logger.warn("Translator is null");
             return Collections.emptyList();
@@ -215,7 +216,6 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
             return Collections.emptyList();
         }
 
-        final String destDeepLLanguage = translationServicesManager.getTargetLanguages().getOrDefault(destLanguage, destLanguage);
         final Map<String, String> texts = data.getTexts();
         final int nbTexts = texts.size();
         final List<String> keys = new ArrayList<>(nbTexts);
@@ -226,14 +226,25 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
         });
         final List<TextResult> results;
         try {
+            // DeepL support only their own list of languages https://developers.deepl.com/docs/getting-started/supported-languages, so we need to convert the language code to the one supported by DeepL if needed
+            Locale sourceLocaleFromCode = LanguageCodeConverters.getLocaleFromCode(srcLanguage);
+            Locale targetLocaleFromCode = LanguageCodeConverters.getLocaleFromCode(destLanguage);
+            List<Language> translatorSourceLanguages = translator.getSourceLanguages();
+            List<Language> translatorTargetLanguages = translator.getTargetLanguages();
+            String deeplSrcLanguage = translatorSourceLanguages.stream().filter(l -> StringUtils.equalsIgnoreCase(l.getCode(), sourceLocaleFromCode.getLanguage())).findFirst().map(Language::getCode).orElse(null);
+            String deeplTargetLanguage = translatorTargetLanguages.stream().filter(l -> StringUtils.equalsIgnoreCase(l.getCode(), targetLocaleFromCode.getLanguage())).findFirst().map(Language::getCode).orElse(null);
+            if (deeplSrcLanguage == null || deeplTargetLanguage == null) {
+                throw new DataFetchingException(String.format("DeepL doesn't support the language %s", deeplSrcLanguage == null ? sourceLocaleFromCode.getDisplayName():targetLocaleFromCode.getDisplayName()));
+            }
+            final String destDeepLLanguage = translationServicesManager.getTargetLanguages().getOrDefault(deeplTargetLanguage, deeplTargetLanguage);
             TextTranslationOptions textTranslationOptions = new TextTranslationOptions();
             textTranslationOptions.setTagHandling("html");
             textTranslationOptions.setTagHandlingVersion("v2");
-            String glossaryId = deepLGlossaryManager.getOrCreateGlossaryId(translator, srcLanguage, destDeepLLanguage, glossaryTerms);
+            String glossaryId = deepLGlossaryManager.getOrCreateGlossaryId(translator, deeplSrcLanguage, destDeepLLanguage, glossaryTerms);
             if (StringUtils.isNotBlank(glossaryId)) {
                 textTranslationOptions.setGlossaryId(glossaryId);
             }
-            results = translator.translateText(srcTexts, srcLanguage, destDeepLLanguage, textTranslationOptions);
+            results = translator.translateText(srcTexts, deeplSrcLanguage, destDeepLLanguage, textTranslationOptions);
         } catch (DeepLException e) {
             if (logger.isErrorEnabled()) {
                 logger.error("Failed to translate content", e);
@@ -244,6 +255,6 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
         final Map<String, String> translations = IntStream.range(0, nbTexts).boxed()
                 .collect(Collectors.toMap(keys::get, i -> StringEscapeUtils.unescapeHtml4(results.get(i).getText())));
 
-        return translationServicesManager.getTranslatedFieldList(data, false, translations);
+        return translationServicesManager.getTranslatedFieldList(data, subtree, translations);
     }
 }
