@@ -1,14 +1,6 @@
 import React, {useState} from 'react';
-import {
-    Backdrop,
-    CircularProgress,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle
-} from '@material-ui/core';
-import {Button, Dropdown, Typography} from '@jahia/moonstone';
+import {Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle} from '@material-ui/core';
+import {Button, Dropdown, Loader, Typography} from '@jahia/moonstone';
 import {useTranslation} from 'react-i18next';
 import {useApolloClient} from '@apollo/client';
 import PropTypes from 'prop-types';
@@ -99,6 +91,14 @@ const handleTreeTranslationCall = (translateTreeMutation, setErrorState, setIsLo
     });
 };
 
+const LoaderOverlay = () => {
+    return (
+        <div className="flexFluid flexCol_center alignCenter" style={{backgroundColor: 'var(--color-light)'}}>
+            <Loader size="big"/>
+        </div>
+    );
+};
+
 export const RequestAssistedTranslation = ({
     path,
     sourceLanguage,
@@ -178,6 +178,7 @@ export const RequestAssistedTranslation = ({
                                 className={styles.language}
                                 value={selected.language}
                                 size="medium"
+                                isDisabled={isLoading}
                                 data-sel-role="from-language-selector"
                                 data={availableSourceLanguages.flatMap(element => {
                                     let optionLanguage = siteLanguages.find(siteLanguage => siteLanguage.language === (isTranslateTree ? element.language : element));
@@ -196,15 +197,12 @@ export const RequestAssistedTranslation = ({
                         </>}
                     {!showDropdown &&
                         <Typography variant="subheading">
-                            {/* eslint-disable-next-line react/no-danger */}
-                            <span dangerouslySetInnerHTML={{__html: t('ai-assisted-translations:label.dialogDescriptionAllProperties', translationLanguages)}}/>
+                            { }
+                            <span
+                                dangerouslySetInnerHTML={{__html: t('ai-assisted-translations:label.dialogDescriptionAllProperties', translationLanguages)}}/>
                         </Typography>}
                     {isLoading &&
-                        <Backdrop open={isLoading}
-                                  style={{position: 'absolute', zIndex: 10000, color: 'burlywood'}}
-                        >
-                            <CircularProgress color="secondary" size={60} thickness={6}/>
-                        </Backdrop>}
+                        <LoaderOverlay/>}
                 </DialogContent>
                 <DialogActions>
                     <Button size="big"

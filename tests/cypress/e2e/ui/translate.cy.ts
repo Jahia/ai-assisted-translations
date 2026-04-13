@@ -98,7 +98,10 @@ describe('translate action tests', () => {
         cy.get('@translateDialog').should('not.exist');
         const pageBuilder = new JContentPageBuilder(jcontent);
         pageBuilder.refresh();
+        cy.wait(1000); // Wait for the translation to be applied
         let module = pageBuilder.getModule(`/sites/${siteKey}/home/area-main/${name}`, false);
+        module.click();
+        module.getBox().assertIsClicked()
         module.doubleClick();
         const contentEditor = ContentEditor.getContentEditor();
         contentEditor.getField(SmallTextField, 'qant:allFields_smallText').checkValue('un petit texte à traduire par notre nouvel outil de traduction assistée par IA.');
