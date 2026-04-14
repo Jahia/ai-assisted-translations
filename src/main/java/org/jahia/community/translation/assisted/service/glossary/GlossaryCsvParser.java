@@ -92,16 +92,10 @@ public class GlossaryCsvParser {
             return;
         }
 
-        boolean hasAtLeastOneTerm = false;
-        for (String header : headers) {
-            if (!isLanguageHeader(header)) {
-                continue;
-            }
-            if (StringUtils.isNotBlank(row.get(header))) {
-                hasAtLeastOneTerm = true;
-                break;
-            }
-        }
+        boolean hasAtLeastOneTerm = headers.stream()
+                .filter(this::isLanguageHeader)
+                .anyMatch(header -> StringUtils.isNotBlank(row.get(header)));
+        
         if (!hasAtLeastOneTerm) {
             errors.add("Line " + lineNumber + ": row has no translatable term value");
         }

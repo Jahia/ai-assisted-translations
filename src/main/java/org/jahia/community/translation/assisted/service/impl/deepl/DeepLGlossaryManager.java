@@ -14,10 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component(service = DeepLGlossaryManager.class, immediate = true)
@@ -92,10 +89,8 @@ public class DeepLGlossaryManager {
                     .filter(StringUtils::isNotBlank)
                     .collect(Collectors.toSet());
             try {
-                for (MultilingualGlossaryInfo glossaryInfo : translator.listMultilingualGlossaries()) {
-                    if (!StringUtils.startsWith(glossaryInfo.getName(), GLOSSARY_NAME_PREFIX) || protectedGlossaryIds.contains(glossaryInfo.getGlossaryId())) {
-                        continue;
-                    }
+                List<MultilingualGlossaryInfo> glossaryInfos = translator.listMultilingualGlossaries().stream().filter(info -> StringUtils.startsWith(info.getName(), GLOSSARY_NAME_PREFIX) || protectedGlossaryIds.contains(info.getGlossaryId())).collect(Collectors.toList());
+                for (MultilingualGlossaryInfo glossaryInfo : glossaryInfos) {
                     Date creationTime = glossaryInfo.getCreationTime();
                     if (creationTime == null || synchronizedNow - creationTime.getTime() < GLOSSARY_MAX_AGE_MILLIS) {
                         continue;

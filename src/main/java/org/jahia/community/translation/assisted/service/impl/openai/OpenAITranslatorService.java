@@ -291,11 +291,8 @@ public class OpenAITranslatorService implements TranslatorService {
         entries.sort((a, b) -> Integer.compare(StringUtils.length(b.getKey()), StringUtils.length(a.getKey())));
 
         Map<String, String> limitedTerms = new LinkedHashMap<>();
-        for (Map.Entry<String, String> entry : entries) {
+        for (Map.Entry<String, String> entry : entries.stream().filter(e -> StringUtils.isNotBlank(StringUtils.trimToEmpty(e.getKey()))).collect(Collectors.toList())) {
             String sourceTerm = StringUtils.trimToEmpty(entry.getKey());
-            if (StringUtils.isBlank(sourceTerm)) {
-                continue;
-            }
             boolean relevant = isRelevantGlossaryTerm(sourceTerm, nonEmptyBatchTexts);
             if (relevant) {
                 limitedTerms.put(sourceTerm, entry.getValue());
