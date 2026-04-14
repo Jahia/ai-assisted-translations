@@ -77,6 +77,15 @@ describe('translate action tests', () => {
 
     beforeEach(() => {
         cy.loginAndStoreSession();
+
+        // Intercept translation service calls so tests run on CI/CD without a live translation backend
+        cy.intercept('POST', '/modules/graphql', req => {
+            if (req.body?.operationName === 'SuggestTranslationForLanguage') {
+                req.reply({fixture: 'graphql/suggestTranslationForLanguage.json'});
+            } else if (req.body?.operationName === 'translateNode') {
+                req.reply({fixture: 'graphql/translateNode.json'});
+            }
+        }).as('translationServiceCall');
     });
 
     it('cannot open translate dialog if content has only one language', () => {
@@ -95,6 +104,7 @@ describe('translate action tests', () => {
         menu.get().find('.moonstone-menuItem').should('have.length', 3);
         menu.select('English')
         getComponentByRole(Button, 'translate-button').should('not.be.disabled').click();
+        cy.wait('@translationServiceCall');
         cy.get('@translateDialog').should('not.exist');
         const pageBuilder = new JContentPageBuilder(jcontent);
         pageBuilder.refresh();
