@@ -6,6 +6,7 @@ import graphql.annotations.annotationTypes.GraphQLName;
 import graphql.annotations.annotationTypes.GraphQLTypeExtension;
 import org.jahia.community.translation.assisted.service.AssistedTranslationResponse;
 import org.jahia.community.translation.assisted.service.TranslatorService;
+import org.jahia.modules.graphql.provider.dxm.DataFetchingException;
 import org.jahia.modules.graphql.provider.dxm.node.GqlJcrNodeMutation;
 import org.jahia.osgi.BundleUtils;
 import org.slf4j.Logger;
@@ -18,11 +19,9 @@ import javax.jcr.RepositoryException;
 public class GqlJcrNodeMutationAssistedTranslation {
     private static final Logger logger = LoggerFactory.getLogger(GqlJcrNodeMutationAssistedTranslation.class);
     private final GqlJcrNodeMutation nodeMutation;
-    private final TranslatorService translatorService;
 
     public GqlJcrNodeMutationAssistedTranslation(GqlJcrNodeMutation nodeMutation) {
         this.nodeMutation = nodeMutation;
-        this.translatorService = BundleUtils.getOsgiService(TranslatorService.class, null);
     }
 
     @GraphQLField
@@ -33,6 +32,12 @@ public class GqlJcrNodeMutationAssistedTranslation {
     ) throws InterruptedException {
         if (logger.isDebugEnabled()) {
             logger.debug(String.format("Translating %s from %s to %s", nodeMutation.getNode().getPath(), sourceLocale, targetLocale));
+        }
+
+        TranslatorService translatorService = BundleUtils.getOsgiService(TranslatorService.class, null);
+        if (translatorService == null) {
+            logger.warn("No TranslatorService available – translation service is not configured");
+            throw new DataFetchingException("No translation service available. Please check the module configuration.");
         }
 
         try {
@@ -56,6 +61,13 @@ public class GqlJcrNodeMutationAssistedTranslation {
         if (logger.isDebugEnabled()) {
             logger.debug(String.format("Translating %s, property %s, from %s to %s", nodeMutation.getNode().getPath(), propertyName, sourceLocale, targetLocale));
         }
+
+        TranslatorService translatorService = BundleUtils.getOsgiService(TranslatorService.class, null);
+        if (translatorService == null) {
+            logger.warn("No TranslatorService available – translation service is not configured");
+            throw new DataFetchingException("No translation service available. Please check the module configuration.");
+        }
+
         try {
             return translatorService.translateProperty(nodeMutation.getNode().getNode(), propertyName, sourceLocale, targetLocale);
         } catch (RepositoryException e) {

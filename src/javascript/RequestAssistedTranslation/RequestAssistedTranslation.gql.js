@@ -24,7 +24,7 @@ const getQueryTranslationLocksAndPermissions = (allLanguages, path) => {
     }`;
 };
 
-const getMutationTranslateNode = gql`mutation translateNode($path:String!,$sourceLanguage:String!,$targetLanguage:String!) {
+const getMutationTranslateNode = gql`mutation TranslateNode($path:String!,$sourceLanguage:String!,$targetLanguage:String!) {
         jcr{
             mutateNode(pathOrId: $path) {
                 translateNode(sourceLocale: $sourceLanguage, targetLocale: $targetLanguage){
@@ -35,7 +35,7 @@ const getMutationTranslateNode = gql`mutation translateNode($path:String!,$sourc
         }
     }`;
 
-const getMutationTranslateProperty = gql`mutation translateProperty($path:String!,$propertyName:String!,$sourceLocale:String!,$targetLocale:String!) {
+const getMutationTranslateProperty = gql`mutation TranslateProperty($path:String!,$propertyName:String!,$sourceLocale:String!,$targetLocale:String!) {
         jcr{
             mutateNode(pathOrId: $path) {
                 translateProperty(propertyName: $propertyName, sourceLocale: $sourceLocale, targetLocale: $targetLocale){

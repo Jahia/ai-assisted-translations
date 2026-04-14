@@ -141,7 +141,7 @@ export const RequestAssistedTranslation = ({
         if (formik !== undefined) {
             handleSuggestionCall(suggestTranslation, formik, setErrorState, setIsLoading, onClose, setErrorMessage);
         } else if (isTranslateTree === true) {
-            handleTreeTranslationCall(translateTreeMutation, setErrorState, setIsLoading, onClose, client, setErrorMessage());
+            handleTreeTranslationCall(translateTreeMutation, setErrorState, setIsLoading, onClose, client, setErrorMessage);
         }
     };
 
