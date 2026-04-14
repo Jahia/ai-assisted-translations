@@ -113,7 +113,6 @@ export const RequestAssistedTranslation = ({
     onClose
 }) => {
     const {t} = useTranslation('ai-assisted-translations');
-    const {t: j} = useTranslation('jcontent');
     const [selected, setSelected] = useState(getInitialState(siteLanguages, sourceLanguage));
     const [errorState, setErrorState] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -197,9 +196,8 @@ export const RequestAssistedTranslation = ({
                         </>}
                     {!showDropdown &&
                         <Typography variant="subheading">
-                            { }
-                            <span
-                                dangerouslySetInnerHTML={{__html: t('ai-assisted-translations:label.dialogDescriptionAllProperties', translationLanguages)}}/>
+                            {/* eslint-disable-next-line react/no-danger */}
+                            <span dangerouslySetInnerHTML={{__html: t('ai-assisted-translations:label.dialogDescriptionAllProperties', translationLanguages)}}/>
                         </Typography>}
                     {isLoading &&
                         <LoaderOverlay/>}
