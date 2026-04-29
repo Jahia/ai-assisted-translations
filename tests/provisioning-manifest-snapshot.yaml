@@ -1,0 +1,14 @@
+
+# uninstall only if it exists, otherwise it throws an error
+# need to hardcode version for uninstall
+- if: org.jahia.osgi.BundleUtils.getBundleBySymbolicName('content-editor',null) != null
+  do:
+    - uninstallBundle: 'mvn:org.jahia.modules/content-editor/3.6.0'
+
+- addMavenRepository: 'https://devtools.jahia.com/nexus/content/groups/public/@snapshots@noreleases@id=JahiaPublicSnapshots'
+- installBundle:
+    - 'mvn:org.jahia.modules/jcontent'
+    - 'mvn:org.jahia.modules/ai-assisted-translation'
+  autoStart: true
+  uninstallPreviousVersion: true
+- include: 'provisioning.yml'

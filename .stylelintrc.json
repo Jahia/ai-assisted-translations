@@ -1,0 +1,6 @@
+{
+    "extends": ["@jahia/stylelint-config"],
+    "rules": {
+        "no-duplicate-selectors": null
+    }
+}

@@ -1,0 +1,19 @@
+{
+  "data": {
+    "jcr": {
+      "nodeByPath": {
+        "translationSuggestions": [
+          {
+            "fieldName": "smallText",
+            "translatedValue": "un petit texte à traduire par notre nouvel outil de traduction assistée par IA."
+          },
+          {
+            "fieldName": "textarea",
+            "translatedValue": "textarea en anglais"
+          }
+        ]
+      }
+    }
+  }
+}
+

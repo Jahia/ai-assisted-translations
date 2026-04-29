@@ -1,5 +1,5 @@
 {
-    "name": "@jahia/transation-deepl",
+    "name": "@jahia/ai-assisted-translations",
     "version": "1.2.2-SNAPSHOT",
     "scripts": {
         "build": "yarn webpack",
@@ -20,9 +20,9 @@
         "lint:fix": "yarn lint:js:fix && yarn lint:scss:fix",
         "sync-pom": "sync-pom-version --use-yarn"
     },
-    "description": "translation-deepl for Jahia",
+    "description": "AI Assisted Translations for Jahia",
     "main": "index.js",
-    "repository": "git@github.com:Jahia/translation-deepl.git",
+    "repository": "git@github.com:Jahia/ai-assisted-translations.git",
     "author": "Jahia Customer Support Team <support@jahia.com>",
     "license": "MIT",
     "jahia": {
@@ -41,6 +41,7 @@
         "@apollo/react-hooks": "^3",
         "@jahia/data-helper": "1.1.14",
         "@jahia/moonstone": "^2.16.2",
+        "@jahia/react-material": "^3.0.6",
         "@jahia/ui-extender": "^1.1.0",
         "@material-ui/core": "^3.9.3",
         "formik": "^2.4.5",
@@ -59,6 +60,7 @@
         "@babel/plugin-syntax-dynamic-import": "^7.8.3",
         "@babel/preset-env": "^7.24.4",
         "@babel/preset-react": "^7.24.1",
+        "@babel/plugin-transform-runtime": "^7.13.10",
         "@cyclonedx/webpack-plugin": "^3.8.2",
         "@jahia/eslint-config": "2.1.0",
         "@jahia/stylelint-config": "^0.0.3",
@@ -67,8 +69,8 @@
         "clean-webpack-plugin": "^4.0.0",
         "copy-webpack-plugin": "^11.0.0",
         "css-loader": "^6.8.1",
-        "eslint": "^8.4.1",
-        "eslint-plugin-jest": "^27.2.1",
+        "eslint": "^8.57.1",
+        "eslint-plugin-json": "^2.1.1",
         "eslint-plugin-react": "^7.32.2",
         "eslint-plugin-react-hooks": "^4.6.0",
         "file-loader": "^6.2.0",

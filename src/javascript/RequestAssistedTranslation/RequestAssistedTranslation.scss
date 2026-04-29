@@ -1,0 +1,45 @@
+.subheading {
+    padding: 0 0 16px;
+
+    color: var(--color-dark60);
+}
+
+.actions {
+    display: flex;
+    margin: 0 -8px;
+    padding: 8px 0;
+
+    > * {
+        margin: 0 8px;
+    }
+}
+
+.languages {
+    min-height: 260px;
+    max-height: 260px;
+    margin: 0 -8px;
+    overflow-y: scroll;
+}
+
+.language {
+    margin-right: 16px;
+}
+
+.emptylanguages {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 260px;
+
+    color: var(--color-dark60);
+}
+
+.item {
+    display: flex;
+    align-items: center;
+
+    > * {
+        margin: 0 8px;
+    }
+}

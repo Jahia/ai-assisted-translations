@@ -1,0 +1,1585 @@
+cypress/e2e/ui/translate.cy.ts:
+    translate action tests -> [[ before all #1 ]]
+        cy:command (K): runProvisioningScript	Run inline script towards server: https://digitall.jahia.localhost
+        cy:command (K): runProvisioningScript	Run inline script towards server: https://digitall.jahia.localhost
+        cy:command (K): runProvisioningScript	Run inline script towards server: https://digitall.jahia.localhost
+        cy:command (K): apolloClient	Create new apollo client
+        cy:command (K): apollo	Execute Graphql Mutation: mutation addNode($parentPathOrId: String!, $name: String!, $primaryNodeType: String!, $children: [InputJCRNode] = [], $properties: [InputJCRProperty], $mixins: [String] = []) {
+                            jcr(workspace: EDIT) {
+                                addNode(
+                                    parentPathOrId: $parentPathOrId,
+                                    name: $name,
+                                    primaryNodeType: $primaryNodeType,
+                                    properties: $properties,
+                                    mixins: $mixins
+                                ) {
+                                    addChildrenBatch(nodes: $children){
+                                        uuid
+                                    }
+                                    uuid
+                                    node {
+                                        name
+                                    }
+                                }
+                            }
+                        }
+        cy:command (K): wrap	{}
+            cy:xhr (K): POST https://digitall.jahia.localhost/modules/graphql
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "authorization": "Basic cm9vdDpyb290MTIzNA==",
+                          "Referer": "https://digitall.jahia.localhost/__cypress/iframes/cypress%2Fe2e%2Fui%2Ftranslate.cy.ts?browserFamily=chromium",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "accept": "*/*",
+                          "content-type": "application/json"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1",
+                          "Content-Encoding": "br",
+                          "Connection": "keep-alive",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:41 GMT",
+                          "content-type": "application/json;charset=UTF-8",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:log (K): Caught Graphql Mutation Error: {"graphQLErrors":[{"message":"javax.jcr.ItemExistsException: This node already exists: /sites/translateSite/home/area-main","locations":[{"line":3,"column":5}],"path":["jcr","addNode"],"extensions":{"classification":"DataFetchingException"},"errorType":"DataFetchingException"}],"clientErrors":[],"networkError":null,"message":"javax.jcr.ItemExistsException: This node already exists: /sites/translateSite/home/area-main"}
+        cy:command (K): apollo	Execute Graphql Mutation: mutation addNode($parentPathOrId: String!, $name: String!, $primaryNodeType: String!, $children: [InputJCRNode] = [], $properties: [InputJCRProperty], $mixins: [String] = []) {
+                            jcr(workspace: EDIT) {
+                                addNode(
+                                    parentPathOrId: $parentPathOrId,
+                                    name: $name,
+                                    primaryNodeType: $primaryNodeType,
+                                    properties: $properties,
+                                    mixins: $mixins
+                                ) {
+                                    addChildrenBatch(nodes: $children){
+                                        uuid
+                                    }
+                                    uuid
+                                    node {
+                                        name
+                                    }
+                                }
+                            }
+                        }
+        cy:command (K): wrap	{}
+            cy:xhr (K): POST https://digitall.jahia.localhost/modules/graphql
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "authorization": "Basic cm9vdDpyb290MTIzNA==",
+                          "Referer": "https://digitall.jahia.localhost/__cypress/iframes/cypress%2Fe2e%2Fui%2Ftranslate.cy.ts?browserFamily=chromium",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "accept": "*/*",
+                          "content-type": "application/json"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1",
+                          "Content-Encoding": "br",
+                          "Connection": "keep-alive",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:41 GMT",
+                          "content-type": "application/json;charset=UTF-8",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:log (K): Caught Graphql Mutation Error: {"graphQLErrors":[{"message":"javax.jcr.ItemExistsException: This node already exists: /sites/translateSite/home/area-main/translate-field-test","locations":[{"line":3,"column":5}],"path":["jcr","addNode"],"extensions":{"classification":"DataFetchingException"},"errorType":"DataFetchingException"}],"clientErrors":[],"networkError":null,"message":"javax.jcr.ItemExistsException: This node already exists: /sites/translateSite/home/area-main/translate-field-test"}
+        cy:command (K): apollo	Execute Graphql Mutation: mutation addNode($parentPathOrId: String!, $name: String!, $primaryNodeType: String!, $children: [InputJCRNode] = [], $properties: [InputJCRProperty], $mixins: [String] = []) {
+                            jcr(workspace: EDIT) {
+                                addNode(
+                                    parentPathOrId: $parentPathOrId,
+                                    name: $name,
+                                    primaryNodeType: $primaryNodeType,
+                                    properties: $properties,
+                                    mixins: $mixins
+                                ) {
+                                    addChildrenBatch(nodes: $children){
+                                        uuid
+                                    }
+                                    uuid
+                                    node {
+                                        name
+                                    }
+                                }
+                            }
+                        }
+        cy:command (K): wrap	{}
+            cy:xhr (K): POST https://digitall.jahia.localhost/modules/graphql
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "authorization": "Basic cm9vdDpyb290MTIzNA==",
+                          "Referer": "https://digitall.jahia.localhost/__cypress/iframes/cypress%2Fe2e%2Fui%2Ftranslate.cy.ts?browserFamily=chromium",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "accept": "*/*",
+                          "content-type": "application/json"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1",
+                          "Content-Encoding": "br",
+                          "Connection": "keep-alive",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:41 GMT",
+                          "content-type": "application/json;charset=UTF-8",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:log (K): Caught Graphql Mutation Error: {"graphQLErrors":[{"message":"javax.jcr.ItemExistsException: This node already exists: /sites/translateSite/contents/translate-field-test","locations":[{"line":3,"column":5}],"path":["jcr","addNode"],"extensions":{"classification":"DataFetchingException"},"errorType":"DataFetchingException"}],"clientErrors":[],"networkError":null,"message":"javax.jcr.ItemExistsException: This node already exists: /sites/translateSite/contents/translate-field-test"}
+        cy:command (K): runProvisioningScript	Run inline script towards server: https://digitall.jahia.localhost
+        cy:command (K): runProvisioningScript	Run inline script towards server: https://digitall.jahia.localhost
+            cy:log (K): Grant role(s) editor with principal type USER to translateEditor on node /sites/translateSite
+        cy:command (K): apollo	Execute Graphql Mutation: mutation grantRoles(
+                            $pathOrId: String!
+                            $roleNames: [String]!
+                            $principalName: String!
+                            $principalType: PrincipalType!
+                        ) {
+                            jcr {
+                                mutateNode(pathOrId: $pathOrId) {
+                                    grantRoles(
+                                        roleNames: $roleNames
+                                        principalType: $principalType
+                                        principalName: $principalName
+                                    )
+                                }
+                            }
+                        }
+        cy:command (K): wrap	{}
+            cy:xhr (K): POST https://digitall.jahia.localhost/modules/graphql
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "authorization": "Basic cm9vdDpyb290MTIzNA==",
+                          "Referer": "https://digitall.jahia.localhost/__cypress/iframes/cypress%2Fe2e%2Fui%2Ftranslate.cy.ts?browserFamily=chromium",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "accept": "*/*",
+                          "content-type": "application/json"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1",
+                          "Content-Encoding": "br",
+                          "Connection": "keep-alive",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:42 GMT",
+                          "content-type": "application/json;charset=UTF-8",
+                          "Vary": "Accept-Encoding"
+                        }
+
+    translate action tests -> can open translate dialog on page
+        cy:command (K): session	session-root
+        cy:command (K): Clear page
+        cy:command (K): sessions_manager
+        cy:command (K): session
+        cy:command (K): login	Login with root
+        cy:command (K): assert	Login result: expected **302** to equal **302**
+                        Actual: 	302
+                        Expected: 	302
+        cy:command (K): session
+        cy:request (K): /start
+                        Status: 200
+                        Request headers: <EMPTY>
+                        Request body: <EMPTY>
+                        Response headers: {
+                          "cache-control": "no-store",
+                          "content-encoding": "gzip",
+                          "content-type": "text/html;charset=UTF-8",
+                          "date": "Tue, 14 Apr 2026 19:28:42 GMT",
+                          "vary": "accept-encoding",
+                          "transfer-encoding": "chunked"
+                        }
+                        Response body: <html>
+                        <head>
+                            <meta charset="utf-8">
+                            <title>Jahia</title>
+                        
+                            <script type="text/javascript" src="/gwt/resources/i18n/messages_en.v3ea9a2bce778b8b4fee8c333ac432e50.js"></script>
+                        <meta name="gwt:property" content="locale=en"/><link type="text/css" href="/gwt/resources/css/gwt.min.vd871507d09b1b29fcd92189c3d4b73c0.css" rel="stylesheet"/>
+                        <link type="text/css" href="/modules/assets/javascript/codemirror/lib/codemirror.css" rel="stylesheet"/>
+                        <link type="text/css" href="/modules/assets/css/codemirror/theme/elegant.css" rel="stylesheet"/>
+                        <link type="text/css" href="/modules/jexperience/javascript/jexperience/edit-mode/css/wem-edit-style-anthracite.css" rel="stylesheet"/>
+                        <script type="text/javascript">
+                        var jahiaGWTParameters={"workspace":"default","uilang":"en","currentUserPath":"\/users\/root","langdisplayname":"English","serverDisplayableTimeZone":"Eastern Standard Time (GMT-5:00)","contextPath":"","areaAutoActivated":"true","dxVersion":"8.2.2.1","currentUser":"root","baseUrl":"\/cms\/render\/default\/en","editUrl":"\/cms\/edit\/default\/en","servletPath":"\/appshell","studioMaxDisplayableFileSize":"1048576","developmentMode":"true","modulesSourcesDiskPath":"\/var\/jahia\/sources","uilangdisplayname":"English","lang":"en","serviceEntryPoint":"\/gwt\/","pathInfo":"\/jahia\/dashboard"}; contextJsParameters=jahiaGWTParameters;
+                        </script>
+                        <script type="text/javascript" src="/modules/ckeditor/javascript/ckeditor.js"></script>
+                        <script type="text/javascript" src="/modules/assets/javascript/codemirror.jahia.min.js"></script>
+                        <script type="text/javascript" src="/modules/assets/javascript/atmosphere-min-2.2.12.js"></script>
+                        <script type="text/javascript" src="/modules/jquery/javascript/jquery-3.7.1.min.js"></script>
+                        <script type="text/javascript" src="/modules/CsrfServlet"></script>
+                        <script type="text/javascript" src="/modules/jexperience/javascript/jexperience/edit-mode/wem-edit-i18n.js"></script>
+                        <script type="text/javascript">
+                                const userFirstname = '';
+                                const userLastName = '';
+                                const currentUsername = 'root';
+                                const userFullname = userFirstname || userLastName ? userFirstname + ' ' + userLastName: currentUsername;
+                        
+                                Object.assign(window.contextJsParameters, {
+                                    // Theses values are for GWT only
+                                    siteKey: 'digitall',
+                                    siteUuid: 'e5a9ed0f-0876-45ed-86cc-559bc7804fb9',
+                        
+                                    version: '8.2.2.1',
+                                    contextPath: '',
+                                    user: {
+                                        username: currentUsername,
+                                        fullname: userFullname,
+                                        firstName: userFirstname,
+                                        lastName: userLastName,
+                                        email: '',
+                                        path: '\/users\/root'
+                                    },
+                                    valid: true,
+                                    config: {"environment":"","displayWorkflowCounter":"true","operatingMode":"development","maxUploadSize":100,"links":{"whatsNew":"https://academy.jahia.com/whats-new?dxversion=$dx-version&site=$site-servername","documentation":"https://academy.jahia.com/documentation/enduser/jahia/8"}},
+                                    site: 'digitall',
+                                    language: 'en',
+                                    urlbase: '/jahia'
+                                });
+                            </script>
+                            <script id='jahia-gwt' type='text/javascript' src='/gwt/empty/empty.nocache.js'></script>
+                        
+                        <link rel="stylesheet" type="text/css" media="screen"
+                                  href="/engines/jahia-anthracite/css/edit_en.v504f1dfab60eddf99dada5947cdf08d2.css"/>
+                            <style>
+                                @keyframes loadingBar {
+                                    0% {
+                                        width: 5%
+                                    }
+                        
+                                    20% {
+                                        width: 62%
+                                    }
+                        
+                                    44% {
+                                        width: 85%
+                                    }
+                        
+                                    80% {
+                                        width: 90%
+                                    }
+                        
+                                    100% {
+                                        width: 100%
+                                    }
+                                }
+                        
+                        
+                                @keyframes ripple {
+                                    22% {
+                                        opacity: 0;
+                                        transform: scale(1)
+                                    }
+                        
+                                    78% {
+                                        opacity: .15;
+                                        transform: scale(160)
+                                    }
+                        
+                                    100% {
+                                        opacity: 0;
+                                        transform: scale(180)
+                                    }
+                                }
+                        
+                        
+                                body {
+                                    margin: 0;
+                                    padding: 0;
+                                    overflow: hidden;
+                                    box-sizing: border-box;
+                                    font-family: sans-serif;
+                                }
+                        
+                                .jahia-loader {
+                                    width: 100vw;
+                                    height: 100vh;
+                                    background-color: #1f262a;
+                                    padding-top: 30vh;
+                                    font-size: 20px;
+                                    display: flex;
+                                    flex-direction: column;
+                                    align-items: center;
+                                    gap: 56px;
+                                    color: #fefefe;
+                                }
+                        
+                                .jahia-loading {
+                                    width: 300px;
+                                    height: 4px;
+                                    background-color: #60717b;
+                                }
+                        
+                                .jahia-loading_progress {
+                                    width: 300px;
+                                    height: 4px;
+                                    background-color: rgba(255, 255, 255, .3);
+                                    border-radius: 20px;
+                                    margin-bottom: 12px;
+                                    position: relative;
+                                }
+                        
+                                .jahia-loading_progress:after {
+                                    content: "";
+                                    position: absolute;
+                                    inset: 0;
+                                    display: block;
+                                    height: 4px;
+                                    background-color: #00A0E3;
+                                    border-radius: 20px;
+                                    animation: loadingBar 12s infinite;
+                                }
+                        
+                                .jahia-loading_text, .jahia-loading_started {
+                                    font-size: 14px;
+                                }
+                        
+                                .jahia-loading_count {
+                                    width: 300px;
+                                    position: relative;
+                                }
+                        
+                                .jahia-loading_timeout {
+                                    display: flex;
+                                    justify-content: center;
+                                    align-items: center;
+                                    flex-direction: column;
+                                }
+                        
+                                .jahia-loading_timeout p {
+                                    margin: 0 0 8px;
+                                }
+                        
+                                .jahia-button {
+                                    border: 1px solid currentColor;
+                                    padding: 8px 24px;
+                                    border-radius: 8px;
+                                    background-color: transparent;
+                                    color: currentColor;
+                                    cursor: pointer;
+                                    margin: 24px 0;
+                                    font-size: 16px;
+                                }
+                        
+                                .jahia-button:hover {
+                                    color: #00A0E3;
+                                }
+                        
+                                .is-hidden {
+                                    display: none !important;
+                                }
+                        
+                        
+                                .jahia-loader-ripple {
+                                    margin-left: -1px;
+                                    width: 10px;
+                                    height: 10px;
+                                    left: 50vw;
+                                    top: 50vh;
+                                    opacity: 0;
+                                    border-radius: 50%;
+                                    animation: ripple 1.8s;
+                                    animation-delay: .4s;
+                                    position: absolute;
+                                    background-color: #515151;
+                                }
+                        
+                        
+                                /* Error page */
+                                .page-error {
+                                    background-size: 95%;
+                                    background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjI1MyIgaGVpZ2h0PSI0OTgiIHZpZXdCb3g9IjAgMCAyMjUzIDQ5OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTAuMjQ0NDA0IDQ5MS40OTVWNi40NTQ2SDM0NC45MzJWMTA0LjE1MUgxMjMuMzk2VjE5Ni4zNDNIMzMxLjE3MlYyOTMuMzUxSDEyMy4zOTZWMzkzLjc5OUgzNDQuOTMyVjQ5MS40OTVIMC4yNDQ0MDRaTTgxOC45NTIgNDkxLjQ5NUg2NzkuOTc2TDU5Ni4wNCAzMzYuNjk1QzU4NS40OTEgMzE4LjgwNyA1NjguNzQ5IDMwOS44NjMgNTQ1LjgxNiAzMDkuODYzSDUwNy4yODhWNDkxLjQ5NUgzODIuNzZWNi40NTQ2SDYxMy45MjhDNjcyLjYzNyA2LjQ1NDYgNzE2LjY2OSAxOS4yOTczIDc0Ni4wMjQgNDQuOTgyNkM3NzUuODM3IDcwLjIwOTMgNzkwLjc0NCAxMDYuOTAzIDc5MC43NDQgMTU1LjA2M0M3OTAuNzQ0IDE5MS43NTYgNzgwLjY1MyAyMjIuOTQ1IDc2MC40NzIgMjQ4LjYzMUM3NDAuMjkxIDI3My44NTcgNzExLjg1MyAyOTAuODI4IDY3NS4xNiAyOTkuNTQzQzcwMy4xMzkgMzA1LjUwNSA3MjUuMzg0IDMyMy42MjMgNzQxLjg5NiAzNTMuODk1TDgxOC45NTIgNDkxLjQ5NVpNNTkzLjk3NiAyMTQuOTE5QzYyMS45NTUgMjE0LjkxOSA2NDEuOTA3IDIxMC41NjEgNjUzLjgzMiAyMDEuODQ3QzY2Ni4yMTYgMTkzLjEzMiA2NzIuNDA4IDE3OC45MTMgNjcyLjQwOCAxNTkuMTkxQzY3Mi40MDggMTM5LjAwOSA2NjYuMjE2IDEyNC41NjEgNjUzLjgzMiAxMTUuODQ3QzY0MS45MDcgMTA2LjY3MyA2MjEuOTU1IDEwMi4wODcgNTkzLjk3NiAxMDIuMDg3SDUwNS45MTJWMjE0LjkxOUg1OTMuOTc2Wk0xMjc3LjM5IDQ5MS40OTVIMTEzOC40MUwxMDU0LjQ4IDMzNi42OTVDMTA0My45MyAzMTguODA3IDEwMjcuMTkgMzA5Ljg2MyAxMDA0LjI1IDMwOS44NjNIOTY1LjcyNlY0OTEuNDk1SDg0MS4xOThWNi40NTQ2SDEwNzIuMzdDMTEzMS4wNyA2LjQ1NDYgMTE3NS4xMSAxOS4yOTczIDEyMDQuNDYgNDQuOTgyNkMxMjM0LjI3IDcwLjIwOTMgMTI0OS4xOCAxMDYuOTAzIDEyNDkuMTggMTU1LjA2M0MxMjQ5LjE4IDE5MS43NTYgMTIzOS4wOSAyMjIuOTQ1IDEyMTguOTEgMjQ4LjYzMUMxMTk4LjczIDI3My44NTcgMTE3MC4yOSAyOTAuODI4IDExMzMuNiAyOTkuNTQzQzExNjEuNTggMzA1LjUwNSAxMTgzLjgyIDMyMy42MjMgMTIwMC4zMyAzNTMuODk1TDEyNzcuMzkgNDkxLjQ5NVpNMTA1Mi40MSAyMTQuOTE5QzEwODAuMzkgMjE0LjkxOSAxMTAwLjM0IDIxMC41NjEgMTExMi4yNyAyMDEuODQ3QzExMjQuNjUgMTkzLjEzMiAxMTMwLjg1IDE3OC45MTMgMTEzMC44NSAxNTkuMTkxQzExMzAuODUgMTM5LjAwOSAxMTI0LjY1IDEyNC41NjEgMTExMi4yNyAxMTUuODQ3QzExMDAuMzQgMTA2LjY3MyAxMDgwLjM5IDEwMi4wODcgMTA1Mi40MSAxMDIuMDg3SDk2NC4zNVYyMTQuOTE5SDEwNTIuNDFaTTE1MjYuNzYgNDk3LjY4N0MxNDc3LjIyIDQ5Ny42ODcgMTQzNC4xIDQ4Ny41OTYgMTM5Ny40MSA0NjcuNDE1QzEzNjEuMTggNDQ2Ljc3NSAxMzMzLjIgNDE3Ljg3OSAxMzEzLjQ4IDM4MC43MjdDMTI5My43NSAzNDMuMTE2IDEyODMuODkgMjk5LjA4NCAxMjgzLjg5IDI0OC42MzFDMTI4My44OSAxOTguMTc3IDEyOTMuNzUgMTU0LjM3NSAxMzEzLjQ4IDExNy4yMjNDMTMzMy4yIDc5LjYxMTkgMTM2MS4xOCA1MC43MTU5IDEzOTcuNDEgMzAuNTM0NkMxNDM0LjEgMTAuMzUzMyAxNDc3LjIyIDAuMjYyNTk3IDE1MjYuNzYgMC4yNjI1OTdDMTU3Ni4yOSAwLjI2MjU5NyAxNjE5LjE4IDEwLjM1MzMgMTY1NS40MSAzMC41MzQ2QzE2OTIuMSA1MC43MTU5IDE3MjAuMDggNzkuNjExOSAxNzM5LjM1IDExNy4yMjNDMTc1OS4wNyAxNTQuMzc1IDE3NjguOTMgMTk4LjE3NyAxNzY4LjkzIDI0OC42MzFDMTc2OC45MyAyOTkuMDg0IDE3NTkuMDcgMzQzLjExNiAxNzM5LjM1IDM4MC43MjdDMTcxOS42MiA0MTcuODc5IDE2OTEuNDIgNDQ2Ljc3NSAxNjU0LjcyIDQ2Ny40MTVDMTYxOC40OSA0ODcuNTk2IDE1NzUuODMgNDk3LjY4NyAxNTI2Ljc2IDQ5Ny42ODdaTTE1MjYuNzYgNDAwLjY3OUMxNTYzLjQ1IDQwMC42NzkgMTU5Mi4xMiAzODcuODM2IDE2MTIuNzYgMzYyLjE1MUMxNjMzLjQgMzM2LjAwNyAxNjQzLjcyIDI5OC4xNjcgMTY0My43MiAyNDguNjMxQzE2NDMuNzIgMTk5LjA5NSAxNjMzLjE3IDE2MS40ODQgMTYxMi4wNyAxMzUuNzk5QzE1OTEuNDMgMTEwLjExMyAxNTYyLjk5IDk3LjI3MDYgMTUyNi43NiA5Ny4yNzA2QzE0OTAuMDYgOTcuMjcwNiAxNDYxLjQgMTEwLjExMyAxNDQwLjc2IDEzNS43OTlDMTQyMC4xMiAxNjEuMDI1IDE0MDkuOCAxOTguNjM2IDE0MDkuOCAyNDguNjMxQzE0MDkuOCAyOTguNjI1IDE0MjAuMTIgMzM2LjQ2NSAxNDQwLjc2IDM2Mi4xNTFDMTQ2MS40IDM4Ny44MzYgMTQ5MC4wNiA0MDAuNjc5IDE1MjYuNzYgNDAwLjY3OVpNMjI1Mi4wNSA0OTEuNDk1SDIxMTMuMDdMMjAyOS4xMyAzMzYuNjk1QzIwMTguNTggMzE4LjgwNyAyMDAxLjg0IDMwOS44NjMgMTk3OC45MSAzMDkuODYzSDE5NDAuMzhWNDkxLjQ5NUgxODE1Ljg1VjYuNDU0NkgyMDQ3LjAyQzIxMDUuNzMgNi40NTQ2IDIxNDkuNzYgMTkuMjk3MyAyMTc5LjEyIDQ0Ljk4MjZDMjIwOC45MyA3MC4yMDkzIDIyMjMuODQgMTA2LjkwMyAyMjIzLjg0IDE1NS4wNjNDMjIyMy44NCAxOTEuNzU2IDIyMTMuNzUgMjIyLjk0NSAyMTkzLjU3IDI0OC42MzFDMjE3My4zOCAyNzMuODU3IDIxNDQuOTUgMjkwLjgyOCAyMTA4LjI1IDI5OS41NDNDMjEzNi4yMyAzMDUuNTA1IDIxNTguNDggMzIzLjYyMyAyMTc0Ljk5IDM1My44OTVMMjI1Mi4wNSA0OTEuNDk1Wk0yMDI3LjA3IDIxNC45MTlDMjA1NS4wNSAyMTQuOTE5IDIwNzUgMjEwLjU2MSAyMDg2LjkzIDIwMS44NDdDMjA5OS4zMSAxOTMuMTMyIDIxMDUuNSAxNzguOTEzIDIxMDUuNSAxNTkuMTkxQzIxMDUuNSAxMzkuMDA5IDIwOTkuMzEgMTI0LjU2MSAyMDg2LjkzIDExNS44NDdDMjA3NSAxMDYuNjczIDIwNTUuMDUgMTAyLjA4NyAyMDI3LjA3IDEwMi4wODdIMTkzOS4wMVYyMTQuOTE5SDIwMjcuMDdaIiBmaWxsPSIjRkRGREZEIiBmaWxsLW9wYWNpdHk9IjAuNCIvPgo8L3N2Zz4K");
+                                    background-repeat: no-repeat;
+                                    background-position: center;
+                                    background-attachment: fixed;
+                                    display: flex;
+                                    flex: 1;
+                                    min-height: 100vh;
+                                    justify-content: center;
+                                    align-items: center;
+                                    background-color: #f0f0f0;
+                                }
+                        
+                                .page-error-wrapper {
+                                    width: 900px;
+                                    text-align: center;
+                                    padding: 120px 40px 40px 40px;
+                                }
+                        
+                                .page-error-description {
+                                    margin-bottom: var(--spacing-small);
+                                }
+                        
+                        
+                                .page-error-title {
+                                    font-weight: bold;
+                                    font-size: 1.75rem;
+                                    line-height: 2rem;
+                                    margin: 0 auto 40px;
+                                }
+                        
+                                .page-error-log {
+                                    text-align: left;
+                                    font-family: monospace;
+                                    line-height: 1.3rem;
+                                    margin: var(--spacing-huge) 0;
+                                    overflow: auto;
+                                    font-size: 14px;
+                                    padding: 16px;
+                                    white-space: pre-line;
+                                    background: #fff;
+                                    border: 1px solid #dadada;
+                                }
+                        
+                                .page-error-link {
+                                    color: var(--color-accent);
+                                }
+                        
+                                .page-error-link:hover {
+                                    color: var(--color-accent_dark)
+                                }
+                        
+                            </style>
+                        </head>
+                        
+                        <body>
+                        <div class="jahia-loader">
+                            <!-- Logo -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="176" height="80" viewBox="0 0 176 80" fill="none">
+                                <path
+                                        d="M10.6889 59.9247C10.6889 62.7674 9.56386 65.4942 7.56025 67.5074C5.55664 69.5207 2.83795 70.6561 0 70.665V80C2.62753 79.9956 5.22848 79.4729 7.65432 78.4616C10.0802 77.4504 12.2834 75.9704 14.1383 74.1062C15.9931 72.2421 17.4632 70.0302 18.4647 67.5969C19.4662 65.1637 19.9793 62.5566 19.975 59.9247V25.1276C16.7135 26.5394 13.6025 28.2769 10.6889 30.3137V59.9247ZM156.025 20.0084C153.335 19.8981 150.651 20.3336 148.134 21.2886C145.616 22.2435 143.318 23.6984 141.376 25.5656C139.434 27.4329 137.889 29.6741 136.833 32.1545C135.778 34.635 135.233 37.3036 135.233 40C135.233 42.6964 135.778 45.365 136.833 47.8455C137.889 50.3259 139.434 52.5671 141.376 54.4344C143.318 56.3016 145.616 57.7565 148.134 58.7114C150.651 59.6664 153.335 60.1019 156.025 59.9916H160.2V50.6901H156.025C153.911 50.6901 151.844 50.0621 150.087 48.8857C148.329 47.7092 146.959 46.037 146.15 44.0806C145.341 42.1242 145.129 39.9714 145.541 37.8945C145.954 35.8176 146.972 33.9098 148.467 32.4124C149.962 30.915 151.866 29.8953 153.94 29.4822C156.013 29.0691 158.162 29.2811 160.116 30.0915C162.069 30.9018 163.738 32.2742 164.913 34.0349C166.087 35.7956 166.714 37.8657 166.714 39.9833V59.9916H176V39.9833C176 37.3573 175.483 34.7571 174.479 32.3315C173.475 29.9058 172.003 27.7023 170.147 25.847C168.292 23.9918 166.09 22.5211 163.667 21.5193C161.243 20.5174 158.647 20.004 156.025 20.0084ZM92.8601 20.0084C89.084 20.0016 85.3855 21.0817 82.2046 23.12V0H72.9186V59.9916H82.2046V39.9833C82.3572 37.2515 83.5481 34.6819 85.5328 32.8021C87.5175 30.9222 90.1453 29.8747 92.8768 29.8747C95.6083 29.8747 98.2361 30.9222 100.221 32.8021C102.205 34.6819 103.396 37.2515 103.549 39.9833V59.9916H112.835V39.9833C112.835 37.3573 112.318 34.7571 111.314 32.3315C110.31 29.9058 108.838 27.7023 106.983 25.847C105.127 23.9918 102.925 22.5211 100.502 21.5193C98.0784 20.5174 95.4817 20.004 92.8601 20.0084ZM119.816 59.9916H129.102V30.3137C126.184 28.2838 123.074 26.5467 119.816 25.1276V59.9916ZM45.9624 20.0084C43.2728 19.8981 40.5886 20.3336 38.0712 21.2886C35.5538 22.2435 33.2551 23.6984 31.3131 25.5656C29.3711 27.4329 27.8259 29.6741 26.7704 32.1545C25.7149 34.635 25.1708 37.3036 25.1708 40C25.1708 42.6964 25.7149 45.365 26.7704 47.8455C27.8259 50.3259 29.3711 52.5671 31.3131 54.4344C33.2551 56.3016 35.5538 57.7565 38.0712 58.7114C40.5886 59.6664 43.2728 60.1019 45.9624 59.9916H50.1378V50.6901H45.9624C43.8483 50.6901 41.7817 50.0621 40.024 48.8857C38.2662 47.7092 36.8962 46.037 36.0871 44.0806C35.2781 42.1242 35.0664 39.9714 35.4789 37.8945C35.8913 35.8176 36.9093 33.9098 38.4042 32.4124C39.8991 30.915 41.8037 29.8953 43.8771 29.4822C45.9506 29.0691 48.0997 29.2811 50.0529 30.0915C52.006 30.9018 53.6754 32.2742 54.85 34.0349C56.0245 35.7956 56.6514 37.8657 56.6514 39.9833V59.9916H65.9374V39.9833C65.9374 37.3573 65.4204 34.7571 64.4162 32.3315C63.412 29.9058 61.9401 27.7023 60.0848 25.847C58.2295 23.9918 56.0272 22.5211 53.604 21.5193C51.1807 20.5174 48.584 20.004 45.9624 20.0084Z"
+                                        fill="white"/>
+                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                      d="M19.9525 16.6223V10.6666H10.6665V21.34C13.6171 19.4965 16.7245 17.9178 19.9525 16.6223ZM119.794 16.6223V10.6666H129.08V21.34C126.122 19.5096 123.016 17.9315 119.794 16.6223Z"
+                                      fill="#00A0E3"/>
+                            </svg>
+                            <!-- Loading in progress -->
+                            <div class="jahia-loading">
+                                <div class="jahia-loading_progress"></div>
+                                <span class="jahia-loading_text">Loading Jahia</span>
+                            </div>
+                            <!-- Loading count -->
+                            <div class="jahia-loading_count is-hidden">
+                                <span class="jahia-loading_started"><span class="jahia-loading-loaded"></span> Loaded (<span class="jahia-loading-count"></span>)</span>
+                            </div>
+                            <!-- Loading Timeout -->
+                            <div class="jahia-loading_timeout is-hidden">
+                                <p>Jahia is taking longer than anticipated to load.</p><p> You have the option to continue waiting or to refresh the page</p><button class="jahia-button" onClick="window.location.reload()">
+                                    Reload</button>
+                            </div>
+                        
+                            <div class="jahia-loader-ripple"></div>
+                        </div>
+                        <div class="page-error is-hidden">
+                            <main class="page-error-wrapper">
+                                <h1 class="page-error-title">Something wrong happened</h1>
+                                <p>An error occurred, please report this issue to your administrator.</p><pre class="page-error-log">
+                                </pre>
+                            </main>
+                        </div>
+                        
+                        <div id="reactComponent"></div>
+                        
+                        <div id="gwt-root"></div>
+                        
+                        
+                        <script type="text/javascript"
+                                src="/engines/jahia-anthracite/js/dist/build/anthracite-min.v0576084f411af3770df92ebb1cdb9808.js"></script>
+                        <script type="text/javascript">
+                            setTimeout(() => {
+                                // in case loader still present after 1 minute, display reload message
+                                if (document.querySelector('.jahia-loading_timeout')) {
+                                    document.querySelector('.jahia-loading_timeout').classList.remove('is-hidden');
+                                }
+                            }, 60000)
+                            window.appShell = {
+                                remotes: {},
+                                scripts: ["/modules/tags/javascript/apps/tagmanager.js","/modules/jahia-user-entries/configs/jahiaUserEntries.js?v=1776194922342","/modules/linkchecker/javascript/apps/linkchecker.js","/modules/event/javascript/apps/event-module-register.js","/modules/jahia-authentication/javascript/apps/register.js","/modules/jexperience/configs/jexperience.js?v=1776194922342","/modules/kibana-dashboards-provider/configs/kibanaDashboardsProvider.js?v=1776194922342","/modules/jahia-ui-root/configs/jahiaui.js?v=1776194922342","/modules/jcontent/configs/jcontent.js?v=1776194922342","/modules/site-settings-publication/javascript/apps/sitesettingspublication.js","/modules/se-extra-views/javascript/apps/registerExtensions.js","/modules/bootstrap4-components/javascript/apps/registerExtensions.js","/modules/importContentFromJson/configs/importContentFromJson.js?v=1776194922342","/modules/site-settings-error-pages/javascript/apps/register.js","/modules/qa-module/javascript/apps/qa-module-register.js"],
+                                targetId: "reactComponent",
+                            };
+                            window.jahiaCommons = function (module) {
+                                if (jahia.modules[module]) {
+                                    return (jahia.modules[module]);
+                                } else {
+                                    console.error("Cannot find module", module)
+                                }
+                            }
+                        </script>
+                        <script src="/modules/jahia-user-entries/javascript/apps/remoteEntry.vc85c7d6ea2ad54137a4328e7f47fdf34.js"></script>
+                        <script src="/modules/serverSettings/javascript/apps/remoteEntry.v2ff09507dc8563ac0b8de675ad723759.js"></script>
+                        <script src="/modules/external-provider-users-groups/javascript/apps/remoteEntry.v4d35eb25bcf4a7037347c5dbc4bcd88a.js"></script>
+                        <script src="/modules/jahia-developer-tools/javascript/apps/remoteEntry.v36cb376742b4ff83014148afabeff353.js"></script>
+                        <script src="/modules/security-filter-tools/javascript/apps/remoteEntry.v41a9d3fe0d96da8d2b8dbc086e8995ed.js"></script>
+                        <script src="/modules/serverSettings-ee/javascript/apps/remoteEntry.v2b6c90c576e1f57d754702834306a59c.js"></script>
+                        <script src="/modules/jexperience/javascript/apps/remoteEntry.vb03caef4289179c4e9b8ab3a7c99d0f5.js"></script>
+                        <script src="/modules/kibana-dashboards-provider/javascript/apps/remoteEntry.va014b38f791ab7f656fca7fe7cab3415.js"></script>
+                        <script src="/modules/sitemap/javascript/apps/remoteEntry.v524835f56e9f8f68d85622eb16c3a816.js"></script>
+                        <script src="/modules/module-management-community/javascript/apps/remoteEntry.veb3db0ffef365d6f1b6c9802aee1ab6f.js"></script>
+                        <script src="/modules/graphql-dxm-provider/javascript/apps/remoteEntry.v934b33430f91cf8f035156b5f012bcec.js"></script>
+                        <script src="/modules/jahia-administration/javascript/apps/remoteEntry.vbafe9958d79343d722091bcb7e0b474a.js"></script>
+                        <script src="/modules/jahia-dashboard/javascript/apps/remoteEntry.vd078d6969ecf07cbfbe1e483a37d9ab9.js"></script>
+                        <script src="/modules/jahia-page-composer/javascript/apps/remoteEntry.vd283bd5b8798206ee9b31248dda3014b.js"></script>
+                        <script src="/modules/jahia-repository-explorer/javascript/apps/remoteEntry.vc5c421f7c73bbe6c6dd8ef0d755c84d0.js"></script>
+                        <script src="/modules/jahia-ui-root/javascript/apps/remoteEntry.vc7de3a74cecaffd37cdc54303c60caff.js"></script>
+                        <script src="/modules/jcontent/javascript/apps/remoteEntry.vdb0bb5651c9984eaa97cb0e3e88dbd1c.js"></script>
+                        <script src="/modules/jexperience-dashboards/javascript/apps/remoteEntry.v73d03c0082e8c29a07bf301b07d5c680.js"></script>
+                        <script src="/modules/module-manager/javascript/apps/remoteEntry.vc4752755a1e562bab6e05bb6ce7855dc.js"></script>
+                        <script src="/modules/personal-api-tokens/javascript/apps/remoteEntry.v65cf1c98f78ffa00f1d013c0c38d1bd7.js"></script>
+                        <script src="/modules/rolesmanager/javascript/apps/remoteEntry.v9075403b10f1bdaefb5b1c4267ae6e84.js"></script>
+                        <script src="/modules/site-settings-seo/javascript/apps/remoteEntry.v7340a0c97f0d2989ed47b85e6c8a95fb.js"></script>
+                        <script src="/modules/siteSettings/javascript/apps/remoteEntry.vcc615f87c0343733e50dee9b195e3a5c.js"></script>
+                        <script src="/modules/codemirror-editor/javascript/apps/remoteEntry.v79aaa37b989dddb976a93d923fcf40b4.js"></script>
+                        <script src="/modules/importContentFromJson/javascript/apps/remoteEntry.vf7d3f817a98b6405eec040446b630ad0.js"></script>
+                        <script src="/modules/forms-core/javascript/apps/remoteEntry.v4741c461205900a220c99553e43b4c00.js"></script>
+                        <script src="/modules/ai-assisted-translations/javascript/apps/remoteEntry.vb162420b0740561e3ea8c4c1462a4fa1.js"></script>
+                        <script src="/modules/app-shell/javascript/apps/appshell.v7009eb70d95d4415510cfaebaab5318e.js"></script>
+                        </body>
+        cy:command (K): its	.status
+        cy:command (K): assert	expected **200** to equal **200**
+                        Actual: 	200
+                        Expected: 	200
+        cy:command (K): Clear page
+      cy:intercept (K): Method: POST
+                        Matcher: "**/modules/graphql"
+                        Mocked Response: function (req) {
+                                    var _a;
+                                    // Apollo sends JSON; guard against the body arriving as a raw string
+                                    var body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+                                    var operationName = (_a = body[0]) === null || _a === void 0 ? void 0 : _a.operationName;
+                                    if (operationName === 'TranslateNode') {
+                                        req.alias = 'translateNodeCall';
+                                        req.reply({ fixture: 'graphql/translateNode.json' });
+                                    }
+                                    else if (operationName === 'SuggestTranslationForLanguage') {
+                                        req.alias = 'suggestTranslationCall';
+                                        req.reply({ fixture: 'graphql/suggestTranslationForLanguage.json' });
+                                    }
+                                }
+            cy:log (K): Checking we can open teh dialog to translate all properties
+        cy:command (K): visit	/jahia/jcontent/translateSite/fr/pages/home
+          cons:log (K): Initializing remotes ..
+          cons:log (K): Bootstrapping application ..
+         cons:warn (!): Unsatisfied version 18.3.1 from @jahia/jcontent of shared singleton module react (required ^16.10.2)
+         cons:warn (!): Unsatisfied version 4.0.0 from @jahia/jcontent of shared singleton module @apollo/react-components (required ^3.1.5)
+         cons:warn (!): Unsatisfied version 5.0.1 from @jahia/jcontent of shared singleton module redux (required ^4.0.5)
+         cons:warn (!): Unsatisfied version 9.2.0 from @jahia/jcontent of shared singleton module react-redux (required ^8.0.5)
+         cons:warn (!): Unsatisfied version 2.17.3 from @jahia/jcontent of shared singleton module @jahia/moonstone (required ^1.0.0)
+            cy:xhr (K): POST https://digitall.jahia.localhost/modules/CsrfServlet
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "CSRFTOKEN": "YOXW-WYXZ-M7HS-PQB6-023G-G9G0-VM6S-9A4J",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1",
+                          "Content-Encoding": "br",
+                          "Connection": "keep-alive",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:42 GMT",
+                          "content-type": "application/json;charset=US-ASCII",
+                          "Vary": "Accept-Encoding"
+                        }
+         cons:warn (!): Unsatisfied version 18.3.1 from @jahia/jcontent of shared singleton module react (required ^16.10.2)
+         cons:warn (!): Unsatisfied version 9.2.0 from @jahia/jcontent of shared singleton module react-redux (required ^7.2.8)
+         cons:warn (!): Unsatisfied version 2.17.3 from @jahia/jcontent of shared singleton module @jahia/moonstone (required ^1.0.0)
+         cons:warn (!): Unsatisfied version 18.3.1 from @jahia/jcontent of shared singleton module react (required ^16.10.2)
+         cons:warn (!): Unsatisfied version 18.3.1 from @jahia/jcontent of shared singleton module react (required ^16.13.1)
+         cons:warn (!): Unsatisfied version 9.2.0 from @jahia/jcontent of shared singleton module react-redux (required ^7.2.1)
+         cons:warn (!): Unsatisfied version 5.0.1 from @jahia/jcontent of shared singleton module redux (required ^4.0.5)
+         cons:warn (!): Unsatisfied version 2.17.3 from @jahia/jcontent of shared singleton module @jahia/moonstone (required ^1.5.3)
+         cons:warn (!): Unsatisfied version 9.2.0 from @jahia/jcontent of shared singleton module react-redux (required ^7.2.0)
+         cons:warn (!): Unsatisfied version 5.3.4 from @jahia/jcontent of shared singleton module react-router (required ^7.5.0)
+         cons:warn (!): Unsatisfied version 9.2.0 from @jahia/jcontent of shared singleton module react-redux (required >=7.2.0 <9.0.0-0)
+         cons:warn (!): No satisfying version (^3.0.6) of shared module @jahia/react-material found in shared scope default.
+                        Available versions: 3.0.5 from @jahia/jcontent
+         cons:warn (!): Unsatisfied version 5.3.4 from @jahia/jcontent of shared singleton module react-router-dom (required ^7.5.0)
+         cons:warn (!): Unsatisfied version 9.2.0 from @jahia/jcontent of shared singleton module react-redux (required >=7.2.4 <9.0.0-0)
+         cons:warn (!): Unsatisfied version 11.18.6 from @jahia/jcontent of shared singleton module react-i18next (required ^14.1.2)
+         cons:warn (!): No satisfying version (^3.0.6) of shared module @jahia/react-material found in shared scope default.
+                        Available versions: 3.0.5 from @jahia/jcontent
+         cons:warn (!): No satisfying version (^1.11.13) of shared module dayjs found in shared scope default.
+                        Available versions: 1.10.7 from @jahia/app-shell, 1.11.7 from @jahia/jcontent, 1.11.4 from @jahia/personal-api-tokens
+         cons:warn (!): Unsatisfied version 19.9.2 from @jahia/rolesManager of shared singleton module i18next (required ^23.5.1)
+         cons:warn (!): Unsatisfied version 18.3.1 from @jahia/jcontent of shared singleton module react (required ^16.10.2)
+         cons:warn (!): Unsatisfied version 9.2.0 from @jahia/jcontent of shared singleton module react-redux (required ^7.2.0)
+         cons:warn (!): Unsatisfied version 18.3.1 from @jahia/jcontent of shared singleton module react (required ^16.13.0)
+         cons:warn (!): Unsatisfied version 9.2.0 from @jahia/jcontent of shared singleton module react-redux (required ^7.2.0)
+         cons:warn (!): Unsatisfied version 2.17.3 from @jahia/jcontent of shared singleton module @jahia/moonstone (required ^1.0.0)
+         cons:warn (!): Unsatisfied version 5.0.1 from @jahia/jcontent of shared singleton module redux (required ^4.0.0)
+         cons:warn (!): Unsatisfied version 1.1.17 from @jahia/jcontent of shared singleton module @jahia/data-helper (required =1.0.12)
+         cons:warn (!): Unsatisfied version 18.3.1 from @jahia/jcontent of shared singleton module react (required ^16.10.2)
+         cons:warn (!): Unsatisfied version 9.2.0 from @jahia/jcontent of shared singleton module react-redux (required ^7.2.0)
+         cons:warn (!): Unsatisfied version 2.17.3 from @jahia/jcontent of shared singleton module @jahia/moonstone (required ^1.1.0)
+         cons:warn (!): Unsatisfied version 1.1.17 from @jahia/jcontent of shared singleton module @jahia/data-helper (required =1.0.12)
+         cons:warn (!): Unsatisfied version 18.3.1 from @jahia/jcontent of shared singleton module react (required ^16.13.1)
+         cons:warn (!): Unsatisfied version 18.3.1 from @jahia/jcontent of shared singleton module react (required ^19.2.0)
+         cons:warn (!): Unsatisfied version 11.18.6 from @jahia/jcontent of shared singleton module react-i18next (required ^16.0.0)
+         cons:warn (!): Unsatisfied version 18.3.1 from @jahia/jcontent of shared singleton module react (required ^16.13.0)
+         cons:warn (!): Unsatisfied version 18.3.1 from @jahia/jcontent of shared singleton module react-dom (required ^16.13.0)
+         cons:warn (!): Unsatisfied version 2.17.3 from @jahia/jcontent of shared singleton module @jahia/moonstone (required ^1.4.1)
+         cons:warn (!): Unsatisfied version 9.2.0 from @jahia/jcontent of shared singleton module react-redux (required >=7.2.0 <9.0.0-0)
+         cons:warn (!): Unsatisfied version 11.18.6 from @jahia/jcontent of shared singleton module react-i18next (required ^14.1.2)
+         cons:warn (!): No satisfying version (^3.0.6) of shared module @jahia/react-material found in shared scope default.
+                        Available versions: 3.0.5 from @jahia/jcontent
+         cons:warn (!): Unsatisfied version 9.2.0 from @jahia/jcontent of shared singleton module react-redux (required >=8.1.1 <9.0.0-0)
+         cons:warn (!): Unsatisfied version 11.18.6 from @jahia/jcontent of shared singleton module react-i18next (required ^13.0.2)
+         cons:warn (!): No satisfying version (^1.11.9) of shared module dayjs found in shared scope default.
+                        Available versions: 1.10.7 from @jahia/app-shell, 1.11.7 from @jahia/jcontent, 1.11.4 from @jahia/personal-api-tokens
+         cons:warn (!): Unsatisfied version 18.3.1 of shared singleton module react (required ^16.13.1)
+         cons:warn (!): Unsatisfied version 9.2.0 from @jahia/jcontent of shared singleton module react-redux (required >=7.2.0 <9.0.0-0)
+         cons:warn (!): Unsatisfied version 1.1.17 from @jahia/jcontent of shared singleton module @jahia/data-helper (required =1.1.14)
+         cons:warn (!): Unsatisfied version 9.2.0 from @jahia/jcontent of shared singleton module react-redux (required >=7.2.0 <9.0.0-0)
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/app-shell/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "dee6f30fb2be79da130b4c90c851ff7b.194ac349ae3",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:43 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:43 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Tue, 28 Jan 2025 09:18:36 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+         cons:warn (!): Warning: fragment with name SiteInfo already exists.
+                        graphql-tag enforces all fragment names across your application to be unique; read more about
+                        this in the docs: http://dev.apollodata.com/core/fragments.html#unique-names
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/tags/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "e96793282a49375c370b7dc2f22a49af.17727330708",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:44 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:44 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Thu, 21 Jan 2021 23:06:31 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/linkchecker/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "342fe21a5719ff1520ca26da730f9f8e.17c940831b3",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:44 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:44 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Mon, 18 Oct 2021 15:32:17 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/event/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "85f11852e3f66d021f9b8892761b9e04.18f28c814c3",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:44 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:44 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Mon, 29 Apr 2024 07:35:52 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/jahia-authentication/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "98522e97ff73a44806d83c950da2cbdf.18dc6c07550",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:44 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:44 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Tue, 20 Feb 2024 13:41:58 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/site-settings-publication/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "df1bf370eebaac8e4f8a356db4c8411b.19915484523",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:44 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:44 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Thu, 04 Sep 2025 15:11:21 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/se-extra-views/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "d6e3c7047d533fca89d5ac21b00c4fcf.19d0bbc2ea1",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:44 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:44 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Fri, 20 Mar 2026 14:52:55 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (!): GET https://digitall.jahia.localhost/modules/bootstrap4-components/javascript/locales/en.json
+                        Status: 404
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "no-cache, no-store, must-revalidate, proxy-revalidate, max-age=0",
+                          "content-encoding": "gzip",
+                          "pragma": "no-cache",
+                          "Connection": "keep-alive",
+                          "expires": "Wed, 09 May 1979 05:30:00 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:44 GMT",
+                          "content-type": "text/html;charset=UTF-8",
+                          "Vary": "accept-encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/site-settings-error-pages/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "561ad502ffc0740d999208798718a97c.19d2649c748",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:44 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:44 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Wed, 25 Mar 2026 18:37:42 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+          cons:log (K): Register kibana target selector
+        cy:command (K): get	.moonstone-header button[data-sel-role="requestTranslationAiAssistedForOnePage"]
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/personal-api-tokens/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "efb63d490c9a7311d155782af272eb8e.19cbcebb526",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Thu, 05 Mar 2026 07:34:49 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/kibana-dashboards-provider/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "4f0a376a50b179adc90e7a6c248474d9.19c579209fc",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Fri, 13 Feb 2026 15:15:14 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): POST https://digitall.jahia.localhost/gwt/contentManager.gwt?lang=en&site=e5a9ed0f-0876-45ed-86cc-559bc7804fb9&workspace=default&windowId=1409020613
+                        Status: 200
+                        Request headers: {
+                          "X-GWT-Permutation": "E664CE175BDCC1552654CD2CCB831ED6",
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "X-GWT-Module-Base": "https://digitall.jahia.localhost/gwt/empty/",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "Content-Type": "text/x-gwt-rpc; charset=UTF-8"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, max-age=2678400",
+                          "content-encoding": "gzip",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-disposition": "attachment",
+                          "content-type": "application/json;charset=utf-8",
+                          "Vary": "Accept-Encoding"
+                        }
+          cons:log (K): %c External Provider Users Groups routes have been registered,
+                        color: #3c8cba
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/external-provider-users-groups/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "31213858aafdbac12e36893985800f71.19330a51a86",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Fri, 15 Nov 2024 16:25:46 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/jahia-administration/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "7d98f1790bc0aa185e6be3dbb6010eac.19b0748f75f",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Wed, 10 Dec 2025 08:03:01 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/site-settings-seo/javascript/locales/en.v683f58b8af3650ed3f8142d533a31fd1.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "0927231f1a2d6077a929970ab0ceed24.199f0debbf5",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Fri, 17 Oct 2025 06:32:33 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+          cons:log (K): %c Site Settings SEO registered routes,
+                        color: #3c8cba
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/sitemap/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "b0c942cbe64963d8ca4c2bd484c17cdc.197bfbc9805",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Mon, 30 Jun 2025 07:28:17 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+          cons:log (K): %c Sitemap registered routes,
+                        color: #3c8cba
+          cons:log (K): Picker configuration for Content editor >= 4.1
+          cons:log (K): %c jExperience is activated,
+                        color: #3c8cba
+          cons:log (K): %c GraphQL Jahia Provider routes have been registered,
+                        color: #3c8cba
+          cons:log (K): %c Module Manager routes have been registered,
+                        color: #3c8cba
+          cons:log (K): %c Roles manager routes have been registered,
+                        color: #3c8cba
+          cons:log (K): %c Site Settings routes have been registered,
+                        color: #3c8cba
+          cons:log (K): %c Forms Core routes have been registered,
+                        color: #3c8cba
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/jexperience/javascript/locales/en.vc10ac71ef69f9c54d56139c9a5a574f1.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "02bc55751338edeb3a5a88a9e52a1caf.19bd5a3f970",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Mon, 19 Jan 2026 09:44:11 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/serverSettings/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "8cc384010d9de4239f5d1017b1acc2a2.19473ea07ed",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Fri, 17 Jan 2025 10:58:24 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/security-filter-tools/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "11daa189ac8ee1a2e534aa4a47873715.18ecef66b92",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Thu, 11 Apr 2024 21:00:39 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/serverSettings-ee/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "b93d8f46414a66f7e1bc84fb81df91f8.194f979d6a6",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Wed, 12 Feb 2025 09:24:59 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/graphql-dxm-provider/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "ee54cb8bed0ab562eb190b38600cd30a.19c6c285789",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Tue, 17 Feb 2026 15:11:49 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+          cons:log (K): %c Server Settings EE routes have been registered,
+                        color: #3c8cba
+         cons:info (K): %c jahiaUiRoot is activated,
+                        color: #3c8cba
+          cons:log (K): %c Import Content From JSON Component registered,
+                        color: #3c8cba
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/module-manager/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "0ded03f0e8a4fe95c0821ab992430fe0.19b03d1a32b",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Tue, 09 Dec 2025 15:53:49 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/rolesmanager/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "62bfda678ededc1d7d664c76248952eb.19b46d65ff7",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Mon, 22 Dec 2025 16:13:33 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/siteSettings/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "52ceaa3a5173d521625f7d1a2945e4f8.19b12354adc",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Fri, 12 Dec 2025 10:57:21 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/forms-core/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "b9ed4be5056bd9fe1a18d7c4b995462b.19d20d4a947",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Tue, 24 Mar 2026 17:11:41 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/module-management-community/javascript/locales/en.v27bdef35598aea57bb7b4c42566585e5.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "287b9751a9e7688ad94174b7e148f66d.19c9f71336e",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Fri, 27 Feb 2026 14:12:02 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/importContentFromJson/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "98cc0abad4ba5f104e19abdc7cff1c15.19cb9cabc97",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Wed, 04 Mar 2026 16:59:57 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+          cons:log (K): %c moduleManagementCommunity registered routes,
+                        color: #3c8cba
+            cy:xhr (K): POST https://digitall.jahia.localhost/gwt/contentManager.gwt?lang=fr&site=/sites/translateSite&workspace=default&windowId=1409020613
+                        Status: 200
+                        Request headers: {
+                          "X-GWT-Permutation": "E664CE175BDCC1552654CD2CCB831ED6",
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "X-GWT-Module-Base": "https://digitall.jahia.localhost/gwt/empty/",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "Content-Type": "text/x-gwt-rpc; charset=UTF-8"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, max-age=2678400",
+                          "content-encoding": "gzip",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-disposition": "attachment",
+                          "content-type": "application/json;charset=utf-8",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/jcontent/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "b04ee32909fa76165c71f175c024c925.19bb1d2d408",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Mon, 12 Jan 2026 10:49:02 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): POST https://digitall.jahia.localhost/gwt/contentManager.gwt?lang=fr&site=/sites/translateSite&workspace=default&windowId=1409020613
+                        Status: 200
+                        Request headers: {
+                          "X-GWT-Permutation": "E664CE175BDCC1552654CD2CCB831ED6",
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "X-GWT-Module-Base": "https://digitall.jahia.localhost/gwt/empty/",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "Content-Type": "text/x-gwt-rpc; charset=UTF-8"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, max-age=2678400",
+                          "content-encoding": "gzip",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-disposition": "attachment",
+                          "content-type": "application/json;charset=utf-8",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/jahia-ui-root/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "8d2be4b8cd79f5b4cb592c6cafd5598f.19b07335f2f",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Wed, 10 Dec 2025 07:39:25 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/jahia-dashboard/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "382cb570e62bb3f08680481323454349.19b46730f77",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Mon, 22 Dec 2025 14:25:04 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/jahia-user-entries/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "7c06eaed5936aa8d3e90ec884540453b.18ed198178d",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Fri, 12 Apr 2024 09:16:29 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/jahia-page-composer/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "3707a064dbf2d806f55af19197a4dcb7.19b043b8c18",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Tue, 09 Dec 2025 17:49:30 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/jahia-developer-tools/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "43d63d4b13747baef60b4c955ef46bce.1889c82402b",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Thu, 08 Jun 2023 19:36:01 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/jahia-repository-explorer/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "cb347450b041cc1bfffbacc5c1e22b12.19b0748f4b8",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:45 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:45 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Wed, 10 Dec 2025 08:03:00 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+         cons:warn (!): The property `label` is deprecated in the Dropdown component. Use `placeholder` to show text when no value is selected; otherwise, the label for the selected value is automatically displayed.
+         cons:warn (!): The property `label` is deprecated in the Dropdown component. Use `placeholder` to show text when no value is selected; otherwise, the label for the selected value is automatically displayed.
+         cons:warn (!): The property `label` is deprecated in the Dropdown component. Use `placeholder` to show text when no value is selected; otherwise, the label for the selected value is automatically displayed.
+         cons:warn (!): The property `label` is deprecated in the Dropdown component. Use `placeholder` to show text when no value is selected; otherwise, the label for the selected value is automatically displayed.
+        cy:command (K): assert	expected **<button.moonstone-button.moonstone-button_default.moonstone-button_ghost.moonstone-icon.alignCenter>** to exist in the DOM
+                        Actual: 	"<button.moonstone-button.moonstone-button_default.moonstone-button_ghost.moonstone-icon.alignCenter>"
+                        Expected: 	"<button.moonstone-button.moonstone-button_default.moonstone-button_ghost.moonstone-icon.alignCenter>"
+        cy:command (K): click
+            cy:xhr (K): POST https://digitall.jahia.localhost/modules/CsrfServlet
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "CSRFTOKEN": "YOXW-WYXZ-M7HS-PQB6-023G-G9G0-VM6S-9A4J",
+                          "Referer": "https://digitall.jahia.localhost/cms/editframe/default/fr/sites/translateSite/home.html?redirect=false",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1",
+                          "Content-Encoding": "br",
+                          "Connection": "keep-alive",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:46 GMT",
+                          "content-type": "application/json;charset=US-ASCII",
+                          "Vary": "Accept-Encoding"
+                        }
+            cy:xhr (K): GET https://digitall.jahia.localhost/modules/ai-assisted-translations/javascript/locales/en.json
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "Referer": "https://digitall.jahia.localhost/jahia/jcontent/translateSite/fr/pages/home",
+                          "X-Requested-With": "XMLHttpRequest",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/147.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1, public, max-age=2678400",
+                          "Content-Encoding": "br",
+                          "etag": "a5d7b1bb4ae851904c8de6056973658f.19d8d74469e",
+                          "Connection": "keep-alive",
+                          "expires": "Fri, 15 May 2026 05:58:46 GMT",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 14 Apr 2026 19:28:46 GMT",
+                          "content-type": "application/json",
+                          "last-modified": "Tue, 14 Apr 2026 19:25:00 GMT",
+                          "Vary": "Accept-Encoding"
+                        }
+        cy:command (K): get	div[data-sel-role='translate-language-dialog']
+        cy:command (K): assert	expected **<div.jss22.jss8>** to be **visible**
+        cy:command (K): get	.moonstone-dropdown_container[data-sel-role="from-language-selector"]
+        cy:command (K): click
+         cons:warn (!): The property `label` is deprecated in the Dropdown component. Use `placeholder` to show text when no value is selected; otherwise, the label for the selected value is automatically displayed.
+        cy:command (K): find	.moonstone-menu:not(.moonstone-hidden)
+        cy:command (K): find	.moonstone-menuItem
+        cy:command (K): assert	expected **[ <li.moonstone-listItem.flexRow.moonstone-menuItem>, 2 more... ]** to have a length of **3**
+                        Actual: 	3
+                        Expected: 	3
+        cy:command (K): find	.moonstone-menuItem
+        cy:command (K): contains	English
+        cy:command (K): scrollIntoView
+        cy:command (K): find	.moonstone-menuItem
+        cy:command (K): contains	English
+        cy:command (K): assert	expected **<span.moonstone-typography.moonstone-variant_caption.moonstone-weight_default.flexFluid.moonstone-nowrap>** to be **visible**
+        cy:command (K): find	.moonstone-menuItem
+        cy:command (K): contains	English
+        cy:command (K): trigger	click
+        cy:command (K): get	.moonstone-button[data-sel-role="translate-button"]
+        cy:command (K): assert	expected **<button.moonstone-button.moonstone-button_big.moonstone-button_accent.alignCenter.jss100>** not to be **disabled**
+        cy:command (K): click
+        cy:command (K): wait	@translateNodeCall
+        cy:command (K): get	@translateDialog
+        cy:command (K): assert	expected **div[data-sel-role=**'translate-language-dialog'**]** not to exist in the DOM
+                        Actual: 	"div[data-sel-role=**'translate-language-dialog'**]"
+                        Expected: 	"div[data-sel-role='translate-language-dialog']"
+

@@ -1,0 +1,18 @@
+{
+  "extends": "../tsconfig.json",
+  "include": ["**/*/*.ts", "support/index.js"],
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "noEmit": false,
+    "isolatedModules": false,
+    "types": [
+      "cypress",
+      "node",
+      "@jahia/cypress",
+      "@4tw/cypress-drag-drop",
+      "cypress-iframe",
+      "cypress-real-events"
+    ],
+    "lib": ["es2015"]
+  }
+}

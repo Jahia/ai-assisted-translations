@@ -8,15 +8,15 @@
     </parent>
 
     <groupId>org.jahia.community</groupId>
-    <artifactId>translation-deepl</artifactId>
-    <name>Translation - DeepL</name>
+    <artifactId>ai-assisted-translations</artifactId>
+    <name>AI Assisted Translations</name>
     <version>1.2.2-SNAPSHOT</version>
     <packaging>bundle</packaging>
-    <description>Module to allow you asking translation to DeepL from jContent.</description>
+    <description>Module to request AI-assisted translations from jContent.</description>
     <scm>
-        <connection>scm:git:git@github.com:Jahia/translation-deepl.git</connection>
-        <developerConnection>scm:git:git@github.com:Jahia/translation-deepl.git</developerConnection>
-        <url>https://github.com/Jahia/translation-deepl</url>
+        <connection>scm:git:git@github.com:Jahia/ai-assisted-translations.git</connection>
+        <developerConnection>scm:git:git@github.com:Jahia/ai-assisted-translations.git</developerConnection>
+        <url>https://github.com/Jahia/ai-assisted-translations</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -25,13 +25,29 @@
         <jahia.plugin.version>6.13</jahia.plugin.version>
         <require-capability>osgi.extender;filter:="(osgi.extender=org.jahia.bundles.blueprint.extender.config)"</require-capability>
         <yarn.arguments>build:production</yarn.arguments>
+        <import-package>
+            !org.apache.commons.io,
+            !org.apache.commons.io.*,
+            *
+        </import-package>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.deepl.api</groupId>
             <artifactId>deepl-java</artifactId>
-            <version>1.10.3</version>
+            <version>1.14.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.openai</groupId>
+            <artifactId>openai-java</artifactId>
+            <version>4.26.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -54,12 +70,6 @@
         <dependency>
             <groupId>org.jahia.modules</groupId>
             <artifactId>graphql-dxm-provider</artifactId>
-            <version>2.9.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jahia.modules</groupId>
-            <artifactId>graphql-dxm-provider</artifactId>
             <version>3.4.0</version>
             <scope>provided</scope>
         </dependency>
@@ -68,6 +78,16 @@
             <artifactId>graphql-java-annotations</artifactId>
             <version>21.1</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.14.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.utils</artifactId>
+            <version>${felix.utils.version}</version>
         </dependency>
     </dependencies>
 
@@ -94,7 +114,12 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <_dsannotations>org.jahia.community.translation.deepl.*</_dsannotations>
+                        <_dsannotations>org.jahia.community.translation.assisted.*</_dsannotations>
+                        <Import-Package>
+                            !org.apache.commons.io,
+                            !org.apache.commons.io.*,
+                            *
+                        </Import-Package>
                     </instructions>
                 </configuration>
             </plugin>
@@ -115,7 +140,7 @@
             <plugin>
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
-                <version>1.6</version>
+                <version>1.15.4</version>
                 <!-- executions go here -->
                 <executions>
                     <execution>
@@ -125,8 +150,8 @@
                             <goal>install-node-and-yarn</goal>
                         </goals>
                         <configuration>
-                            <nodeVersion>v22.6.0</nodeVersion>
-                            <yarnVersion>v1.22.21</yarnVersion>
+                            <nodeVersion>v24.14.0</nodeVersion>
+                            <yarnVersion>v1.22.11</yarnVersion>
                         </configuration>
                     </execution>
                     <execution>

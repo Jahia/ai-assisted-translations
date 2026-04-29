@@ -1,0 +1,303 @@
+cypress/e2e/ui/testI18n.cy.ts:
+    Test i18n -> Test I18n values in various workspace/locales and various type of usage SSR/hydrate/rendered client side
+        cy:command (K): runProvisioningScript	Run inline script towards server: https://luxe.jahia.localhost
+        cy:command (K): runProvisioningScript	Run inline script towards server: https://luxe.jahia.localhost
+        cy:command (K): runProvisioningScript	Run inline script towards server: https://luxe.jahia.localhost
+        cy:command (K): apolloClient	Create new apollo client
+        cy:command (K): apollo	Execute Graphql Mutation: mutation addNode($parentPathOrId: String!, $name: String!, $primaryNodeType: String!, $children: [InputJCRNode] = [], $properties: [InputJCRProperty], $mixins: [String] = []) {
+                            jcr(workspace: EDIT) {
+                                addNode(
+                                    parentPathOrId: $parentPathOrId,
+                                    name: $name,
+                                    primaryNodeType: $primaryNodeType,
+                                    properties: $properties,
+                                    mixins: $mixins
+                                ) {
+                                    addChildrenBatch(nodes: $children){
+                                        uuid
+                                    }
+                                    uuid
+                                    node {
+                                        name
+                                    }
+                                }
+                            }
+                        }
+        cy:command (K): wrap	{}
+            cy:xhr (K): POST https://luxe.jahia.localhost/modules/graphql
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "authorization": "Basic cm9vdDpyb290MTIzNA==",
+                          "Referer": "https://luxe.jahia.localhost/__cypress/iframes/cypress%2Fe2e%2Fui%2FtestI18n.cy.ts?browserFamily=chromium",
+                          "sec-ch-ua": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+                          "sec-ch-ua-mobile": "?0",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+                          "accept": "*/*",
+                          "content-type": "application/json"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1",
+                          "Content-Encoding": "br",
+                          "Connection": "keep-alive",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 31 Mar 2026 17:04:28 GMT",
+                          "content-type": "application/json;charset=UTF-8",
+                          "Vary": "Accept-Encoding"
+                        }
+        cy:command (K): apollo	Execute Graphql Mutation: mutation ($pathOrId: String!, $properties: [InputJCRProperty]) {
+                          jcr(workspace: EDIT) {
+                            mutateNode(pathOrId: $pathOrId) {
+                              setPropertiesBatch(properties: $properties) {
+                                path
+                              }
+                            }
+                          }
+                        }
+        cy:command (K): wrap	{}
+            cy:xhr (K): POST https://luxe.jahia.localhost/modules/graphql
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "authorization": "Basic cm9vdDpyb290MTIzNA==",
+                          "Referer": "https://luxe.jahia.localhost/__cypress/iframes/cypress%2Fe2e%2Fui%2FtestI18n.cy.ts?browserFamily=chromium",
+                          "sec-ch-ua": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+                          "sec-ch-ua-mobile": "?0",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+                          "accept": "*/*",
+                          "content-type": "application/json"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1",
+                          "Content-Encoding": "br",
+                          "Connection": "keep-alive",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 31 Mar 2026 17:04:29 GMT",
+                          "content-type": "application/json;charset=UTF-8",
+                          "Vary": "Accept-Encoding"
+                        }
+        cy:command (K): apollo	Execute Graphql Mutation: mutation addNode($parentPathOrId: String!, $name: String!, $primaryNodeType: String!, $children: [InputJCRNode] = [], $properties: [InputJCRProperty], $mixins: [String] = []) {
+                            jcr(workspace: EDIT) {
+                                addNode(
+                                    parentPathOrId: $parentPathOrId,
+                                    name: $name,
+                                    primaryNodeType: $primaryNodeType,
+                                    properties: $properties,
+                                    mixins: $mixins
+                                ) {
+                                    addChildrenBatch(nodes: $children){
+                                        uuid
+                                    }
+                                    uuid
+                                    node {
+                                        name
+                                    }
+                                }
+                            }
+                        }
+        cy:command (K): wrap	{}
+            cy:xhr (K): POST https://luxe.jahia.localhost/modules/graphql
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "authorization": "Basic cm9vdDpyb290MTIzNA==",
+                          "Referer": "https://luxe.jahia.localhost/__cypress/iframes/cypress%2Fe2e%2Fui%2FtestI18n.cy.ts?browserFamily=chromium",
+                          "sec-ch-ua": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+                          "sec-ch-ua-mobile": "?0",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+                          "accept": "*/*",
+                          "content-type": "application/json"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1",
+                          "Content-Encoding": "br",
+                          "Connection": "keep-alive",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 31 Mar 2026 17:04:29 GMT",
+                          "content-type": "application/json;charset=UTF-8",
+                          "Vary": "Accept-Encoding"
+                        }
+        cy:command (K): apollo	Execute Graphql Mutation: mutation publishNode($pathOrId: String!, $languages: [String]!, $publishSubNodes: Boolean!, $includeSubTree: Boolean!) {
+                            jcr(workspace: EDIT) {
+                                mutateNode(pathOrId: $pathOrId) {
+                                    publish(publishSubNodes: $publishSubNodes, languages: $languages, includeSubTree: $includeSubTree)
+                                }
+                            }
+                        }
+        cy:command (K): wrap	{}
+            cy:xhr (K): POST https://luxe.jahia.localhost/modules/graphql
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "authorization": "Basic cm9vdDpyb290MTIzNA==",
+                          "Referer": "https://luxe.jahia.localhost/__cypress/iframes/cypress%2Fe2e%2Fui%2FtestI18n.cy.ts?browserFamily=chromium",
+                          "sec-ch-ua": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+                          "sec-ch-ua-mobile": "?0",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+                          "accept": "*/*",
+                          "content-type": "application/json"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1",
+                          "Content-Encoding": "br",
+                          "Connection": "keep-alive",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 31 Mar 2026 17:04:29 GMT",
+                          "content-type": "application/json;charset=UTF-8",
+                          "Vary": "Accept-Encoding"
+                        }
+        cy:command (K): waitUntil	Object{4}
+        cy:command (K): apollo	Execute Graphql Query: query getJobsWithStatus{
+                            admin {
+                                jahia {
+                                    scheduler{
+                                        jobs {
+                                            siteKey
+                                            group
+                                            jobStatus
+                                        }
+                                    }
+                                }
+                            }
+                        }
+        cy:command (K): wrap	{}
+            cy:xhr (K): POST https://luxe.jahia.localhost/modules/graphql
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "authorization": "Basic cm9vdDpyb290MTIzNA==",
+                          "Referer": "https://luxe.jahia.localhost/__cypress/iframes/cypress%2Fe2e%2Fui%2FtestI18n.cy.ts?browserFamily=chromium",
+                          "sec-ch-ua": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+                          "sec-ch-ua-mobile": "?0",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+                          "accept": "*/*",
+                          "content-type": "application/json"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1",
+                          "content-encoding": "gzip",
+                          "Connection": "keep-alive",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 31 Mar 2026 17:04:29 GMT",
+                          "content-type": "application/json;charset=UTF-8",
+                          "Vary": "accept-encoding"
+                        }
+        cy:command (K): waitUntil	true
+        cy:command (K): wait	500
+        cy:command (K): login	Login with root
+        cy:command (K): assert	Login result: expected **302** to equal **302**
+                        Actual: 	302
+                        Expected: 	302
+        cy:command (K): visit	/cms/render/default/en/sites/javascriptI18NTestSite/home/testPageI18N.html
+          cons:log (K): Executing head script...
+          cons:log (K): Executing inline script...
+          cons:log (K): Executing body script...
+            cy:xhr (K): POST https://luxe.jahia.localhost/modules/CsrfServlet
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "CSRFTOKEN": "0JJ3-TTKY-7YTM-KRHE-8I1B-0DOK-88T0-TT8N",
+                          "Referer": "https://luxe.jahia.localhost/cms/render/default/en/sites/javascriptI18NTestSite/home/testPageI18N.html",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1",
+                          "Content-Encoding": "br",
+                          "Connection": "keep-alive",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 31 Mar 2026 17:04:32 GMT",
+                          "content-type": "application/json;charset=US-ASCII",
+                          "Vary": "Accept-Encoding"
+                        }
+        cy:command (K): uncaught exception	Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+        cy:command (K): visit	/cms/render/default/fr_LU/sites/javascriptI18NTestSite/home/testPageI18N.html
+          cons:log (K): Executing head script...
+          cons:log (K): Executing inline script...
+          cons:log (K): Executing body script...
+            cy:xhr (K): POST https://luxe.jahia.localhost/modules/CsrfServlet
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "CSRFTOKEN": "0JJ3-TTKY-7YTM-KRHE-8I1B-0DOK-88T0-TT8N",
+                          "Referer": "https://luxe.jahia.localhost/cms/render/default/fr_LU/sites/javascriptI18NTestSite/home/testPageI18N.html",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1",
+                          "Content-Encoding": "br",
+                          "Connection": "keep-alive",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 31 Mar 2026 17:04:32 GMT",
+                          "content-type": "application/json;charset=US-ASCII",
+                          "Vary": "Accept-Encoding"
+                        }
+        cy:command (K): visit	/cms/render/default/fr/sites/javascriptI18NTestSite/home/testPageI18N.html
+        cy:command (K): uncaught exception	Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+          cons:log (K): Executing head script...
+          cons:log (K): Executing inline script...
+            cy:xhr (K): POST https://luxe.jahia.localhost/modules/CsrfServlet
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "CSRFTOKEN": "0JJ3-TTKY-7YTM-KRHE-8I1B-0DOK-88T0-TT8N",
+                          "Referer": "https://luxe.jahia.localhost/cms/render/default/fr/sites/javascriptI18NTestSite/home/testPageI18N.html",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1",
+                          "Content-Encoding": "br",
+                          "Connection": "keep-alive",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 31 Mar 2026 17:04:33 GMT",
+                          "content-type": "application/json;charset=US-ASCII",
+                          "Vary": "Accept-Encoding"
+                        }
+          cons:log (K): Executing body script...
+        cy:command (K): visit	/cms/render/default/de/sites/javascriptI18NTestSite/home/testPageI18N.html
+        cy:command (K): uncaught exception	Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+          cons:log (K): Executing head script...
+          cons:log (K): Executing inline script...
+          cons:log (K): Executing body script...
+            cy:xhr (K): POST https://luxe.jahia.localhost/modules/CsrfServlet
+                        Status: 200
+                        Request headers: {
+                          "sec-ch-ua-platform": "\"macOS\"",
+                          "CSRFTOKEN": "0JJ3-TTKY-7YTM-KRHE-8I1B-0DOK-88T0-TT8N",
+                          "Referer": "https://luxe.jahia.localhost/cms/render/default/de/sites/javascriptI18NTestSite/home/testPageI18N.html",
+                          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+                          "sec-ch-ua": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+                          "sec-ch-ua-mobile": "?0"
+                        }
+                        Response headers: {
+                          "Transfer-Encoding": "chunked",
+                          "cache-control": "public, must-revalidate, max-age=1",
+                          "Content-Encoding": "br",
+                          "Connection": "keep-alive",
+                          "Keep-Alive": "timeout=5",
+                          "date": "Tue, 31 Mar 2026 17:04:33 GMT",
+                          "content-type": "application/json;charset=US-ASCII",
+                          "Vary": "Accept-Encoding"
+                        }
+        cy:command (K): get	[data-testid="getSiteLocales"]
+        cy:command (K): assert	expected **<div>** to contain **de,en,fr,fr_LU**
+        cy:command (K): logout	Logout
+        cy:command (K): uncaught exception	Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+        cy:command (K): assert	Logout result: expected **302** to equal **302**
+                        Actual: 	302
+                        Expected: 	302
+        cy:command (K): runProvisioningScript	Run inline script towards server: https://luxe.jahia.localhost
+
