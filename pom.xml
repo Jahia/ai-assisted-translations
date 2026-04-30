@@ -10,14 +10,14 @@
     <groupId>org.jahia.community</groupId>
     <artifactId>ai-assisted-translations</artifactId>
     <name>AI Assisted Translations</name>
-    <version>2.0.0</version>
+    <version>2.0.1-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <description>Module to request AI-assisted translations from jContent.</description>
     <scm>
         <connection>scm:git:git@github.com:Jahia/ai-assisted-translations.git</connection>
         <developerConnection>scm:git:git@github.com:Jahia/ai-assisted-translations.git</developerConnection>
         <url>https://github.com/Jahia/ai-assisted-translations</url>
-        <tag>ai-assisted-translations-2.0.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <properties>
