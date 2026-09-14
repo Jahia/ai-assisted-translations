@@ -158,7 +158,7 @@ Main configuration file:
 
 - `translation.glossary.relative.path`
   - Site-relative location of glossary CSV files.
-  - Default: `/settings/glossaries`.
+  - Default: `/files/glossaries`.
   - Effective path is: `<site-path> + translation.glossary.relative.path`.
 
 ---

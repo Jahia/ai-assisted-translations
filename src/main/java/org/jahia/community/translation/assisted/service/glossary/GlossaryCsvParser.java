@@ -21,6 +21,7 @@ public class GlossaryCsvParser {
 
     public ParsedGlossaryFile parse(String sourceName, InputStream inputStream) throws IOException {
         List<String> errors = new ArrayList<>();
+        List<String> rowWarnings = new ArrayList<>();
         List<Map<String, String>> rows = new ArrayList<>();
         List<String> headers;
         CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
@@ -34,7 +35,7 @@ public class GlossaryCsvParser {
             headers = new ArrayList<>(parser.getHeaderNames());
             if (headers.isEmpty()) {
                 errors.add("CSV is empty");
-                return new ParsedGlossaryFile(sourceName, List.of(), List.of(), errors);
+                return new ParsedGlossaryFile(sourceName, List.of(), List.of(), errors, rowWarnings);
             }
 
             validateHeaders(headers, errors);
@@ -46,7 +47,7 @@ public class GlossaryCsvParser {
                     String value = i < csvRecord.size() ? csvRecord.get(i) : "";
                     row.put(headers.get(i), StringUtils.trimToEmpty(value));
                 }
-                if (validateRow(lineNumber, row, headers, errors)) {
+                if (validateRow(lineNumber, row, headers, rowWarnings)) {
                     rows.add(row);
                 }
             }
@@ -57,39 +58,41 @@ public class GlossaryCsvParser {
                 .map(this::normalizeLanguage)
                 .collect(Collectors.toList());
 
-        return new ParsedGlossaryFile(sourceName, languageHeaders, rows, errors);
+        return new ParsedGlossaryFile(sourceName, languageHeaders, rows, errors, rowWarnings);
     }
 
     private void validateHeaders(List<String> headers, List<String> errors) {
-        if (!"key".equalsIgnoreCase(headers.get(0))) {
-            errors.add("First column must be 'key'");
+        String firstHeader = StringUtils.trimToEmpty(headers.get(0));
+        if (!"key".equalsIgnoreCase(firstHeader)) {
+            errors.add("First column must be 'key' but was '" + firstHeader + "' (columns found: " + headers + ")");
         }
 
         Set<String> duplicateCheck = new LinkedHashSet<>();
-        int languageHeaderCount = 0;
+        List<String> languageHeaders = new ArrayList<>();
         for (String header : headers) {
             String normalized = StringUtils.trimToEmpty(header).toLowerCase(Locale.ROOT);
             if (StringUtils.isBlank(normalized)) {
-                errors.add("Headers cannot contain empty column names");
+                errors.add("Headers cannot contain empty column names (columns found: " + headers + ")");
                 continue;
             }
             if (!duplicateCheck.add(normalized)) {
                 errors.add("Duplicate header: " + header);
             }
             if (isLanguageHeader(header)) {
-                languageHeaderCount++;
+                languageHeaders.add(header);
             }
         }
 
-        if (languageHeaderCount < 2) {
-            errors.add("CSV must define at least two language columns");
+        if (languageHeaders.size() < 2) {
+            errors.add("CSV must define at least two language columns matching 'xx' or 'xx-YY' (e.g. en, fr, pt-BR); found "
+                    + languageHeaders.size() + ": " + languageHeaders + " (columns found: " + headers + ")");
         }
     }
 
-    private boolean validateRow(int lineNumber, Map<String, String> row, List<String> headers, List<String> errors) {
+    private boolean validateRow(int lineNumber, Map<String, String> row, List<String> headers, List<String> rowWarnings) {
         String key = row.get(headers.get(0));
         if (StringUtils.isBlank(key)) {
-            errors.add("Line " + lineNumber + ": key column is mandatory");
+            rowWarnings.add("Line " + lineNumber + ": key column is mandatory, row skipped");
             return false;
         }
 
@@ -98,7 +101,7 @@ public class GlossaryCsvParser {
                 .anyMatch(header -> StringUtils.isNotBlank(row.get(header)));
 
         if (!hasAtLeastOneTerm) {
-            errors.add("Line " + lineNumber + ": row has no translatable term value");
+            rowWarnings.add("Line " + lineNumber + ": row has no translatable term value, row skipped");
             return false;
         }
         return true;

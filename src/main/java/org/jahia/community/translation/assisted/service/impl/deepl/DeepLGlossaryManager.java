@@ -41,17 +41,27 @@ public class DeepLGlossaryManager {
             return null;
         }
 
+        // DeepL rejects the whole glossary ("Bad request. Reason: Invalid entries") if a single entry
+        // breaks its constraints, so normalize and drop offending entries before uploading. Per
+        // https://developers.deepl.com/docs/customize/managing-glossaries an entry must have a unique
+        // source term, a non-empty source and target, no control characters, and no leading/trailing
+        // whitespace (including non-breaking spaces, which String.trim() leaves in place).
+        Map<String, String> sanitizedTerms = sanitizeGlossaryTerms(glossaryTerms);
+        if (MapUtils.isEmpty(sanitizedTerms)) {
+            return null;
+        }
+
         cleanupStaleGlossariesIfNeeded(translator, false);
 
         String glossaryKey = srcLanguage + "|" + destLanguage;
-        String glossaryHash = computeGlossaryHash(glossaryTerms);
+        String glossaryHash = computeGlossaryHash(sanitizedTerms);
         CachedGlossary cachedGlossary = glossaryCache.get(glossaryKey);
         if (cachedGlossary != null && StringUtils.equals(cachedGlossary.hash, glossaryHash)) {
             return cachedGlossary.glossaryId;
         }
 
         String glossaryName = buildGlossaryName(srcLanguage, destLanguage);
-        String csvContent = buildGlossaryCsvContent(glossaryTerms);
+        String csvContent = buildGlossaryCsvContent(sanitizedTerms);
 
         String glossaryId = cachedGlossary != null ? cachedGlossary.glossaryId : findGlossaryIdByName(translator, glossaryName);
         if (StringUtils.isBlank(glossaryId)) {
@@ -121,6 +131,64 @@ public class DeepLGlossaryManager {
 
     private String buildGlossaryName(String srcLanguage, String destLanguage) {
         return GLOSSARY_NAME_PREFIX + "-" + srcLanguage + "-" + destLanguage;
+    }
+
+    private Map<String, String> sanitizeGlossaryTerms(Map<String, String> glossaryTerms) {
+        Map<String, String> sanitized = new LinkedHashMap<>();
+        Set<String> seenSources = new HashSet<>();
+        for (Map.Entry<String, String> entry : glossaryTerms.entrySet()) {
+            String source = stripWhitespace(entry.getKey());
+            String target = stripWhitespace(entry.getValue());
+            if (StringUtils.isEmpty(source) || StringUtils.isEmpty(target)) {
+                continue;
+            }
+            if (containsControlCharacter(source) || containsControlCharacter(target)) {
+                logger.warn("Skipping glossary entry with control characters: '{}' -> '{}'", source, target);
+                continue;
+            }
+            // DeepL forbids duplicate source terms. The incoming map cannot hold duplicate keys, but
+            // stripping whitespace can make two distinct keys collide (e.g. "Term" and "Term "), so guard
+            // against that. Matching is case-sensitive: DeepL accepts sources differing only by case
+            // (e.g. "Unil" and "UNIL"), so we must not drop those.
+            if (!seenSources.add(source)) {
+                logger.warn("Skipping duplicate glossary source term after trimming: '{}'", source);
+                continue;
+            }
+            sanitized.put(source, target);
+        }
+        return sanitized;
+    }
+
+    private String stripWhitespace(String value) {
+        if (value == null) {
+            return "";
+        }
+        // Remove leading/trailing whitespace including Unicode separators such as the non-breaking space
+        // (U+00A0), which DeepL rejects. String.trim()/StringUtils.strip() and Character.isWhitespace()
+        // do not treat U+00A0 as whitespace, so also test Character.isSpaceChar().
+        int start = 0;
+        int end = value.length();
+        while (start < end && isStrippable(value.charAt(start))) {
+            start++;
+        }
+        while (end > start && isStrippable(value.charAt(end - 1))) {
+            end--;
+        }
+        return value.substring(start, end);
+    }
+
+    private boolean isStrippable(char c) {
+        return Character.isWhitespace(c) || Character.isSpaceChar(c);
+    }
+
+    private boolean containsControlCharacter(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (c == '\t' || c == '\n' || c == '\r' || Character.getType(c) == Character.CONTROL) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String buildGlossaryCsvContent(Map<String, String> glossaryTerms) {

@@ -77,7 +77,17 @@ public class CsvGlossaryService implements GlossaryService {
                     warnings.addAll(parsed.getValidationErrors().stream()
                             .map(err -> MessageFormat.format("{0}: {1}", descriptor.getPath(), err))
                             .collect(Collectors.toList()));
+                    logger.warn("Glossary file {} has an invalid format and will be skipped: {}",
+                            descriptor.getPath(), parsed.getValidationErrors());
                     continue;
+                }
+
+                if (parsed.hasRowWarnings()) {
+                    warnings.addAll(parsed.getRowWarnings().stream()
+                            .map(warn -> MessageFormat.format("{0}: {1}", descriptor.getPath(), warn))
+                            .collect(Collectors.toList()));
+                    logger.warn("Glossary file {} has {} invalid row(s) that were skipped, keeping {} valid row(s): {}",
+                            descriptor.getPath(), parsed.getRowWarnings().size(), parsed.getRows().size(), parsed.getRowWarnings());
                 }
 
                 for (Map<String, String> row : parsed.getRows()) {
@@ -92,6 +102,11 @@ public class CsvGlossaryService implements GlossaryService {
                 warnings.add(MessageFormat.format("{0}: {1}", descriptor.getPath(), e.getMessage()));
                 logger.warn("Unable to parse glossary file {}", descriptor.getPath(), e);
             }
+        }
+
+        if (mergedTerms.isEmpty()) {
+            logger.warn("No glossary terms resolved for language pair {} -> {} from files {}. Warnings: {}",
+                    sourceLanguage, targetLanguage, sourceFiles, warnings);
         }
 
         return new ResolvedGlossary(mergedTerms, sourceFiles, warnings);
