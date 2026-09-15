@@ -158,7 +158,7 @@ Main configuration file:
 
 - `translation.glossary.relative.path`
   - Site-relative location of glossary CSV files.
-  - Default: `/settings/glossaries`.
+  - Default: `/files/glossaries`.
   - Effective path is: `<site-path> + translation.glossary.relative.path`.
 
 ---
@@ -211,11 +211,14 @@ mutation TranslateNode {
 
 Glossaries are managed as CSV files stored in Jahia (not one JCR node per term entry).
 
+> For the full lifecycle, per-site resolution, DeepL storage, and how two sites
+> can conflict, see [`docs/glossary-management.md`](docs/glossary-management.md).
+
 ### How glossary resolution works
 
-1. Files are loaded from the configured site folder (default `/files/glossaries`).
+1. Files are loaded from the **global** system-site folder (`/sites/systemsite` + the configured relative path), then from the current **site** folder (default `/files/glossaries`).
 2. Matching CSV files are parsed and validated.
-3. For a requested language pair `(source, target)`, the module builds a source->target term map.
+3. For a requested language pair `(source, target)`, the module builds a source->target term map by merging global then site files, so **site terms override global terms** on conflict.
 4. That map is consumed by providers:
    - **OpenAI**: relevant glossary terms are injected in prompt context per batch.
    - **DeepL**: glossary map is pushed to DeepL glossary API and used via `glossaryId` at translation time.

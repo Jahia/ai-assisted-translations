@@ -2,6 +2,7 @@ package org.jahia.community.translation.assisted.service.glossary;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jahia.services.content.JCRNodeWrapper;
+import org.jahia.services.content.decorator.JCRSiteNode;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -12,9 +13,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -40,8 +42,17 @@ public class CsvGlossaryService implements GlossaryService {
         final String source = normalizeLanguage(sourceLanguage);
         final String target = normalizeLanguage(targetLanguage);
 
-        JCRNodeWrapper site = contextNode.getResolveSite();
-        List<GlossaryFileDescriptor> files = glossaryFileLocator.listGlossaryFiles(site);
+        JCRSiteNode site = contextNode.getResolveSite();
+        // Global (system site) glossaries first so that the current site's glossaries, loaded last,
+        // override them on conflicting source terms; site-specific terms win.
+        List<GlossaryFileDescriptor> files = new ArrayList<>(glossaryFileLocator.listGlobalGlossaryFiles(site));
+        Set<String> globalPaths = files.stream().map(GlossaryFileDescriptor::getPath).collect(Collectors.toSet());
+        for (GlossaryFileDescriptor siteFile : glossaryFileLocator.listGlossaryFiles(site)) {
+            // Guard against double-loading when the resolved site is itself the system site.
+            if (!globalPaths.contains(siteFile.getPath())) {
+                files.add(siteFile);
+            }
+        }
         if (files.isEmpty()) {
             return ResolvedGlossary.empty();
         }
@@ -63,8 +74,10 @@ public class CsvGlossaryService implements GlossaryService {
         cache.clear();
     }
 
-    private ResolvedGlossary buildGlossary(List<GlossaryFileDescriptor> files, JCRNodeWrapper contextNode, String sourceLanguage, String targetLanguage) {
-        Map<String, String> mergedTerms = new HashMap<>();
+    private ResolvedGlossary buildGlossary(List<GlossaryFileDescriptor> files, JCRSiteNode contextNode, String sourceLanguage, String targetLanguage) {
+        // LinkedHashMap preserves load order (global files first, then site files) so that on a source
+        // term that collides only after normalization, the last-loaded (site) value wins deterministically.
+        Map<String, String> mergedTerms = new LinkedHashMap<>();
         List<String> sourceFiles = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
 
@@ -77,7 +90,17 @@ public class CsvGlossaryService implements GlossaryService {
                     warnings.addAll(parsed.getValidationErrors().stream()
                             .map(err -> MessageFormat.format("{0}: {1}", descriptor.getPath(), err))
                             .collect(Collectors.toList()));
+                    logger.warn("Glossary file {} has an invalid format and will be skipped: {}",
+                            descriptor.getPath(), parsed.getValidationErrors());
                     continue;
+                }
+
+                if (parsed.hasRowWarnings()) {
+                    warnings.addAll(parsed.getRowWarnings().stream()
+                            .map(warn -> MessageFormat.format("{0}: {1}", descriptor.getPath(), warn))
+                            .collect(Collectors.toList()));
+                    logger.warn("Glossary file {} has {} invalid row(s) that were skipped, keeping {} valid row(s): {}",
+                            descriptor.getPath(), parsed.getRowWarnings().size(), parsed.getRows().size(), parsed.getRowWarnings());
                 }
 
                 for (Map<String, String> row : parsed.getRows()) {
@@ -94,7 +117,12 @@ public class CsvGlossaryService implements GlossaryService {
             }
         }
 
-        return new ResolvedGlossary(mergedTerms, sourceFiles, warnings);
+        if (mergedTerms.isEmpty()) {
+            logger.warn("No glossary terms resolved for language pair {} -> {} from files {}. Warnings: {}",
+                    sourceLanguage, targetLanguage, sourceFiles, warnings);
+        }
+
+        return new ResolvedGlossary(mergedTerms, contextNode.getSiteKey(), sourceFiles, warnings);
     }
 
     private String getRowTerm(Map<String, String> row, String language) {
