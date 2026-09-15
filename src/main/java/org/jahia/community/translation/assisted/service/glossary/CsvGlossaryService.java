@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -42,7 +43,16 @@ public class CsvGlossaryService implements GlossaryService {
         final String target = normalizeLanguage(targetLanguage);
 
         JCRSiteNode site = contextNode.getResolveSite();
-        List<GlossaryFileDescriptor> files = glossaryFileLocator.listGlossaryFiles(site);
+        // Global (system site) glossaries first so that the current site's glossaries, loaded last,
+        // override them on conflicting source terms; site-specific terms win.
+        List<GlossaryFileDescriptor> files = new ArrayList<>(glossaryFileLocator.listGlobalGlossaryFiles(site));
+        Set<String> globalPaths = files.stream().map(GlossaryFileDescriptor::getPath).collect(Collectors.toSet());
+        for (GlossaryFileDescriptor siteFile : glossaryFileLocator.listGlossaryFiles(site)) {
+            // Guard against double-loading when the resolved site is itself the system site.
+            if (!globalPaths.contains(siteFile.getPath())) {
+                files.add(siteFile);
+            }
+        }
         if (files.isEmpty()) {
             return ResolvedGlossary.empty();
         }

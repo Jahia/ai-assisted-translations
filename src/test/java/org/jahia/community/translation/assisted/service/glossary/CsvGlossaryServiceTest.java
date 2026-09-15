@@ -43,6 +43,9 @@ public class CsvGlossaryServiceTest {
         when(site.getPath()).thenReturn("/sites/test");
         when(site.getSiteKey()).thenReturn("test");
         when(site.getSession().getWorkspace().getName()).thenReturn("default");
+        // Default: no glossary files anywhere; individual tests add global and/or site content.
+        when(locator.listGlobalGlossaryFiles(any())).thenReturn(List.of());
+        when(locator.listGlossaryFiles(any())).thenReturn(List.of());
     }
 
     private static void inject(Object target, String fieldName, Object value) throws Exception {
@@ -51,9 +54,17 @@ public class CsvGlossaryServiceTest {
         field.set(target, value);
     }
 
+    private static final String GLOBAL_GLOSSARY_PATH = "/sites/systemsite/files/glossaries/global.csv";
+
     private void withGlossaryContent(String csv) throws Exception {
         when(locator.listGlossaryFiles(site)).thenReturn(List.of(new GlossaryFileDescriptor(GLOSSARY_PATH, 1L)));
         when(locator.openGlossaryFile(eq(GLOSSARY_PATH), any()))
+                .thenAnswer(invocation -> streamOf(csv));
+    }
+
+    private void withGlobalGlossaryContent(String csv) throws Exception {
+        when(locator.listGlobalGlossaryFiles(any())).thenReturn(List.of(new GlossaryFileDescriptor(GLOBAL_GLOSSARY_PATH, 1L)));
+        when(locator.openGlossaryFile(eq(GLOBAL_GLOSSARY_PATH), any()))
                 .thenAnswer(invocation -> streamOf(csv));
     }
 
@@ -70,6 +81,26 @@ public class CsvGlossaryServiceTest {
         assertEquals(2, resolved.getTerms().size());
         assertEquals("Hello", resolved.getTerms().get("Bonjour"));
         assertEquals("Thanks", resolved.getTerms().get("Merci"));
+    }
+
+    @Test
+    public void loadsGlobalGlossaryWhenSiteHasNone() throws Exception {
+        withGlobalGlossaryContent("key,fr,en\nbonjour,Bonjour,Hello\n");
+
+        ResolvedGlossary resolved = service.resolve(node, "fr", "en");
+
+        assertEquals("Hello", resolved.getTerms().get("Bonjour"));
+    }
+
+    @Test
+    public void siteGlossaryOverridesGlobalOnConflict() throws Exception {
+        withGlobalGlossaryContent("key,fr,en\nbonjour,Bonjour,Hello Global\nmerci,Merci,Thanks\n");
+        withGlossaryContent("key,fr,en\nbonjour,Bonjour,Hello Site\n");
+
+        ResolvedGlossary resolved = service.resolve(node, "fr", "en");
+
+        assertEquals("site value wins on conflict", "Hello Site", resolved.getTerms().get("Bonjour"));
+        assertEquals("global-only term is retained", "Thanks", resolved.getTerms().get("Merci"));
     }
 
     @Test

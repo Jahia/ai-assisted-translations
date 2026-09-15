@@ -26,6 +26,19 @@ glossary files; they are all loaded and **merged** (see below).
 Because the folder is resolved from the **site** of the node being translated,
 each site has its own, independent glossary folder.
 
+### Global glossary (system site)
+
+A **global glossary** shared by every site is read from the Jahia system site,
+at the **same relative path**:
+
+- Location: `/sites/systemsite` + `translation.glossary.relative.path`
+  (e.g. `/sites/systemsite/files/glossaries/*.csv`).
+
+The global glossary is loaded **first**, then the current node's resolved-site
+glossaries are loaded on top. On a conflicting source term, the **site value
+wins** (it is loaded last); source terms that exist only globally are inherited.
+This lets you define organization-wide terms once and override them per site.
+
 ---
 
 ## 2. Lifecycle of a glossary
@@ -45,13 +58,16 @@ No restart or redeploy is required.
 When a translation or suggestion is requested for `(sourceLanguage,
 targetLanguage)`, the module:
 
-1. Lists every `*.csv` under the site's glossary folder.
+1. Lists every `*.csv` under the **global** (system site) folder, then every
+   `*.csv` under the current **site** folder — global first, site second.
 2. Parses and validates each file. Invalid files are **skipped** (logged);
    files with only some bad rows keep their valid rows (logged).
 3. Builds a single `source term -> target term` map for the requested pair by
-   **merging all files**. On a duplicate source term across files, the
-   last-loaded value wins (files are processed in path order).
-4. Caches the resolved map.
+   **merging all files** in load order. On a duplicate source term, the
+   last-loaded value wins — so a site term overrides a global term, and within
+   a folder the last file in path order wins.
+4. Caches the resolved map (the cache fingerprint covers both global and site
+   files, so changing either rebuilds the map).
 
 **Resolution cache key** (`CsvGlossaryService`):
 
@@ -190,7 +206,8 @@ targets the same DeepL account but the same per-site name.
 
 | Concern                        | Class / detail                                             |
 | ------------------------------ | ---------------------------------------------------------- |
-| Per-site file location         | `JcrGlossaryFileLocator` (`<site>` + relative path)        |
+| Per-site file location         | `JcrGlossaryFileLocator.listGlossaryFiles` (`<site>` + relative path) |
+| Global file location           | `JcrGlossaryFileLocator.listGlobalGlossaryFiles` (`/sites/systemsite` + relative path) |
 | Parse & validate               | `GlossaryCsvParser`                                         |
 | Merge + per-site resolution cache | `CsvGlossaryService` (key `workspace\|sitePath\|src\|dest`) |
 | Site key carried to providers  | `ResolvedGlossary.getSiteKey()`                            |

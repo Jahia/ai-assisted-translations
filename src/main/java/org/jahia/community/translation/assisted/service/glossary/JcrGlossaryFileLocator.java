@@ -27,6 +27,7 @@ import static org.jahia.community.translation.assisted.AssistedTranslationsConst
 public class JcrGlossaryFileLocator implements GlossaryFileLocator {
 
     private static final Logger logger = LoggerFactory.getLogger(JcrGlossaryFileLocator.class);
+    private static final String SYSTEM_SITE_PATH = "/sites/systemsite";
     private final Pattern glossaryFilePattern = Pattern.compile(".*\\.csv$");
     private String glossaryRelativePath;
 
@@ -43,13 +44,21 @@ public class JcrGlossaryFileLocator implements GlossaryFileLocator {
 
     @Override
     public List<GlossaryFileDescriptor> listGlossaryFiles(JCRNodeWrapper contextNode) throws RepositoryException {
-        String siteGlossaryPath = buildSiteGlossaryPath(contextNode);
-        JCRSessionWrapper session = contextNode.getSession();
-        if (!session.nodeExists(siteGlossaryPath)) {
+        return listGlossaryFilesInFolder(contextNode.getSession(), buildSiteGlossaryPath(contextNode));
+    }
+
+    @Override
+    public List<GlossaryFileDescriptor> listGlobalGlossaryFiles(JCRNodeWrapper contextNode) throws RepositoryException {
+        String relative = glossaryRelativePath.startsWith("/") ? glossaryRelativePath : "/" + glossaryRelativePath;
+        return listGlossaryFilesInFolder(contextNode.getSession(), SYSTEM_SITE_PATH + relative);
+    }
+
+    private List<GlossaryFileDescriptor> listGlossaryFilesInFolder(JCRSessionWrapper session, String folderPath) throws RepositoryException {
+        if (!session.nodeExists(folderPath)) {
             return List.of();
         }
 
-        JCRNodeWrapper glossaryFolder = session.getNode(siteGlossaryPath);
+        JCRNodeWrapper glossaryFolder = session.getNode(folderPath);
         List<GlossaryFileDescriptor> descriptors = new ArrayList<>();
         List<JCRNodeWrapper> childrenOfType = JCRContentUtils.getChildrenOfType(glossaryFolder, Constants.JAHIANT_FILE);
         for (JCRNodeWrapper fileNode : childrenOfType) {
