@@ -148,7 +148,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
 
         translationServicesManager.buildDataToTranslate(localizedNode, data, true, false);
         ResolvedGlossary resolvedGlossary = glossaryService.resolve(localizedNode, sourceLanguage, targetLanguage);
-        return generateTranslations(data, sourceLanguage, targetLanguage, resolvedGlossary.getTerms(), false);
+        return generateTranslations(data, sourceLanguage, targetLanguage, resolvedGlossary.getTerms(), resolvedGlossary.getSiteKey(), false);
     }
 
     public AssistedTranslationResponse translate(JCRNodeWrapper pNode, String propertyName, String sourceLanguage, String targetLanguage) throws RepositoryException, InterruptedException {
@@ -180,11 +180,11 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
         }
 
         ResolvedGlossary resolvedGlossary = glossaryService.resolve(node, sourceLanguage, targetLanguage);
-        return translateAndSave(data, sourceLanguage, targetLanguage, resolvedGlossary.getTerms());
+        return translateAndSave(data, sourceLanguage, targetLanguage, resolvedGlossary.getTerms(), resolvedGlossary.getSiteKey());
     }
 
-    private AssistedTranslationResponse translateAndSave(TranslationData data, String srcLanguage, String targetLanguage, Map<String, String> glossaryTerms) throws InterruptedException {
-        final Map<String, TranslatedField> translations = translationServicesManager.getTranslatedFieldMap(generateTranslations(data, srcLanguage, targetLanguage, glossaryTerms, true));
+    private AssistedTranslationResponse translateAndSave(TranslationData data, String srcLanguage, String targetLanguage, Map<String, String> glossaryTerms, String siteKey) throws InterruptedException {
+        final Map<String, TranslatedField> translations = translationServicesManager.getTranslatedFieldMap(generateTranslations(data, srcLanguage, targetLanguage, glossaryTerms, siteKey, true));
 
         if (MapUtils.isEmpty(translations)) {
             final String warnMsg = String.format(MSG_NOTHING_TO_TRANSLATE, targetLanguage);
@@ -211,7 +211,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
         }
     }
 
-    private List<TranslatedField> generateTranslations(TranslationData data, String srcLanguage, String destLanguage, Map<String, String> glossaryTerms, boolean subtree) throws InterruptedException {
+    private List<TranslatedField> generateTranslations(TranslationData data, String srcLanguage, String destLanguage, Map<String, String> glossaryTerms, String siteKey, boolean subtree) throws InterruptedException {
         if (translator == null) {
             logger.warn("Translator is null");
             return Collections.emptyList();
@@ -251,7 +251,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
             String glossaryId;
             boolean exception = false;
             try {
-                glossaryId = deepLGlossaryManager.getOrCreateGlossaryId(translator, deeplSrcLanguage, deeplTargetLanguage, glossaryTerms);
+                glossaryId = deepLGlossaryManager.getOrCreateGlossaryId(translator, siteKey, deeplSrcLanguage, deeplTargetLanguage, glossaryTerms);
                 if (StringUtils.isNotBlank(glossaryId)) {
                     textTranslationOptions.setGlossaryId(glossaryId);
                 }
@@ -264,7 +264,7 @@ public class DeepLTranslatorServiceImpl implements TranslatorService {
             if(exception) {
                 try {
                     logger.info("Retrying to create or get DeepL glossary without language code conversion for language pair {} / {}", sourceLocaleFromCode.getLanguage().toUpperCase(), targetLocaleFromCode.getLanguage().toUpperCase());
-                    glossaryId = deepLGlossaryManager.getOrCreateGlossaryId(translator, sourceLocaleFromCode.getLanguage().toUpperCase(), targetLocaleFromCode.getLanguage().toUpperCase(), glossaryTerms);
+                    glossaryId = deepLGlossaryManager.getOrCreateGlossaryId(translator, siteKey, sourceLocaleFromCode.getLanguage().toUpperCase(), targetLocaleFromCode.getLanguage().toUpperCase(), glossaryTerms);
                     if (StringUtils.isNotBlank(glossaryId)) {
                         textTranslationOptions.setGlossaryId(glossaryId);
                     }

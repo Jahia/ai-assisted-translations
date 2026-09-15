@@ -2,6 +2,7 @@ package org.jahia.community.translation.assisted.service.glossary;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jahia.services.content.JCRNodeWrapper;
+import org.jahia.services.content.decorator.JCRSiteNode;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -40,7 +41,7 @@ public class CsvGlossaryService implements GlossaryService {
         final String source = normalizeLanguage(sourceLanguage);
         final String target = normalizeLanguage(targetLanguage);
 
-        JCRNodeWrapper site = contextNode.getResolveSite();
+        JCRSiteNode site = contextNode.getResolveSite();
         List<GlossaryFileDescriptor> files = glossaryFileLocator.listGlossaryFiles(site);
         if (files.isEmpty()) {
             return ResolvedGlossary.empty();
@@ -63,7 +64,7 @@ public class CsvGlossaryService implements GlossaryService {
         cache.clear();
     }
 
-    private ResolvedGlossary buildGlossary(List<GlossaryFileDescriptor> files, JCRNodeWrapper contextNode, String sourceLanguage, String targetLanguage) {
+    private ResolvedGlossary buildGlossary(List<GlossaryFileDescriptor> files, JCRSiteNode contextNode, String sourceLanguage, String targetLanguage) {
         Map<String, String> mergedTerms = new HashMap<>();
         List<String> sourceFiles = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
@@ -109,7 +110,7 @@ public class CsvGlossaryService implements GlossaryService {
                     sourceLanguage, targetLanguage, sourceFiles, warnings);
         }
 
-        return new ResolvedGlossary(mergedTerms, sourceFiles, warnings);
+        return new ResolvedGlossary(mergedTerms, contextNode.getSiteKey(), sourceFiles, warnings);
     }
 
     private String getRowTerm(Map<String, String> row, String language) {

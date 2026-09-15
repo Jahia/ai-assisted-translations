@@ -211,6 +211,9 @@ mutation TranslateNode {
 
 Glossaries are managed as CSV files stored in Jahia (not one JCR node per term entry).
 
+> For the full lifecycle, per-site resolution, DeepL storage, and how two sites
+> can conflict, see [`docs/glossary-management.md`](docs/glossary-management.md).
+
 ### How glossary resolution works
 
 1. Files are loaded from the configured site folder (default `/files/glossaries`).

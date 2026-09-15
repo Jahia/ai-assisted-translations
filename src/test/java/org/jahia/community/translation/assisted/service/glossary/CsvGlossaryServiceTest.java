@@ -41,6 +41,7 @@ public class CsvGlossaryServiceTest {
         when(node.getResolveSite()).thenReturn(site);
         when(site.getResolveSite()).thenReturn(site);
         when(site.getPath()).thenReturn("/sites/test");
+        when(site.getSiteKey()).thenReturn("test");
         when(site.getSession().getWorkspace().getName()).thenReturn("default");
     }
 
@@ -69,6 +70,15 @@ public class CsvGlossaryServiceTest {
         assertEquals(2, resolved.getTerms().size());
         assertEquals("Hello", resolved.getTerms().get("Bonjour"));
         assertEquals("Thanks", resolved.getTerms().get("Merci"));
+    }
+
+    @Test
+    public void resolvedGlossaryCarriesSiteKey() throws Exception {
+        withGlossaryContent("key,fr,en\nbonjour,Bonjour,Hello\n");
+
+        ResolvedGlossary resolved = service.resolve(node, "fr", "en");
+
+        assertEquals("test", resolved.getSiteKey());
     }
 
     @Test

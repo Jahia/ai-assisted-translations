@@ -24,6 +24,8 @@ import static org.mockito.Mockito.when;
 
 public class DeepLGlossaryManagerTest {
 
+    private static final String SITE = "acme";
+
     private DeepLGlossaryManager manager;
     private DeepLClient translator;
 
@@ -35,13 +37,13 @@ public class DeepLGlossaryManagerTest {
 
     @Test
     public void returnsNullWhenTermsAreEmpty() throws Exception {
-        assertNull(manager.getOrCreateGlossaryId(translator, "FR", "EN", Map.of()));
+        assertNull(manager.getOrCreateGlossaryId(translator, SITE, "FR", "EN", Map.of()));
         verifyNoInteractions(translator);
     }
 
     @Test
     public void returnsNullWhenTranslatorIsNull() throws Exception {
-        assertNull(manager.getOrCreateGlossaryId(null, "FR", "EN", Map.of("Bonjour", "Hello")));
+        assertNull(manager.getOrCreateGlossaryId(null, SITE, "FR", "EN", Map.of("Bonjour", "Hello")));
     }
 
     @Test
@@ -51,7 +53,7 @@ public class DeepLGlossaryManagerTest {
         terms.put("  ", "Hello");   // blank source
         terms.put("Merci", "\u00A0"); // target is only a non-breaking space -> blank after strip
 
-        assertNull(manager.getOrCreateGlossaryId(translator, "FR", "EN", terms));
+        assertNull(manager.getOrCreateGlossaryId(translator, SITE, "FR", "EN", terms));
         verifyNoInteractions(translator);
     }
 
@@ -70,7 +72,7 @@ public class DeepLGlossaryManagerTest {
         terms.put("Bonjour", "\u00A0Hello");      // leading non-breaking space -> trimmed, kept
         terms.put("\u00A0Salut ", "Hi");          // leading nbsp + trailing space -> trimmed, kept
 
-        String glossaryId = manager.getOrCreateGlossaryId(translator, "FR", "EN", terms);
+        String glossaryId = manager.getOrCreateGlossaryId(translator, SITE, "FR", "EN", terms);
 
         assertEquals("glossary-1", glossaryId);
         String csv = csvCaptor.getValue();
@@ -95,7 +97,7 @@ public class DeepLGlossaryManagerTest {
         terms.put("EPFL", "EPFL");        // pass-through -> kept
         terms.put("Bonjour", "Hello");    // kept
 
-        manager.getOrCreateGlossaryId(translator, "FR", "EN", terms);
+        manager.getOrCreateGlossaryId(translator, SITE, "FR", "EN", terms);
 
         String csv = csvCaptor.getValue();
         assertTrue("pass-through entry must be kept", csv.contains("\"EPFL\",\"EPFL\""));
@@ -117,7 +119,7 @@ public class DeepLGlossaryManagerTest {
         terms.put("Unil", "Unil");
         terms.put("UNIL", "Unil");
 
-        manager.getOrCreateGlossaryId(translator, "FR", "EN", terms);
+        manager.getOrCreateGlossaryId(translator, SITE, "FR", "EN", terms);
 
         String csv = csvCaptor.getValue();
         assertTrue(csv.contains("\"Unil\",\"Unil\""));
@@ -138,7 +140,7 @@ public class DeepLGlossaryManagerTest {
         terms.put("Bonjour", "Hello");    // kept (first seen)
         terms.put("Bonjour ", "Hi");      // trailing space -> same source after trim -> dropped
 
-        manager.getOrCreateGlossaryId(translator, "FR", "EN", terms);
+        manager.getOrCreateGlossaryId(translator, SITE, "FR", "EN", terms);
 
         String csv = csvCaptor.getValue();
         assertEquals("source colliding after trim must be dropped", 1, csv.split("\n").length);
@@ -154,12 +156,60 @@ public class DeepLGlossaryManagerTest {
 
         Map<String, String> terms = Map.of("Bonjour", "Hello");
 
-        String first = manager.getOrCreateGlossaryId(translator, "FR", "EN", terms);
-        String second = manager.getOrCreateGlossaryId(translator, "FR", "EN", terms);
+        String first = manager.getOrCreateGlossaryId(translator, SITE, "FR", "EN", terms);
+        String second = manager.getOrCreateGlossaryId(translator, SITE, "FR", "EN", terms);
 
         assertEquals("glossary-1", first);
         assertEquals("glossary-1", second);
         verify(translator, times(1))
                 .createMultilingualGlossaryFromCsv(anyString(), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public void glossaryNameIsScopedBySite() throws Exception {
+        when(translator.listMultilingualGlossaries()).thenReturn(List.of());
+        MultilingualGlossaryInfo created = mock(MultilingualGlossaryInfo.class);
+        when(created.getGlossaryId()).thenReturn("glossary-1");
+        ArgumentCaptor<String> nameCaptor = ArgumentCaptor.forClass(String.class);
+        when(translator.createMultilingualGlossaryFromCsv(nameCaptor.capture(), eq("FR"), eq("EN"), anyString()))
+                .thenReturn(created);
+
+        manager.getOrCreateGlossaryId(translator, "acme", "FR", "EN", Map.of("Bonjour", "Hello"));
+
+        assertEquals("jahia-ai-assisted-translations-acme-FR-EN", nameCaptor.getValue());
+    }
+
+    @Test
+    public void differentSitesGetDistinctGlossaries() throws Exception {
+        when(translator.listMultilingualGlossaries()).thenReturn(List.of());
+        MultilingualGlossaryInfo created = mock(MultilingualGlossaryInfo.class);
+        when(created.getGlossaryId()).thenReturn("glossary-1");
+        ArgumentCaptor<String> nameCaptor = ArgumentCaptor.forClass(String.class);
+        when(translator.createMultilingualGlossaryFromCsv(nameCaptor.capture(), eq("FR"), eq("EN"), anyString()))
+                .thenReturn(created);
+
+        // Same language pair and identical terms, but two different sites must not share a glossary.
+        Map<String, String> terms = Map.of("Bonjour", "Hello");
+        manager.getOrCreateGlossaryId(translator, "acme", "FR", "EN", terms);
+        manager.getOrCreateGlossaryId(translator, "globex", "FR", "EN", terms);
+
+        verify(translator, times(2))
+                .createMultilingualGlossaryFromCsv(anyString(), anyString(), anyString(), anyString());
+        assertEquals("jahia-ai-assisted-translations-acme-FR-EN", nameCaptor.getAllValues().get(0));
+        assertEquals("jahia-ai-assisted-translations-globex-FR-EN", nameCaptor.getAllValues().get(1));
+    }
+
+    @Test
+    public void blankSiteKeyFallsBackToDefault() throws Exception {
+        when(translator.listMultilingualGlossaries()).thenReturn(List.of());
+        MultilingualGlossaryInfo created = mock(MultilingualGlossaryInfo.class);
+        when(created.getGlossaryId()).thenReturn("glossary-1");
+        ArgumentCaptor<String> nameCaptor = ArgumentCaptor.forClass(String.class);
+        when(translator.createMultilingualGlossaryFromCsv(nameCaptor.capture(), eq("FR"), eq("EN"), anyString()))
+                .thenReturn(created);
+
+        manager.getOrCreateGlossaryId(translator, null, "FR", "EN", Map.of("Bonjour", "Hello"));
+
+        assertEquals("jahia-ai-assisted-translations-default-FR-EN", nameCaptor.getValue());
     }
 }

@@ -36,7 +36,7 @@ public class DeepLGlossaryManager {
         }
     }
 
-    public synchronized String getOrCreateGlossaryId(DeepLClient translator, String srcLanguage, String destLanguage, Map<String, String> glossaryTerms) throws InterruptedException, DeepLException {
+    public synchronized String getOrCreateGlossaryId(DeepLClient translator, String siteKey, String srcLanguage, String destLanguage, Map<String, String> glossaryTerms) throws InterruptedException, DeepLException {
         if (translator == null || MapUtils.isEmpty(glossaryTerms)) {
             return null;
         }
@@ -53,14 +53,17 @@ public class DeepLGlossaryManager {
 
         cleanupStaleGlossariesIfNeeded(translator, false);
 
-        String glossaryKey = srcLanguage + "|" + destLanguage;
+        // Scope the glossary by site so that two sites sharing a language pair do not overwrite each
+        // other's remote glossary (the cache key and the DeepL glossary name both include the site).
+        String site = sanitizeNamePart(siteKey);
+        String glossaryKey = site + "|" + srcLanguage + "|" + destLanguage;
         String glossaryHash = computeGlossaryHash(sanitizedTerms);
         CachedGlossary cachedGlossary = glossaryCache.get(glossaryKey);
         if (cachedGlossary != null && StringUtils.equals(cachedGlossary.hash, glossaryHash)) {
             return cachedGlossary.glossaryId;
         }
 
-        String glossaryName = buildGlossaryName(srcLanguage, destLanguage);
+        String glossaryName = buildGlossaryName(site, srcLanguage, destLanguage);
         String csvContent = buildGlossaryCsvContent(sanitizedTerms);
 
         String glossaryId = cachedGlossary != null ? cachedGlossary.glossaryId : findGlossaryIdByName(translator, glossaryName);
@@ -129,8 +132,17 @@ public class DeepLGlossaryManager {
         return null;
     }
 
-    private String buildGlossaryName(String srcLanguage, String destLanguage) {
-        return GLOSSARY_NAME_PREFIX + "-" + srcLanguage + "-" + destLanguage;
+    private String buildGlossaryName(String site, String srcLanguage, String destLanguage) {
+        return GLOSSARY_NAME_PREFIX + "-" + site + "-" + srcLanguage + "-" + destLanguage;
+    }
+
+    private String sanitizeNamePart(String value) {
+        String trimmed = StringUtils.trimToNull(value);
+        if (trimmed == null) {
+            return "default";
+        }
+        // Keep the site segment of the glossary name/cache key simple and unambiguous.
+        return trimmed.replaceAll("[^A-Za-z0-9]+", "-");
     }
 
     private Map<String, String> sanitizeGlossaryTerms(Map<String, String> glossaryTerms) {
