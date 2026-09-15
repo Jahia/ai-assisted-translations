@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -75,7 +75,9 @@ public class CsvGlossaryService implements GlossaryService {
     }
 
     private ResolvedGlossary buildGlossary(List<GlossaryFileDescriptor> files, JCRSiteNode contextNode, String sourceLanguage, String targetLanguage) {
-        Map<String, String> mergedTerms = new HashMap<>();
+        // LinkedHashMap preserves load order (global files first, then site files) so that on a source
+        // term that collides only after normalization, the last-loaded (site) value wins deterministically.
+        Map<String, String> mergedTerms = new LinkedHashMap<>();
         List<String> sourceFiles = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
 

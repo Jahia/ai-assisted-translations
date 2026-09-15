@@ -86,6 +86,27 @@ public class GlossaryCsvParserTest {
     }
 
     @Test
+    public void rowWithMoreColumnsThanHeaderIsSkipped() throws IOException {
+        // An unquoted comma in a term produces an extra field; it must be surfaced, not silently truncated.
+        ParsedGlossaryFile parsed = parse("key,fr,en\noops,Bonjour, tout le monde,Hello\nmerci,Merci,Thanks\n");
+
+        assertFalse(parsed.hasErrors());
+        assertTrue(parsed.hasRowWarnings());
+        assertEquals("only the well-formed row is kept", 1, parsed.getRows().size());
+        assertEquals("merci", parsed.getRows().get(0).get("key"));
+        assertTrue(parsed.getRowWarnings().stream().anyMatch(w -> w.contains("columns but the header defines")));
+    }
+
+    @Test
+    public void languageHeaderUnderscoreAndDashVariantsAreDuplicates() throws IOException {
+        // fr_FR and fr-FR resolve to the same column, so they must be rejected as duplicate headers.
+        ParsedGlossaryFile parsed = parse("key,fr_FR,fr-FR\nx,Bonjour,Salut\n");
+
+        assertTrue(parsed.hasErrors());
+        assertTrue(parsed.getValidationErrors().stream().anyMatch(e -> e.contains("Duplicate header")));
+    }
+
+    @Test
     public void languageHeadersAreNormalizedToDash() throws IOException {
         ParsedGlossaryFile parsed = parse("key,fr_FR,pt-BR\nx,Bonjour,Ola\n");
 

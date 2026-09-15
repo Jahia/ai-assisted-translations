@@ -42,6 +42,12 @@ public class GlossaryCsvParser {
 
             for (CSVRecord csvRecord : parser) {
                 int lineNumber = (int) csvRecord.getRecordNumber() + 1;
+                if (csvRecord.size() > headers.size()) {
+                    rowWarnings.add("Line " + lineNumber + ": row has " + csvRecord.size()
+                            + " columns but the header defines " + headers.size()
+                            + " (unquoted comma or extra column?), row skipped");
+                    continue;
+                }
                 Map<String, String> row = new LinkedHashMap<>();
                 for (int i = 0; i < headers.size(); i++) {
                     String value = i < csvRecord.size() ? csvRecord.get(i) : "";
@@ -75,7 +81,10 @@ public class GlossaryCsvParser {
                 errors.add("Headers cannot contain empty column names (columns found: " + headers + ")");
                 continue;
             }
-            if (!duplicateCheck.add(normalized)) {
+            // Language headers are canonicalized ('_' -> '-') by getRowTerm, so 'fr_FR' and 'fr-FR'
+            // resolve to the same column; treat them as duplicates instead of accepting a shadow column.
+            String duplicateKey = isLanguageHeader(header) ? normalized.replace('_', '-') : normalized;
+            if (!duplicateCheck.add(duplicateKey)) {
                 errors.add("Duplicate header: " + header);
             }
             if (isLanguageHeader(header)) {

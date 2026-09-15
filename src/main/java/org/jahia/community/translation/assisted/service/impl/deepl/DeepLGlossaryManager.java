@@ -106,7 +106,11 @@ public class DeepLGlossaryManager {
                 List<MultilingualGlossaryInfo> glossaryInfos = translator.listMultilingualGlossaries().stream().filter(info -> StringUtils.startsWith(info.getName(), GLOSSARY_NAME_PREFIX) || protectedGlossaryIds.contains(info.getGlossaryId())).collect(Collectors.toList());
                 for (MultilingualGlossaryInfo glossaryInfo : glossaryInfos) {
                     Date creationTime = glossaryInfo.getCreationTime();
-                    if (creationTime == null || synchronizedNow - creationTime.getTime() < GLOSSARY_MAX_AGE_MILLIS) {
+                    // Keep glossaries still referenced by the in-memory cache so their cached id stays
+                    // valid, and keep those younger than the max age.
+                    boolean stillReferenced = protectedGlossaryIds.contains(glossaryInfo.getGlossaryId());
+                    boolean youngerThanMaxAge = creationTime == null || synchronizedNow - creationTime.getTime() < GLOSSARY_MAX_AGE_MILLIS;
+                    if (stillReferenced || youngerThanMaxAge) {
                         continue;
                     }
                     translator.deleteMultilingualGlossary(glossaryInfo);
@@ -147,7 +151,6 @@ public class DeepLGlossaryManager {
 
     private Map<String, String> sanitizeGlossaryTerms(Map<String, String> glossaryTerms) {
         Map<String, String> sanitized = new LinkedHashMap<>();
-        Set<String> seenSources = new HashSet<>();
         for (Map.Entry<String, String> entry : glossaryTerms.entrySet()) {
             String source = stripWhitespace(entry.getKey());
             String target = stripWhitespace(entry.getValue());
@@ -159,12 +162,12 @@ public class DeepLGlossaryManager {
                 continue;
             }
             // DeepL forbids duplicate source terms. The incoming map cannot hold duplicate keys, but
-            // stripping whitespace can make two distinct keys collide (e.g. "Term" and "Term "), so guard
-            // against that. Matching is case-sensitive: DeepL accepts sources differing only by case
-            // (e.g. "Unil" and "UNIL"), so we must not drop those.
-            if (!seenSources.add(source)) {
-                logger.warn("Skipping duplicate glossary source term after trimming: '{}'", source);
-                continue;
+            // stripping whitespace can make two distinct keys collide (e.g. "Term" and "Term "). The map
+            // is iterated in load order (global first, then site), so on such a collision the last entry
+            // wins - keeping the site term's value overriding the global one. Matching is case-sensitive:
+            // DeepL accepts sources differing only by case (e.g. "Unil" and "UNIL"), so we keep those.
+            if (sanitized.containsKey(source)) {
+                logger.warn("Duplicate glossary source term after trimming, keeping the last value: '{}'", source);
             }
             sanitized.put(source, target);
         }

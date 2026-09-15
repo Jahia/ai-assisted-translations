@@ -18,10 +18,13 @@ cancel_action,Cancel,Annuler,Abbrechen,active,common
 ## Validation rules (phase 1)
 - Header row is mandatory.
 - `key` must be the first column.
-- Header names must be unique.
+- Header names must be unique. Underscore and dash variants of the same language header
+  (e.g. `fr_FR` and `fr-FR`) resolve to the same column and are rejected as duplicates.
 - Language headers must match: `xx` or `xx-YY` (underscore variant accepted).
 - Each non-empty data row must have a non-empty `key` value.
 - Each non-empty data row must contain at least one non-empty language value.
+- A row with more columns than the header (e.g. an unquoted comma inside a term) is skipped
+  and reported, rather than silently truncated.
 
 ## Notes
 - Non-language columns are ignored by runtime term extraction in phase 1/2.

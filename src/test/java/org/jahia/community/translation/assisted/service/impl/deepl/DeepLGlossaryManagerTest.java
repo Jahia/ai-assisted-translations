@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -197,6 +199,62 @@ public class DeepLGlossaryManagerTest {
                 .createMultilingualGlossaryFromCsv(anyString(), anyString(), anyString(), anyString());
         assertEquals("jahia-ai-assisted-translations-acme-FR-EN", nameCaptor.getAllValues().get(0));
         assertEquals("jahia-ai-assisted-translations-globex-FR-EN", nameCaptor.getAllValues().get(1));
+    }
+
+    @Test
+    public void siteTermWinsOnPostTrimCollision() throws Exception {
+        when(translator.listMultilingualGlossaries()).thenReturn(List.of());
+        MultilingualGlossaryInfo created = mock(MultilingualGlossaryInfo.class);
+        when(created.getGlossaryId()).thenReturn("glossary-1");
+        ArgumentCaptor<String> csvCaptor = ArgumentCaptor.forClass(String.class);
+        when(translator.createMultilingualGlossaryFromCsv(anyString(), eq("FR"), eq("EN"), csvCaptor.capture()))
+                .thenReturn(created);
+
+        // Load order (global first, site last); both strip to "Term", the site value must win.
+        Map<String, String> terms = new LinkedHashMap<>();
+        terms.put("Term ", "global");
+        terms.put("Term", "site");
+
+        manager.getOrCreateGlossaryId(translator, SITE, "FR", "EN", terms);
+
+        String csv = csvCaptor.getValue();
+        assertEquals(1, csv.split("\n").length);
+        assertTrue("site value overrides global deterministically", csv.contains("\"Term\",\"site\""));
+    }
+
+    @Test
+    public void keepsGlossaryStillReferencedByCacheEvenWhenStale() throws Exception {
+        // First create a glossary so its id is cached (protected).
+        when(translator.listMultilingualGlossaries()).thenReturn(List.of());
+        MultilingualGlossaryInfo created = mock(MultilingualGlossaryInfo.class);
+        when(created.getGlossaryId()).thenReturn("gid-cached");
+        when(translator.createMultilingualGlossaryFromCsv(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(created);
+        manager.getOrCreateGlossaryId(translator, SITE, "FR", "EN", Map.of("Bonjour", "Hello"));
+
+        // The same glossary now shows up as stale; cleanup must not delete it while it is cached.
+        MultilingualGlossaryInfo stale = mock(MultilingualGlossaryInfo.class);
+        when(stale.getGlossaryId()).thenReturn("gid-cached");
+        when(stale.getName()).thenReturn("jahia-ai-assisted-translations-acme-FR-EN");
+        when(stale.getCreationTime()).thenReturn(new Date(0L));
+        when(translator.listMultilingualGlossaries()).thenReturn(List.of(stale));
+
+        manager.cleanupStaleGlossariesIfNeeded(translator, true);
+
+        verify(translator, never()).deleteMultilingualGlossary(stale);
+    }
+
+    @Test
+    public void deletesStaleGlossaryNotReferencedByCache() throws Exception {
+        MultilingualGlossaryInfo stale = mock(MultilingualGlossaryInfo.class);
+        when(stale.getGlossaryId()).thenReturn("gid-old");
+        when(stale.getName()).thenReturn("jahia-ai-assisted-translations-old-FR-EN");
+        when(stale.getCreationTime()).thenReturn(new Date(0L));
+        when(translator.listMultilingualGlossaries()).thenReturn(List.of(stale));
+
+        manager.cleanupStaleGlossariesIfNeeded(translator, true);
+
+        verify(translator).deleteMultilingualGlossary(stale);
     }
 
     @Test

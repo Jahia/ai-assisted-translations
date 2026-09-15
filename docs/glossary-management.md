@@ -39,6 +39,10 @@ glossaries are loaded on top. On a conflicting source term, the **site value
 wins** (it is loaded last); source terms that exist only globally are inherited.
 This lets you define organization-wide terms once and override them per site.
 
+The global glossary is read with a **system session**, so it applies even to
+users who do not have read access to the system site. Site glossaries continue
+to be read with the current user's session.
+
 ---
 
 ## 2. Lifecycle of a glossary
