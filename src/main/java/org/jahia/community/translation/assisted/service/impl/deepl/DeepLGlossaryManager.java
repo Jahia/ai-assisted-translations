@@ -141,8 +141,8 @@ public class DeepLGlossaryManager {
         if (trimmed == null) {
             return "default";
         }
-        // Keep the site segment of the glossary name/cache key simple and unambiguous.
-        return trimmed.replaceAll("[^A-Za-z0-9]+", "-");
+        // Keep the site segment of the glossary name/cache key simple and unambiguous, as it is a Jahia sitekey we rely on Jahia for the formatting and authorized characters.
+        return trimmed;
     }
 
     private Map<String, String> sanitizeGlossaryTerms(Map<String, String> glossaryTerms) {
