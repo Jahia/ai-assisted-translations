@@ -158,12 +158,21 @@ public class OpenAITranslatorService implements TranslatorService {
 
     @Override
     public List<TranslatedField> suggestTranslationForNode(JCRNodeWrapper node, String sourceLanguage, String targetLanguage) throws RepositoryException, InterruptedException {
+        return suggestTranslationForNode(node, sourceLanguage, targetLanguage, null);
+    }
+
+    @Override
+    public List<TranslatedField> suggestTranslationForNode(JCRNodeWrapper node, String sourceLanguage, String targetLanguage, Collection<String> propertyNames) throws RepositoryException, InterruptedException {
         // Ensure we get the nod ein the source language to be able to suggest translations
         final JCRSessionWrapper session = JCRSessionFactory.getInstance().getCurrentUserSession(node.getSession().getWorkspace().getName(), LanguageCodeConverters.languageCodeToLocale(sourceLanguage));
         final JCRNodeWrapper localizedNode = session.getNodeByIdentifier(node.getIdentifier());
         final TranslationData data = new TranslationData();
 
         translationServicesManager.buildDataToTranslate(localizedNode, data, true, false);
+        if (propertyNames != null && !propertyNames.isEmpty()) {
+            // Only what is kept is sent to OpenAI, which bills by the tokens it receives.
+            data.retainProperties(propertyNames);
+        }
         // Build JSON to send to OpenAI, using data.getTexts() which is a map of key->text to translate, where key is the JCR path to the property (e.g. /a/title) and value is the text to translate (e.g. "Hello <b>world</b>")
         ResolvedGlossary resolvedGlossary = glossaryService.resolve(localizedNode, sourceLanguage, targetLanguage);
         return getTranslatedFieldList(sourceLanguage, targetLanguage, data, false, resolvedGlossary.getTerms());

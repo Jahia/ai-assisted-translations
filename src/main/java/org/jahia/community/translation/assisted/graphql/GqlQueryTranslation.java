@@ -30,7 +30,8 @@ public class GqlQueryTranslation {
     @GraphQLDescription("Translate node")
     public List<TranslatedField> translationSuggestions(
             @GraphQLName("sourceLanguage") @GraphQLDescription("Language to translate from") String sourceLocale,
-            @GraphQLName("targetLanguage") @GraphQLDescription("Language to translate to") String targetLocale
+            @GraphQLName("targetLanguage") @GraphQLDescription("Language to translate to") String targetLocale,
+            @GraphQLName("propertyNames") @GraphQLDescription("Only translate these properties, as JCR names. Nothing else is sent to the translation service. All the translatable properties of the node when omitted.") List<String> propertyNames
     ) {
         try {
             TranslatorService translatorService = BundleUtils.getOsgiService(TranslatorService.class, null);
@@ -43,7 +44,7 @@ public class GqlQueryTranslation {
                     logger.debug(String.format("Translating %s from %s to %s", node.getPath(), sourceLocale, targetLocale));
                 }
                 logger.info("Translating from {} to {} with provider {}", sourceLocale, targetLocale, translatorService.getProviderKey());
-                return translatorService.suggestTranslationForNode(node.getNode(), sourceLocale, targetLocale);
+                return translatorService.suggestTranslationForNode(node.getNode(), sourceLocale, targetLocale, propertyNames);
             } else {
                 logger.warn("TranslatorService with provider key {} is not available", translatorService.getProviderKey());
                 return Collections.emptyList();
