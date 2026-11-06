@@ -21,4 +21,15 @@ const suggestTranslationForLanguage = gql`query SuggestTranslationForLanguage($p
         }
     }
 }`;
-export {getMutationTranslateNode, suggestTranslationForLanguage};
+// Only the named properties are sent to the translation service, which bills by what it is sent.
+const suggestTranslationForProperties = gql`query SuggestTranslationForProperties($path:String!, $sourceLanguage:String!, $targetLanguage:String!, $propertyNames:[String]) {
+    jcr {
+        nodeByPath(path: $path) {
+            translationSuggestions(sourceLanguage: $sourceLanguage, targetLanguage: $targetLanguage, propertyNames: $propertyNames) {
+                fieldName
+                translatedValue
+            }
+        }
+    }
+}`;
+export {getMutationTranslateNode, suggestTranslationForLanguage, suggestTranslationForProperties};

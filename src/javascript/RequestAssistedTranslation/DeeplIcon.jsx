@@ -1,9 +1,18 @@
 import * as React from 'react';
-const SVGComponent = props => (
+import PropTypes from 'prop-types';
+// A flex container squeezes an svg that may shrink: next to a button label this icon was drawn about
+// 6px wide, a dark dot. flexShrink 0 keeps it at the size asked for.
+// moonstone's Button and list items hand an icon a size as a word, so both a word and a number are
+// understood. "default" stays 20, which is what this icon always used.
+const PIXELS_BY_SIZE = {small: 12, default: 20, big: 28};
+const toPixels = size => (typeof size === 'number' ? size : (PIXELS_BY_SIZE[size] || PIXELS_BY_SIZE.default));
+
+const SVGComponent = ({size = 'default', style, ...props}) => (
     <svg
-    height={20}
+    height={toPixels(size)}
     viewBox="0 0 550 689.9"
-    width={20}
+    width={toPixels(size)}
+    style={{flexShrink: 0, ...style}}
     xmlns="http://www.w3.org/2000/svg"
     {...props}
     >
@@ -17,4 +26,9 @@ const SVGComponent = props => (
     />
     </svg>
 );
+SVGComponent.propTypes = {
+    size: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    style: PropTypes.object
+};
+
 export default SVGComponent;
