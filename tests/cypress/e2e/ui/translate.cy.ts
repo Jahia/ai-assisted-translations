@@ -100,7 +100,7 @@ describe('translate action tests', () => {
         jcontent.getHeader().get().find('button[data-sel-role=\'requestTranslationAiAssistedForOnePage\']').should('not.exist');
     });
 
-    it.only('can open translate dialog on page', () => {
+    it('can open translate dialog on page', () => {
         cy.log('Checking we can open teh dialog to translate all properties')
         const jcontent = JContent.visit(siteKey, 'fr', 'pages/home');
         jcontent.getHeaderActionButton('requestTranslationAiAssistedForOnePage').should('exist').click();
@@ -108,7 +108,8 @@ describe('translate action tests', () => {
         const dropdown = getComponentByRole(Dropdown,'from-language-selector');
         dropdown.get().click();
         let menu = getComponent(Menu, dropdown);
-        menu.get().find('.moonstone-menuItem').should('have.length', 3);
+        // The target language (French) is not offered as a source.
+        menu.get().should('contain', 'English').and('contain', 'Deutsch').and('not.contain', 'Français');
         menu.select('English')
         getComponentByRole(Button, 'translate-button').should('not.be.disabled').click();
         cy.wait('@translateNodeCall');

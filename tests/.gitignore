@@ -1,0 +1,6 @@
+node_modules
+results
+artifacts
+run-artifacts
+.env
+.yarn/install-state.gz
