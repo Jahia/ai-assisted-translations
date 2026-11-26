@@ -6,6 +6,7 @@ import org.jahia.community.translation.assisted.AssistedTranslationsConstants;
 import org.jahia.services.content.JCRContentUtils;
 import org.jahia.services.content.JCRNodeWrapper;
 import org.jahia.services.content.JCRSessionWrapper;
+import org.jahia.services.content.JCRTemplate;
 import org.jahia.services.content.decorator.JCRFileNode;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -14,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,6 +30,7 @@ import static org.jahia.community.translation.assisted.AssistedTranslationsConst
 public class JcrGlossaryFileLocator implements GlossaryFileLocator {
 
     private static final Logger logger = LoggerFactory.getLogger(JcrGlossaryFileLocator.class);
+    private static final String SYSTEM_SITE_PATH = "/sites/systemsite";
     private final Pattern glossaryFilePattern = Pattern.compile(".*\\.csv$");
     private String glossaryRelativePath;
 
@@ -43,13 +47,25 @@ public class JcrGlossaryFileLocator implements GlossaryFileLocator {
 
     @Override
     public List<GlossaryFileDescriptor> listGlossaryFiles(JCRNodeWrapper contextNode) throws RepositoryException {
-        String siteGlossaryPath = buildSiteGlossaryPath(contextNode);
-        JCRSessionWrapper session = contextNode.getSession();
-        if (!session.nodeExists(siteGlossaryPath)) {
+        return listGlossaryFilesInFolder(contextNode.getSession(), buildSiteGlossaryPath(contextNode));
+    }
+
+    @Override
+    public List<GlossaryFileDescriptor> listGlobalGlossaryFiles(JCRNodeWrapper contextNode) throws RepositoryException {
+        String relative = glossaryRelativePath.startsWith("/") ? glossaryRelativePath : "/" + glossaryRelativePath;
+        String folderPath = SYSTEM_SITE_PATH + relative;
+        // Read the global glossary with a short-lived system session (opened and closed by JCRTemplate) so
+        // it applies regardless of whether the current user has read access to the system site.
+        return JCRTemplate.getInstance().doExecuteWithSystemSessionAsUser(null, workspace(contextNode), null,
+                session -> listGlossaryFilesInFolder(session, folderPath));
+    }
+
+    private List<GlossaryFileDescriptor> listGlossaryFilesInFolder(JCRSessionWrapper session, String folderPath) throws RepositoryException {
+        if (!session.nodeExists(folderPath)) {
             return List.of();
         }
 
-        JCRNodeWrapper glossaryFolder = session.getNode(siteGlossaryPath);
+        JCRNodeWrapper glossaryFolder = session.getNode(folderPath);
         List<GlossaryFileDescriptor> descriptors = new ArrayList<>();
         List<JCRNodeWrapper> childrenOfType = JCRContentUtils.getChildrenOfType(glossaryFolder, Constants.JAHIANT_FILE);
         for (JCRNodeWrapper fileNode : childrenOfType) {
@@ -66,9 +82,32 @@ public class JcrGlossaryFileLocator implements GlossaryFileLocator {
 
     @Override
     public InputStream openGlossaryFile(String path, JCRNodeWrapper contextNode) throws RepositoryException {
+        if (isGlobalGlossaryPath(path)) {
+            // Read the bytes fully inside the system session so it can be closed before the stream is consumed.
+            byte[] content = JCRTemplate.getInstance().doExecuteWithSystemSessionAsUser(null, workspace(contextNode), null,
+                    session -> readFileContent(session, path));
+            return new ByteArrayInputStream(content);
+        }
         JCRSessionWrapper session = contextNode.getSession();
         JCRFileNode fileNode = (JCRFileNode) session.getNode(path);
         return fileNode.getFileContent().downloadFile();
+    }
+
+    private static byte[] readFileContent(JCRSessionWrapper session, String path) throws RepositoryException {
+        JCRFileNode fileNode = (JCRFileNode) session.getNode(path);
+        try (InputStream in = fileNode.getFileContent().downloadFile()) {
+            return in.readAllBytes();
+        } catch (IOException e) {
+            throw new RepositoryException("Unable to read global glossary file " + path, e);
+        }
+    }
+
+    private boolean isGlobalGlossaryPath(String path) {
+        return path != null && path.startsWith(SYSTEM_SITE_PATH + "/");
+    }
+
+    private String workspace(JCRNodeWrapper contextNode) throws RepositoryException {
+        return contextNode.getSession().getWorkspace().getName();
     }
 
     private String buildSiteGlossaryPath(JCRNodeWrapper contextNode) throws RepositoryException {
