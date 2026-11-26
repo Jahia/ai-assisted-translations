@@ -43,7 +43,7 @@ const answerMockedOperations = req => {
     });
     req.alias = mocks[0].alias;
     if (indexes.length === req.body.length) {
-        req.reply(mocks.length === 1 ? mocks[0].result : mocks.map(mock => mock.result));
+        req.reply(mocks.map(mock => mock.result));
         return;
     }
 
@@ -121,7 +121,6 @@ describe('translate action tests', () => {
         cy.loginAndStoreSession();
 
         // Mock the translation service calls, so that the tests run on CI without a translation backend.
-        Object.keys(mockedOperations).forEach(operationName => delete mockedOperations[operationName]);
         cy.intercept('POST', '**/modules/graphql', answerMockedOperations);
         mockGraphqlOperation('TranslateNode', 'graphql/translateNode.json', 'translateNodeCall');
         mockGraphqlOperation('SuggestTranslationForLanguage', 'graphql/suggestTranslationForLanguage.json', 'suggestTranslationCall');
