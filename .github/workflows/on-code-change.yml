@@ -1,0 +1,48 @@
+name: On Code Change (PR)
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Module
+    permissions:
+      contents: read
+      packages: read
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/jahia/jahia-docker-mvn-cache:11-jdk-noble-mvn-loaded
+      credentials:
+        username: ${{ secrets.GH_PACKAGES_USERNAME }}
+        password: ${{ secrets.GH_PACKAGES_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jahia/jahia-modules-action/build@v2
+        with:
+          nexus_username: ${{ secrets.NEXUS_USERNAME }}
+          nexus_password: ${{ secrets.NEXUS_PASSWORD }}
+          mvn_settings_filepath: '.github/maven.settings.xml'
+
+  # The integration-tests action does not build the module: it installs the artifact of the build job.
+  integration-tests:
+    name: Integration Tests
+    needs: build
+    permissions:
+      contents: read
+      packages: read
+      checks: write
+    secrets: inherit
+    uses: Jahia/jahia-modules-action/.github/workflows/reusable-integration-tests.yml@v2
+    with:
+      module_id: ai-assisted-translations
+      module_branch: ${{ github.ref }}
+      jahia_image: ghcr.io/jahia/jahia-ee-dev:8-SNAPSHOT
+      provisioning_manifest: provisioning-manifest-build.yml
+      artifact_prefix: ai-assisted-translations
+      should_skip_testrail: true
+      skip_notifications: true

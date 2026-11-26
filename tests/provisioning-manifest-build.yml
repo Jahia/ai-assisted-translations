@@ -1,7 +1,32 @@
 - addMavenRepository: 'https://store.jahia.com/nexus/content/repositories/jahia-public-app-store@id=JahiaStore'
-- addMavenRepository: 'https://devtools.jahia.com/nexus/content/groups/public/@snapshots@noreleases@id=JahiaSnapshot'
+# qa-module is only published to the internal snapshots. The CI replaces NEXUS_USERNAME and NEXUS_PASSWORD with its account.
+- addMavenRepository: 'https://devtools.jahia.com/nexus/content/repositories/jahia-internal-snapshots@id=jahia-internal-snapshots@snapshots@noreleases'
+  username: 'NEXUS_USERNAME'
+  password: 'NEXUS_PASSWORD'
 
-- include: 'provisioning.yml'
-
-- import: "jar:mvn:org.jahia.modules/digitall/3.0.0/zip/import!/users.zip"
-- importSite: "jar:mvn:org.jahia.modules/digitall/3.0.0/zip/import!/Digitall.zip"
+# The specs create their sites on dx-base-demo-templates, which needs the modules above it, and their
+# content on qa-module's qant:allFields.
+- installBundle:
+    - 'mvn:org.jahia.modules/bookmarks/3.1.0'
+    - 'mvn:org.jahia.modules/bootstrap3-core/4.3.0'
+    - 'mvn:org.jahia.modules/bootstrap3-components/4.3.0'
+    - 'mvn:org.jahia.modules/calendar/3.2.0'
+    - 'mvn:org.jahia.modules/event/4.0.1'
+    - 'mvn:org.jahia.modules/font-awesome/6.1.5'
+    - 'mvn:org.jahia.modules/location/3.2.0'
+    - 'mvn:org.jahia.modules/news/3.4.0'
+    - 'mvn:org.jahia.modules/person/3.2.0'
+    - 'mvn:org.jahia.modules/press/3.1.0'
+    - 'mvn:org.jahia.modules/rating/3.3.0'
+    - 'mvn:org.jahia.modules/topstories/3.0.0'
+    - 'mvn:org.jahia.modules/legacy-default-components/1.0.0'
+    - 'mvn:org.jahia.modules/skins/8.2.0'
+    - 'mvn:org.jahia.modules/default-skins/8.2.0'
+    - 'mvn:org.jahia.modules/grid/8.1.0'
+    - 'mvn:org.jahia.modules/tabularList/8.2.0'
+    - 'mvn:org.jahia.modules/dx-base-demo-core/2.6.0'
+    - 'mvn:org.jahia.modules/dx-base-demo-components/3.0.0'
+    - 'mvn:org.jahia.modules/dx-base-demo-templates/4.0.0'
+    - 'mvn:org.jahia.modules/qa-module/3.2.0-SNAPSHOT'
+  autoStart: true
+  uninstallPreviousVersion: true
