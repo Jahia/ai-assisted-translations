@@ -13,36 +13,44 @@ import {ContentEditor, JContent, JContentPageBuilder} from '@jahia/jcontent-cypr
 import {Field, SmallTextField} from '@jahia/jcontent-cypress/dist/page-object/fields';
 import {Menu} from "@jahia/cypress";
 
+// The fixture and the alias of each mocked operation, by operation name.
+const mockedOperations: Record<string, {result: unknown, alias: string}> = {};
 // The variables of the last call to each mocked operation, by alias.
 const mockedVariables: Record<string, unknown> = {};
 
-// Apollo batches the GraphQL operations, so the mocked one can share a request with other queries, at any index.
-// The other operations go to Jahia, and the fixture takes the place of the mocked one in the response.
 const mockGraphqlOperation = (operationName: string, fixture: string, alias: string) => {
     cy.fixture(fixture).then(result => {
-        cy.intercept('POST', '**/modules/graphql', req => {
-            if (!Array.isArray(req.body)) {
-                return;
-            }
+        mockedOperations[operationName] = {result, alias};
+    });
+};
 
-            const index = req.body.findIndex(operation => operation.operationName === operationName);
-            if (index === -1) {
-                return;
-            }
+// Apollo batches the GraphQL operations, so a mocked one can share a request with other queries, at any index.
+// The other operations go to Jahia, and each fixture takes the place of its operation in the response.
+// The request takes the alias of its first mocked operation.
+const answerMockedOperations = req => {
+    if (!Array.isArray(req.body)) {
+        return;
+    }
 
-            req.alias = alias;
-            mockedVariables[alias] = req.body[index].variables;
-            if (req.body.length === 1) {
-                req.reply(result);
-                return;
-            }
+    const indexes = req.body.flatMap((operation, index) => (mockedOperations[operation.operationName] ? [index] : []));
+    if (indexes.length === 0) {
+        return;
+    }
 
-            // Cypress sends a body changed in place, and ignores a new array.
-            req.body.splice(index, 1);
-            req.continue(res => {
-                res.body.splice(index, 0, result);
-            });
-        });
+    const mocks = indexes.map(index => mockedOperations[req.body[index].operationName]);
+    indexes.forEach((index, i) => {
+        mockedVariables[mocks[i].alias] = req.body[index].variables;
+    });
+    req.alias = mocks[0].alias;
+    if (indexes.length === req.body.length) {
+        req.reply(mocks.length === 1 ? mocks[0].result : mocks.map(mock => mock.result));
+        return;
+    }
+
+    // Cypress sends a body changed in place, and ignores a new array.
+    [...indexes].reverse().forEach(index => req.body.splice(index, 1));
+    req.continue(res => {
+        indexes.forEach((index, i) => res.body.splice(index, 0, mocks[i].result));
     });
 };
 
@@ -113,6 +121,8 @@ describe('translate action tests', () => {
         cy.loginAndStoreSession();
 
         // Mock the translation service calls, so that the tests run on CI without a translation backend.
+        Object.keys(mockedOperations).forEach(operationName => delete mockedOperations[operationName]);
+        cy.intercept('POST', '**/modules/graphql', answerMockedOperations);
         mockGraphqlOperation('TranslateNode', 'graphql/translateNode.json', 'translateNodeCall');
         mockGraphqlOperation('SuggestTranslationForLanguage', 'graphql/suggestTranslationForLanguage.json', 'suggestTranslationCall');
     });
@@ -156,16 +166,27 @@ describe('translate action tests', () => {
 
     });
 
-    it('shows the error of the server when the page translation fails', () => {
-        // Registered after the mock of beforeEach, so this one answers TranslateNode.
-        mockGraphqlOperation('TranslateNode', 'graphql/translateNodeFailure.json', 'translateNodeFailure');
-        const jcontent = JContent.visit(siteKey, 'fr', 'pages/home');
-        jcontent.getHeaderActionButton('requestTranslationAiAssistedForOnePage').should('exist').click();
-        cy.get('div[data-sel-role=\'translate-language-dialog\']').as('translateDialog').should('be.visible');
-        getComponentByRole(Button, 'translate-button').should('not.be.disabled').click();
-        cy.wait('@translateNodeFailure');
-        cy.get('#alert-dialog-description').should('be.visible').and('have.text', 'Nothing to translate in fr');
-        cy.get('@translateDialog').should('exist');
+    [
+        {fixture: 'graphql/translateNodeFailure.json', error: 'Nothing to translate in fr'},
+        {fixture: 'graphql/translateNodeFailureNoMessage.json', error: 'An error occurred when translating. Ensure that the content is not locked or that you have sufficient permissions.'}
+    ].forEach(({fixture, error}) => {
+        it(`keeps the page translation dialog open and shows "${error}" when the server fails`, () => {
+            mockGraphqlOperation('TranslateNode', fixture, 'translateNodeFailure');
+            const jcontent = JContent.visit(siteKey, 'fr', 'pages/home');
+            jcontent.getHeaderActionButton('requestTranslationAiAssistedForOnePage').should('exist').click();
+            cy.get('div[data-sel-role=\'translate-language-dialog\']').as('translateDialog').should('be.visible');
+            getComponentByRole(Button, 'translate-button').should('not.be.disabled').click();
+            cy.wait('@translateNodeFailure');
+            cy.get('[data-sel-role="translation-error-dialog"]').should('be.visible').and('contain.text', error);
+            // A dialog that closes stays in the page during its fade, so the check reads the opacity that the fade
+            // sets at once to 0 on the backdrop and the content of a closing dialog.
+            cy.get('@translateDialog').find('[style*="opacity"]').should($faded => {
+                expect($faded).to.have.length(2);
+                $faded.each((i, element) => {
+                    expect(element.style.opacity).to.equal('1');
+                });
+            });
+        });
     });
 
     it.skip('can open translate dialog on pages and has the correct settings', () => {

@@ -223,6 +223,7 @@ export const RequestAssistedTranslation = ({
             <Dialog
                 maxWidth="lg"
                 open={Boolean(errorState)}
+                data-sel-role="translation-error-dialog"
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
                 onClose={() => {
