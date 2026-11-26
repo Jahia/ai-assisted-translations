@@ -236,8 +236,10 @@ export const RequestAssistedTranslation = ({
                     <DialogContentText
                         id="alert-dialog-description"
                         data-sel-role="translation-error-message"
-                    >{errorMessage || t('ai-assisted-translations:label.errorContentAllProperties')}
+                    >{t('ai-assisted-translations:label.errorContentAllProperties')}
                     </DialogContentText>
+                    {errorMessage &&
+                        <DialogContentText data-sel-role="translation-error-detail">{errorMessage}</DialogContentText>}
                 </DialogContent>
                 <DialogActions>
                     <Button label={t('ai-assisted-translations:label.cancel')}

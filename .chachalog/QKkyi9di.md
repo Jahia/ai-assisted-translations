@@ -3,4 +3,4 @@
 ai-assisted-translations: patch
 ---
 
-Fixed page translation so that a failure shows the error of the server instead of closing the dialog silently.
+Fixed page translation so that a failure shows an error, with the detail from the server, instead of closing the dialog silently.

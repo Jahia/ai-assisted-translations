@@ -166,17 +166,24 @@ describe('translate action tests', () => {
     });
 
     [
-        {fixture: 'graphql/translateNodeFailure.json', error: 'Nothing to translate in fr'},
-        {fixture: 'graphql/translateNodeFailureNoMessage.json', error: 'An error occurred when translating. Ensure that the content is not locked or that you have sufficient permissions.'}
-    ].forEach(({fixture, error}) => {
-        it(`keeps the page translation dialog open and shows "${error}" when the server fails`, () => {
+        {fixture: 'graphql/translateNodeFailure.json', detail: 'Nothing to translate in fr'},
+        {fixture: 'graphql/translateNodeFailureNoMessage.json', detail: null}
+    ].forEach(({fixture, detail}) => {
+        it(`keeps the page translation dialog open and shows the error, with ${detail ? 'the' : 'no'} detail of the server, when it fails`, () => {
             mockGraphqlOperation('TranslateNode', fixture, 'translateNodeFailure');
             const jcontent = JContent.visit(siteKey, 'fr', 'pages/home');
             jcontent.getHeaderActionButton('requestTranslationAiAssistedForOnePage').should('exist').click();
             cy.get('div[data-sel-role=\'translate-language-dialog\']').as('translateDialog').should('be.visible');
             getComponentByRole(Button, 'translate-button').should('not.be.disabled').click();
             cy.wait('@translateNodeFailure');
-            cy.get('[data-sel-role="translation-error-message"]').should('be.visible').and('have.text', error);
+            cy.get('[data-sel-role="translation-error-message"]').should('be.visible')
+                .and('have.text', 'An error occurred when translating. Ensure that the content is not locked or that you have sufficient permissions.');
+            if (detail) {
+                cy.get('[data-sel-role="translation-error-detail"]').should('be.visible').and('have.text', detail);
+            } else {
+                cy.get('[data-sel-role="translation-error-detail"]').should('not.exist');
+            }
+
             // A dialog that closes stays in the page during its fade, so the check reads the opacity that the fade
             // sets at once to 0 on the backdrop and the content of a closing dialog.
             cy.get('@translateDialog').find('[style*="opacity"]').should($faded => {
