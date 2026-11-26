@@ -13,6 +13,39 @@ import {ContentEditor, JContent, JContentPageBuilder} from '@jahia/jcontent-cypr
 import {Field, SmallTextField} from '@jahia/jcontent-cypress/dist/page-object/fields';
 import {Menu} from "@jahia/cypress";
 
+// The variables of the last call to each mocked operation, by alias.
+const mockedVariables: Record<string, unknown> = {};
+
+// Apollo batches the GraphQL operations, so the mocked one can share a request with other queries, at any index.
+// The other operations go to Jahia, and the fixture takes the place of the mocked one in the response.
+const mockGraphqlOperation = (operationName: string, fixture: string, alias: string) => {
+    cy.fixture(fixture).then(result => {
+        cy.intercept('POST', '**/modules/graphql', req => {
+            if (!Array.isArray(req.body)) {
+                return;
+            }
+
+            const index = req.body.findIndex(operation => operation.operationName === operationName);
+            if (index === -1) {
+                return;
+            }
+
+            req.alias = alias;
+            mockedVariables[alias] = req.body[index].variables;
+            if (req.body.length === 1) {
+                req.reply(result);
+                return;
+            }
+
+            // Cypress sends a body changed in place, and ignores a new array.
+            req.body.splice(index, 1);
+            req.continue(res => {
+                res.body.splice(index, 0, result);
+            });
+        });
+    });
+};
+
 describe('translate action tests', () => {
     const siteKey = 'translateSite';
     const oneLangSite = 'oneLangSite';
@@ -79,21 +112,9 @@ describe('translate action tests', () => {
     beforeEach(() => {
         cy.loginAndStoreSession();
 
-        // Intercept translation service calls so tests run on CI/CD without a live translation backend.
-        // RegExp is used so the match works regardless of the Jahia origin / context path.
-        // req.alias is set dynamically so cy.wait() can target each operation individually.
-        cy.intercept('POST', '**/modules/graphql', (req) => {
-            // Apollo sends JSON; guard against the body arriving as a raw string
-            const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-            const operationName = body[0]?.operationName;
-            if (operationName === 'TranslateNode') {
-                req.alias = 'translateNodeCall';
-                req.reply({fixture: 'graphql/translateNode.json'});
-            } else if (operationName === 'SuggestTranslationForLanguage') {
-                req.alias = 'suggestTranslationCall';
-                req.reply({fixture: 'graphql/suggestTranslationForLanguage.json'});
-            }
-        });
+        // Mock the translation service calls, so that the tests run on CI without a translation backend.
+        mockGraphqlOperation('TranslateNode', 'graphql/translateNode.json', 'translateNodeCall');
+        mockGraphqlOperation('SuggestTranslationForLanguage', 'graphql/suggestTranslationForLanguage.json', 'suggestTranslationCall');
     });
 
     it('cannot open translate dialog if content has only one language', () => {
@@ -118,8 +139,9 @@ describe('translate action tests', () => {
         // English is preselected, so the test picks Deutsch to prove that the choice reaches the request.
         menu.select('Deutsch');
         getComponentByRole(Button, 'translate-button').should('not.be.disabled').click();
-        cy.wait('@translateNodeCall').its('request.body.0.variables')
-            .should('deep.equal', {path: `/sites/${siteKey}/home`, sourceLanguage: 'de', targetLanguage: 'fr'});
+        cy.wait('@translateNodeCall').then(() => {
+            expect(mockedVariables.translateNodeCall).to.deep.equal({path: `/sites/${siteKey}/home`, sourceLanguage: 'de', targetLanguage: 'fr'});
+        });
         cy.get('@translateDialog').should('not.exist');
         // const pageBuilder = new JContentPageBuilder(jcontent);
         // pageBuilder.refresh();
