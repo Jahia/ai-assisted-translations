@@ -156,6 +156,18 @@ describe('translate action tests', () => {
 
     });
 
+    it('shows the error of the server when the page translation fails', () => {
+        // Registered after the mock of beforeEach, so this one answers TranslateNode.
+        mockGraphqlOperation('TranslateNode', 'graphql/translateNodeFailure.json', 'translateNodeFailure');
+        const jcontent = JContent.visit(siteKey, 'fr', 'pages/home');
+        jcontent.getHeaderActionButton('requestTranslationAiAssistedForOnePage').should('exist').click();
+        cy.get('div[data-sel-role=\'translate-language-dialog\']').as('translateDialog').should('be.visible');
+        getComponentByRole(Button, 'translate-button').should('not.be.disabled').click();
+        cy.wait('@translateNodeFailure');
+        cy.get('#alert-dialog-description').should('be.visible').and('have.text', 'Nothing to translate in fr');
+        cy.get('@translateDialog').should('exist');
+    });
+
     it.skip('can open translate dialog on pages and has the correct settings', () => {
         const translateEditor = TranslateEditor.visitPage(siteKey, 'en', 'pages/home', 'home');
 

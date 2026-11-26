@@ -72,7 +72,13 @@ const handleSuggestionCall = ({suggestTranslation, formik, setErrorState, setIsL
 };
 
 const handleTreeTranslationCall = ({translateTreeMutation, setErrorState, setIsLoading, onClose, client, setErrorMessage}) => {
-    translateTreeMutation().then(() => {
+    translateTreeMutation().then(result => {
+        if (!result?.successful) {
+            setErrorState('translation_error');
+            setErrorMessage(result?.message || '');
+            return;
+        }
+
         client.reFetchObservableQueries();
         triggerRefetchAll();
         setIsLoading(false);
