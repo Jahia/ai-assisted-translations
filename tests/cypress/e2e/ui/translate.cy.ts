@@ -177,7 +177,7 @@ describe('translate action tests', () => {
             cy.get('div[data-sel-role=\'translate-language-dialog\']').as('translateDialog').should('be.visible');
             getComponentByRole(Button, 'translate-button').should('not.be.disabled').click();
             cy.wait('@translateNodeFailure');
-            cy.get('[data-sel-role="translation-error-dialog"]').should('be.visible').and('contain.text', error);
+            cy.get('[data-sel-role="translation-error-message"]').should('be.visible').and('have.text', error);
             // A dialog that closes stays in the page during its fade, so the check reads the opacity that the fade
             // sets at once to 0 on the backdrop and the content of a closing dialog.
             cy.get('@translateDialog').find('[style*="opacity"]').should($faded => {

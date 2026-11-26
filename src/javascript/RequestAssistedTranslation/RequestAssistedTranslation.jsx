@@ -223,7 +223,6 @@ export const RequestAssistedTranslation = ({
             <Dialog
                 maxWidth="lg"
                 open={Boolean(errorState)}
-                data-sel-role="translation-error-dialog"
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
                 onClose={() => {
@@ -236,6 +235,7 @@ export const RequestAssistedTranslation = ({
                 <DialogContent>
                     <DialogContentText
                         id="alert-dialog-description"
+                        data-sel-role="translation-error-message"
                     >{errorMessage || t('ai-assisted-translations:label.errorContentAllProperties')}
                     </DialogContentText>
                 </DialogContent>
