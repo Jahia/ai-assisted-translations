@@ -65,6 +65,7 @@ describe('translate action tests', () => {
             serverName: 'localhost',
             locale: 'en'
         });
+        enableModule('ai-assisted-translations', oneLangSite);
 
         createUser(editorLogin.username, editorLogin.password);
         grantRoles(`/sites/${siteKey}`, ['editor'], editorLogin.username, 'USER');
@@ -97,6 +98,8 @@ describe('translate action tests', () => {
 
     it('cannot open translate dialog if content has only one language', () => {
         const jcontent = JContent.visit(oneLangSite, 'en', 'pages/home');
+        // Wait for the header actions to render, so that the absence below is not read too early.
+        jcontent.getHeaderActionButton('publish').should('be.visible');
         jcontent.getHeader().get().find('button[data-sel-role=\'requestTranslationAiAssistedForOnePage\']').should('not.exist');
     });
 
@@ -108,11 +111,14 @@ describe('translate action tests', () => {
         const dropdown = getComponentByRole(Dropdown,'from-language-selector');
         dropdown.get().click();
         let menu = getComponent(Menu, dropdown);
-        // The target language (French) is not offered as a source.
-        menu.get().should('contain', 'English').and('contain', 'Deutsch').and('not.contain', 'Français');
+        menu.shouldHaveItem('English');
+        menu.shouldHaveItem('Deutsch');
+        // The target language, French, is not offered as a source. Java names it "français", in lowercase.
+        menu.get().invoke('text').should('not.match', /fran[cç]ais/i);
         menu.select('English')
         getComponentByRole(Button, 'translate-button').should('not.be.disabled').click();
-        cy.wait('@translateNodeCall');
+        cy.wait('@translateNodeCall').its('request.body.0.variables')
+            .should('deep.equal', {path: `/sites/${siteKey}/home`, sourceLanguage: 'en', targetLanguage: 'fr'});
         cy.get('@translateDialog').should('not.exist');
         // const pageBuilder = new JContentPageBuilder(jcontent);
         // pageBuilder.refresh();

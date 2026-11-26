@@ -30,7 +30,7 @@ export const RequestAssistedTranslationForTreeComponent = ({
         return (Loading && <Loading {...others}/>) || null;
     }
 
-    if (!res.checksResult) {
+    if (!res.checksResult || siteInfo.languages.length <= 1) {
         return null;
     }
 
