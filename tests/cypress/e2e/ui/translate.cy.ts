@@ -13,6 +13,47 @@ import {ContentEditor, JContent, JContentPageBuilder} from '@jahia/jcontent-cypr
 import {Field, SmallTextField} from '@jahia/jcontent-cypress/dist/page-object/fields';
 import {Menu} from "@jahia/cypress";
 
+// The fixture and the alias of each mocked operation, by operation name.
+const mockedOperations: Record<string, {result: unknown, alias: string}> = {};
+// The variables of the last call to each mocked operation, by alias.
+const mockedVariables: Record<string, unknown> = {};
+
+const mockGraphqlOperation = (operationName: string, fixture: string, alias: string) => {
+    cy.fixture(fixture).then(result => {
+        mockedOperations[operationName] = {result, alias};
+    });
+};
+
+// Apollo batches the GraphQL operations, so a mocked one can share a request with other queries, at any index.
+// The other operations go to Jahia, and each fixture takes the place of its operation in the response.
+// The request takes the alias of its first mocked operation.
+const answerMockedOperations = req => {
+    if (!Array.isArray(req.body)) {
+        return;
+    }
+
+    const indexes = req.body.flatMap((operation, index) => (mockedOperations[operation.operationName] ? [index] : []));
+    if (indexes.length === 0) {
+        return;
+    }
+
+    const mocks = indexes.map(index => mockedOperations[req.body[index].operationName]);
+    indexes.forEach((index, i) => {
+        mockedVariables[mocks[i].alias] = req.body[index].variables;
+    });
+    req.alias = mocks[0].alias;
+    if (indexes.length === req.body.length) {
+        req.reply(mocks.map(mock => mock.result));
+        return;
+    }
+
+    // Cypress sends a body changed in place, and ignores a new array.
+    [...indexes].reverse().forEach(index => req.body.splice(index, 1));
+    req.continue(res => {
+        indexes.forEach((index, i) => res.body.splice(index, 0, mocks[i].result));
+    });
+};
+
 describe('translate action tests', () => {
     const siteKey = 'translateSite';
     const oneLangSite = 'oneLangSite';
@@ -79,21 +120,10 @@ describe('translate action tests', () => {
     beforeEach(() => {
         cy.loginAndStoreSession();
 
-        // Intercept translation service calls so tests run on CI/CD without a live translation backend.
-        // RegExp is used so the match works regardless of the Jahia origin / context path.
-        // req.alias is set dynamically so cy.wait() can target each operation individually.
-        cy.intercept('POST', '**/modules/graphql', (req) => {
-            // Apollo sends JSON; guard against the body arriving as a raw string
-            const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-            const operationName = body[0]?.operationName;
-            if (operationName === 'TranslateNode') {
-                req.alias = 'translateNodeCall';
-                req.reply({fixture: 'graphql/translateNode.json'});
-            } else if (operationName === 'SuggestTranslationForLanguage') {
-                req.alias = 'suggestTranslationCall';
-                req.reply({fixture: 'graphql/suggestTranslationForLanguage.json'});
-            }
-        });
+        // Mock the translation service calls, so that the tests run on CI without a translation backend.
+        cy.intercept('POST', '**/modules/graphql', answerMockedOperations);
+        mockGraphqlOperation('TranslateNode', 'graphql/translateNode.json', 'translateNodeCall');
+        mockGraphqlOperation('SuggestTranslationForLanguage', 'graphql/suggestTranslationForLanguage.json', 'suggestTranslationCall');
     });
 
     it('cannot open translate dialog if content has only one language', () => {
@@ -118,8 +148,9 @@ describe('translate action tests', () => {
         // English is preselected, so the test picks Deutsch to prove that the choice reaches the request.
         menu.select('Deutsch');
         getComponentByRole(Button, 'translate-button').should('not.be.disabled').click();
-        cy.wait('@translateNodeCall').its('request.body.0.variables')
-            .should('deep.equal', {path: `/sites/${siteKey}/home`, sourceLanguage: 'de', targetLanguage: 'fr'});
+        cy.wait('@translateNodeCall').then(() => {
+            expect(mockedVariables.translateNodeCall).to.deep.equal({path: `/sites/${siteKey}/home`, sourceLanguage: 'de', targetLanguage: 'fr'});
+        });
         cy.get('@translateDialog').should('not.exist');
         // const pageBuilder = new JContentPageBuilder(jcontent);
         // pageBuilder.refresh();
@@ -132,6 +163,36 @@ describe('translate action tests', () => {
         // contentEditor.getField(SmallTextField, 'qant:allFields_smallText').checkValue('un petit texte à traduire par notre nouvel outil de traduction assistée par IA.');
         // contentEditor.cancel();
 
+    });
+
+    [
+        {fixture: 'graphql/translateNodeFailure.json', detail: 'Nothing to translate in fr'},
+        {fixture: 'graphql/translateNodeFailureNoMessage.json', detail: null}
+    ].forEach(({fixture, detail}) => {
+        it(`keeps the page translation dialog open and shows the error, with ${detail ? 'the' : 'no'} detail of the server, when it fails`, () => {
+            mockGraphqlOperation('TranslateNode', fixture, 'translateNodeFailure');
+            const jcontent = JContent.visit(siteKey, 'fr', 'pages/home');
+            jcontent.getHeaderActionButton('requestTranslationAiAssistedForOnePage').should('exist').click();
+            cy.get('div[data-sel-role=\'translate-language-dialog\']').as('translateDialog').should('be.visible');
+            getComponentByRole(Button, 'translate-button').should('not.be.disabled').click();
+            cy.wait('@translateNodeFailure');
+            cy.get('[data-sel-role="translation-error-message"]').should('be.visible')
+                .and('have.text', 'An error occurred when translating. Ensure that the content is not locked or that you have sufficient permissions.');
+            if (detail) {
+                cy.get('[data-sel-role="translation-error-detail"]').should('be.visible').and('have.text', detail);
+            } else {
+                cy.get('[data-sel-role="translation-error-detail"]').should('not.exist');
+            }
+
+            // A dialog that closes stays in the page during its fade, so the check reads the opacity that the fade
+            // sets at once to 0 on the backdrop and the content of a closing dialog.
+            cy.get('@translateDialog').find('[style*="opacity"]').should($faded => {
+                expect($faded).to.have.length(2);
+                $faded.each((i, element) => {
+                    expect(element.style.opacity).to.equal('1');
+                });
+            });
+        });
     });
 
     it.skip('can open translate dialog on pages and has the correct settings', () => {

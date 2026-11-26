@@ -1,0 +1,12 @@
+{
+  "data": {
+    "jcr": {
+      "mutateNode": {
+        "translateNode": {
+          "message": "Nothing to translate in fr",
+          "successful": false
+        }
+      }
+    }
+  }
+}

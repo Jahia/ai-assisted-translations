@@ -72,7 +72,13 @@ const handleSuggestionCall = ({suggestTranslation, formik, setErrorState, setIsL
 };
 
 const handleTreeTranslationCall = ({translateTreeMutation, setErrorState, setIsLoading, onClose, client, setErrorMessage}) => {
-    translateTreeMutation().then(() => {
+    translateTreeMutation().then(result => {
+        if (!result?.successful) {
+            setErrorState('translation_error');
+            setErrorMessage(result?.message || '');
+            return;
+        }
+
         client.reFetchObservableQueries();
         triggerRefetchAll();
         setIsLoading(false);
@@ -229,8 +235,11 @@ export const RequestAssistedTranslation = ({
                 <DialogContent>
                     <DialogContentText
                         id="alert-dialog-description"
-                    >{errorMessage || t('ai-assisted-translations:label.errorContentAllProperties')}
+                        data-sel-role="translation-error-message"
+                    >{t('ai-assisted-translations:label.errorContentAllProperties')}
                     </DialogContentText>
+                    {errorMessage &&
+                        <DialogContentText data-sel-role="translation-error-detail">{errorMessage}</DialogContentText>}
                 </DialogContent>
                 <DialogActions>
                     <Button label={t('ai-assisted-translations:label.cancel')}
