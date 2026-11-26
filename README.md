@@ -66,6 +66,7 @@ How it behaves:
 - Designed for page/main resource level translation from the page header action area.
 - Available when:
   - module is installed on the site,
+  - site has more than one language,
   - current node has write permission,
   - current node is not locked.
 - Opens the same translation dialog but for tree-level/page-level operation.

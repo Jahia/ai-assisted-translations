@@ -115,10 +115,11 @@ describe('translate action tests', () => {
         menu.shouldHaveItem('Deutsch');
         // The target language, French, is not offered as a source. Java names it "français", in lowercase.
         menu.get().invoke('text').should('not.match', /fran[cç]ais/i);
-        menu.select('English')
+        // English is preselected, so the test picks Deutsch to prove that the choice reaches the request.
+        menu.select('Deutsch');
         getComponentByRole(Button, 'translate-button').should('not.be.disabled').click();
         cy.wait('@translateNodeCall').its('request.body.0.variables')
-            .should('deep.equal', {path: `/sites/${siteKey}/home`, sourceLanguage: 'en', targetLanguage: 'fr'});
+            .should('deep.equal', {path: `/sites/${siteKey}/home`, sourceLanguage: 'de', targetLanguage: 'fr'});
         cy.get('@translateDialog').should('not.exist');
         // const pageBuilder = new JContentPageBuilder(jcontent);
         // pageBuilder.refresh();
